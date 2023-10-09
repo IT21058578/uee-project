@@ -21,6 +21,12 @@ import { EmailService } from './email/email.service';
 import { ConfigKey } from './common/enums/config-key.enum';
 import { HttpModule } from '@nestjs/axios';
 import { FileModule } from './file/file.module';
+import { TasksModule } from './tasks/tasks.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { SchedulesModule } from './schedules/schedules.module';
+import { RoomsService } from './rooms/rooms.service';
+import { SchedulesService } from './schedules/schedules.service';
+import { TasksService } from './tasks/tasks.service';
 
 @Module({
   imports: [
@@ -30,25 +36,28 @@ import { FileModule } from './file/file.module';
     JwtTokenModule,
     EmailModule,
     HttpModule,
+    TasksModule,
+    RoomsModule,
+    SchedulesModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    FileModule.forRootAsync({
-      isGlobal: true,
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        authDomain: configService.get(ConfigKey.FIREBASE_AUTH_DOMAIN),
-        storageBucket: configService.get(ConfigKey.FIREBASE_BUCKET_NAME),
-        projectId: configService.get(ConfigKey.FIREBASE_PROJECT_ID),
-        appId: configService.get(ConfigKey.FIREBASE_APP_ID),
-        apiKey: configService.get(ConfigKey.FIREBASE_API_KEY),
-        measurementId: configService.get(ConfigKey.FIREBASE_MEASUREMENT_ID),
-        messagingSenderId: configService.get(
-          ConfigKey.FIREBASE_MESSAGING_SENDER_ID,
-        ),
-      }),
-    }),
+    // FileModule.forRootAsync({
+    //   isGlobal: true,
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: async (configService: ConfigService) => ({
+    //     authDomain: configService.get(ConfigKey.FIREBASE_AUTH_DOMAIN),
+    //     storageBucket: configService.get(ConfigKey.FIREBASE_BUCKET_NAME),
+    //     projectId: configService.get(ConfigKey.FIREBASE_PROJECT_ID),
+    //     appId: configService.get(ConfigKey.FIREBASE_APP_ID),
+    //     apiKey: configService.get(ConfigKey.FIREBASE_API_KEY),
+    //     measurementId: configService.get(ConfigKey.FIREBASE_MEASUREMENT_ID),
+    //     messagingSenderId: configService.get(
+    //       ConfigKey.FIREBASE_MESSAGING_SENDER_ID,
+    //     ),
+    //   }),
+    // }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -89,6 +98,9 @@ import { FileModule } from './file/file.module';
     TokenService,
     JwtTokenService,
     EmailService,
+    RoomsService,
+    SchedulesService,
+    TasksService,
     {
       provide: APP_GUARD,
       useClass: AuthGuard,

@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { UserRole } from '../enums/user-roles.enum';
 import ErrorMessage from '../enums/error-message.enum';
-import { UserFlattened } from 'src/users/user.schema';
+import { FlatUser } from 'src/users/user.schema';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -28,9 +28,7 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const { user }: { user?: UserFlattened } = context
-      .switchToHttp()
-      .getRequest();
+    const { user }: { user?: FlatUser } = context.switchToHttp().getRequest();
     if (user === undefined) {
       this.logger.warn('Could not authorize user. Not authenticated');
       throw new UnauthorizedException(ErrorMessage.NOT_AUTHENTICATED);

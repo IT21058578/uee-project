@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument, UserFlattened } from './user.schema';
+import { User, UserDocument, FlatUser } from './user.schema';
 import { Model } from 'mongoose';
 import { Page, PageBuilder } from 'src/common/util/page-builder';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
@@ -30,7 +30,6 @@ export class UsersService {
     systemAdmin.password = hashSync('password', 10);
     systemAdmin.email = 'johndoe@gmail.com';
     systemAdmin.isAuthorized = true;
-    systemAdmin.companyId = 'SYSTEM';
     await systemAdmin.save();
     this.logger.log('New system admin created');
   }
@@ -94,7 +93,7 @@ export class UsersService {
     pageNum = 1,
     pageSize = 10,
     sort,
-  }: PageRequest): Promise<Page<UserFlattened>> {
+  }: PageRequest): Promise<Page<FlatUser>> {
     const skippedDocuments = (pageNum - 1) * pageSize;
     const [totalDocuments, users] = await Promise.all([
       this.userModel.count({}),
@@ -111,7 +110,7 @@ export class UsersService {
     ]);
 
     const userPage = PageBuilder.buildPage(
-      users.map((user) => user.toJSON() as UserFlattened),
+      users.map((user) => user.toJSON() as FlatUser),
       {
         pageNum,
         pageSize,
