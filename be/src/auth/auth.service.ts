@@ -70,7 +70,7 @@ export class AuthService {
       throw new BadRequestException(ErrorMessage.USER_ALREADY_EXISTS);
     }
     const createdUser = new this.userModel(userDto);
-    createdUser.roles = [UserRole.SYSTEM_ADMIN];
+    createdUser.roles = [UserRole.ADMIN];
     createdUser.password = await hash(createdUser.password, 10);
     createdUser.isAuthorized = false;
     const savedUser = await createdUser.save();

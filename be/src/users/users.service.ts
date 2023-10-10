@@ -15,7 +15,7 @@ export class UsersService {
 
   constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {
     const existingSystemAdmin = this.userModel.findOne({
-      roles: { $in: [UserRole.SYSTEM_ADMIN] },
+      roles: { $in: [UserRole.ADMIN] },
     });
     if (existingSystemAdmin === null) {
       this.logger.log('System admin not found. Creating new system admin...');
@@ -120,5 +120,25 @@ export class UsersService {
     );
 
     return userPage;
+  }
+
+  async assignToRoom(userId: string, roomId: string) {
+    const existingUser = await this.getUser(userId);
+    if (!existingUser.roomIds.includes(roomId)) {
+      existingUser.roomIds.push(roomId);
+      await existingUser.save();
+    }
+  }
+
+  async unassignAllFromRoom(roomId: string) {
+    const existingUsers = await this.userModel.find({
+      roomIds: { $in: [roomId] },
+    });
+    const updatedUsers = existingUsers.map((user) => {
+      user.roomIds = user.roomIds.filter((id) => id !== roomId);
+      return user;
+    });
+    const userPromises = updatedUsers.map(async (user) => user.save());
+    await Promise.all(userPromises);
   }
 }

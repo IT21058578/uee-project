@@ -3,9 +3,15 @@ const ErrorMessage = {
   USER_NOT_FOUND: 'User not found',
   TOKEN_NOT_FOUND: 'Token not found',
   FILE_NOT_FOUND: 'File not found',
+  TASK_NOT_FOUND: 'Task not found',
+  SCHEDULE_NOT_FOUND: 'Schedule not found',
+  ROOM_NOT_FOUND: 'Room not found',
 
   // Already exists
   USER_ALREADY_EXISTS: 'User already exists',
+  TASK_ALREADY_EXISTS: 'Task already exists',
+  SCHEDULE_ALREADY_EXISTS: 'Schedule already exists',
+  ROOM_ALREADY_EXISTS: 'Room already exists',
 
   // Authoriztion
   INVALID_CREDENTIALS: 'Invalid credentials',
