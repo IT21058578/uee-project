@@ -15,10 +15,34 @@ import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
 import AppTextInput from "../components/AppTextInput";
+import { useRegisterMutation } from "../Redux/API/auth.api.slice";
+import { useState } from "react";
+import { HandleResult } from "../utils/HandleResults";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
 const RegisterScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
+
+  const [sendUserInfo, result] = useRegisterMutation();
+
+  const [data, setData] = useState({ 
+    firstName: '',
+    lastName: '',
+    email: '',
+    region: '',
+    country: '',
+    password: '', 
+  });
+
+  const handleChange = (name:any, text:any) => {
+    setData({ ...data, [name]: text });
+  };
+
+  const handleRegister = async () => {
+    sendUserInfo(data);
+  };
+  
+
   return (
     <SafeAreaView>
       <View
@@ -57,11 +81,27 @@ const RegisterScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             marginVertical: Spacing * 3,
           }}
         >
-          <AppTextInput placeholder="Email" />
-          <AppTextInput placeholder="Password" />
-          <AppTextInput placeholder="Confirm Password" />
+          <AppTextInput 
+            placeholder="firstName"  
+            onChangeText={(text) => handleChange("firstName", text)}/>
+          <AppTextInput 
+            placeholder="lastName"  
+            onChangeText={(text) => handleChange("lastName", text)}/>
+          <AppTextInput 
+            placeholder="Email"  
+            onChangeText={(text) => handleChange("email", text)}/>
+          <AppTextInput 
+            placeholder="region"  
+            onChangeText={(text) => handleChange("region", text)}/>
+          <AppTextInput 
+            placeholder="country"  
+            onChangeText={(text) => handleChange("country", text)}/>
+          <AppTextInput 
+            placeholder="password"  
+            onChangeText={(text) => handleChange("password", text)}/>
         </View>
 
+        <HandleResult result={result} />
         <TouchableOpacity
           style={{
             padding: Spacing * 2,
@@ -76,6 +116,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             shadowOpacity: 0.3,
             shadowRadius: Spacing,
           }}
+          onPress={handleRegister}
         >
           <Text
             style={{

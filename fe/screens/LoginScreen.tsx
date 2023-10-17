@@ -15,10 +15,26 @@ import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types";
 import AppTextInput from "../components/AppTextInput";
+import { useLoginMutation } from "../Redux/API/auth.api.slice";
+import { useState } from "react";
+import { HandleResult } from "../utils/HandleResults";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
+
+  const [sendUserInfo, result] = useLoginMutation();
+  const [data, setData] = useState({ email: "", password: "" });
+
+  const handleChange = (name:any, text:any) => {
+    setData({ ...data, [name]: text });
+  };
+
+  const handleLogin = async () => {
+    sendUserInfo(data);
+  };
+  
+
   return (
     <SafeAreaView>
       <View
@@ -57,8 +73,15 @@ const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             marginVertical: Spacing * 3,
           }}
         >
-          <AppTextInput placeholder="Email" />
-          <AppTextInput placeholder="Password" />
+          <AppTextInput 
+            placeholder="Email"
+            value={data.email}
+            onChangeText={(text) => handleChange("email", text)} />
+            
+          <AppTextInput 
+            placeholder="Password"
+            value={data.password}
+            onChangeText={(text) => handleChange("password", text)} />
         </View>
 
         <View>
@@ -73,7 +96,7 @@ const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             Forgot your password ?
           </Text>
         </View>
-
+        <HandleResult result={result} />
         <TouchableOpacity
           style={{
             padding: Spacing * 2,
@@ -88,6 +111,7 @@ const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             shadowOpacity: 0.3,
             shadowRadius: Spacing,
           }}
+          onPress={handleLogin}
         >
           <Text
             style={{
