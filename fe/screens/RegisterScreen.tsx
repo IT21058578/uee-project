@@ -19,6 +19,7 @@ import { useRegisterMutation } from "../Redux/API/auth.api.slice";
 import { useState } from "react";
 import { HandleResult } from "../utils/HandleResults";
 import { ScrollView } from "react-native";
+import Toast from "react-native-toast-message";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
@@ -217,6 +218,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
           </View>
         </View>
       </View>
+      <Toast/>
     </ScrollView>
   );
 };

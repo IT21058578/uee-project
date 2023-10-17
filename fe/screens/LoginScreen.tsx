@@ -18,6 +18,7 @@ import AppTextInput from "../components/AppTextInput";
 import { useLoginMutation } from "../Redux/API/auth.api.slice";
 import { useState } from "react";
 import { HandleResult } from "../utils/HandleResults";
+import Toast from "react-native-toast-message";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -209,6 +210,7 @@ const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             </TouchableOpacity>
           </View>
         </View>
+        <Toast/>
       </View>
     </SafeAreaView>
   );

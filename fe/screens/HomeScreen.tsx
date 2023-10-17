@@ -8,6 +8,7 @@ import { scheduleTypes } from "../types";
 import HomeScheduleBox from "../components/schedule/homeScheduleBox";
 import { schedulesApi } from "../data/virtualData";
 import { useGetDetailedScheduledForUserQuery } from "../Redux/API/schedules.api.slice";
+import { ActivityIndicator } from "react-native";
 
 const Home = () => {
 
@@ -77,8 +78,8 @@ const Home = () => {
         contentContainerStyle={styles.frameScrollViewContent}
       >
 
-        {isLoading ? (
-          <Text>Loading...</Text>
+        {isLoading || isError? (
+           <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>
         ) : (
           scheduleList?.content.map((schedule: scheduleTypes) => (
             <HomeScheduleBox {...schedule} key={schedule.id}/>
@@ -92,6 +93,9 @@ const Home = () => {
 };
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    paddingVertical: 100,
+  },
   viewAllBtn: {
     color: "#393f93",
     fontSize: 12,

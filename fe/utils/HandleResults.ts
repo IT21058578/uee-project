@@ -23,14 +23,11 @@ export const HandleResult = ({ result }: { result: any }) => {
       const responseData = result.data;
 
       if (responseData.tokens && responseData.user) {
-        // Assuming responseData.tokens.accessToken contains the access token
         setItem(RoutePaths.token, responseData.tokens.accessToken);
 
-        // Assuming responseData.user contains the user data
           setItem("user", responseData.user);
           dispatch(setUser(responseData.user));
 
-        // Redirect to the appropriate route based on user data
           navigation.navigate("Home");
 
       } else {
@@ -49,5 +46,7 @@ export const HandleResult = ({ result }: { result: any }) => {
     }
   }, [result]);
 
-  return null; 
+  return null;
+
 };
+
