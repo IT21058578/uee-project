@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import RoutePaths from "./RoutePaths";
-
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
 
 export const toggleLinkClass = (
   path: string,
@@ -12,29 +12,42 @@ export const toggleLinkClass = (
   return currentLink === path ? activeClass : inactiveClass;
 };
 
-export const getItem = (keymane: string) => {
-  return localStorage.getItem(keymane);
-};
-
-export const setItem = (keyname: string, value: string | Object) => {
-  if (typeof value !== "string" && !(value instanceof String)) {
-    value = JSON.stringify(value);
+export const getItem = async (keyname: string) => {
+  try {
+    const value = await AsyncStorage.getItem(keyname);
+    return value;
+  } catch (error) {
+    console.error('Error getting data: ', error);
+    return null;
   }
-  return localStorage.setItem(keyname, value as string);
 };
 
-export const removeItem = (keyname: string) => {
-  return localStorage.removeItem(keyname);
+export const setItem = async (keyname: string, value: string | Object) => {
+  try {
+    const valueString = typeof value !== 'string' ? JSON.stringify(value) : value.toString();
+    await AsyncStorage.setItem(keyname, valueString);
+  } catch (error) {
+    console.error('Error storing data: ', error);
+  }
 };
 
-
-// export const link = (url : string) : string => BASE_STORAGE_URL + url;
-
-export const checkLogin = () => {
-  const isLogged = localStorage.getItem(RoutePaths.token);
-  return !!isLogged;
+export const removeItem = async (keyname: string) => {
+  try {
+    await AsyncStorage.removeItem(keyname);
+  } catch (error) {
+    console.error('Error removing data: ', error);
+  }
 };
 
+export const checkLogin = async () => {
+  try {
+    const isLogged = await AsyncStorage.getItem(RoutePaths.token);
+    return !!isLogged;
+  } catch (error) {
+    console.error('Error checking login: ', error);
+    return false;
+  }
+};
 
 
 export const BASE_URL = "http://localhost:3000"; // BASE URL FOR API FETCHING
