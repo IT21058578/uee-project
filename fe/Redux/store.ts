@@ -1,18 +1,34 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { scheduleApi } from './API/schedules.api.slice';
-import { setupListeners } from '@reduxjs/toolkit/query';
+import { authApiSlice } from './API/auth.api.slice';
+import { roomApiSlice } from './API/rooms.api.slice';
+import { taskApiSlice } from './API/tasks.api.slice';
+import { usersApiSlice } from './API/users.api.slice';
+import { userSlice } from './slices/userSlice';
 
 export const store = configureStore({
   reducer: {
     [scheduleApi.reducerPath] : scheduleApi.reducer,
+    [authApiSlice.reducerPath] : authApiSlice.reducer,
+    [roomApiSlice.reducerPath] : roomApiSlice.reducer,
+    [taskApiSlice.reducerPath] : taskApiSlice.reducer,
+    [usersApiSlice.reducerPath] : usersApiSlice.reducer,
+    user : userSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false,
-    }).concat(scheduleApi.middleware),
+  getDefaultMiddleware()
+  .concat(
+      authApiSlice.middleware,
+      usersApiSlice.middleware,
+      roomApiSlice.middleware,
+      taskApiSlice.middleware,
+      usersApiSlice.middleware,
+  ),
 
 });
 
-setupListeners(store.dispatch);
+export type RootState = ReturnType<typeof store.getState>
+
+export type AppDispatch = typeof store.dispatch
 
 export default store;
