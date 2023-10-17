@@ -21,12 +21,12 @@ const RoomDetails = () => {
                 <Pressable style={styles.rectangle} onPress={handleBackNav}>
                     <Image style={styles.backImg} source={require('../assets/Arrow.png')} />
                 </Pressable>
-                <Text style={styles.typo1}>Task Detail</Text>
+                <Text style={styles.typo1}>Room Details</Text>
             </View>
         </View>
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.box1}>
-                <Text style={styles.typoTitle}>Task : Project Progress</Text>
+                <Text style={styles.typoTitle}>Room : SE Project </Text>
             </View>
             <View style={styles.box2}>
                 <LinearGradient

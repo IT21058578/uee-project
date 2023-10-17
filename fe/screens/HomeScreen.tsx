@@ -7,15 +7,16 @@ import { Color, FontSize, Padding, Border } from "../Styles/GlobalStyles";
 import { scheduleTypes } from "../types";
 import HomeScheduleBox from "../components/schedule/homeScheduleBox";
 import { schedulesApi } from "../data/virtualData";
-import { useGetAllPersonalDaySchedulesQuery } from "../Redux/API/schedules.api.slice";
+import { useGetDetailedScheduledForUserQuery } from "../Redux/API/schedules.api.slice";
 
 const Home = () => {
 
   const {
-    data,
-    data: scheduleList,
     isLoading,
-  } = useGetAllPersonalDaySchedulesQuery("api/scheduleApi");
+    data: scheduleList,
+    isSuccess,
+    isError,
+  } = useGetDetailedScheduledForUserQuery("api/schedules");
 
   return (
     <View style={styles.home}>
@@ -79,7 +80,7 @@ const Home = () => {
         {isLoading ? (
           <Text>Loading...</Text>
         ) : (
-          schedulesApi.map((schedule: scheduleTypes) => (
+          scheduleList?.content.map((schedule: scheduleTypes) => (
             <HomeScheduleBox {...schedule} key={schedule.id}/>
           ))
         )}

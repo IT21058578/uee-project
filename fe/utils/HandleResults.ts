@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import  Toast from 'react-native-toast-message';
-import "react-toastify/dist/ReactToastify.css";
 import { setItem } from "../utils/Genarals";
 import { useNavigation } from "@react-navigation/native";
 import RoutePaths from "../utils/RoutePaths";
@@ -18,6 +17,7 @@ export const HandleResult = ({ result }: { result: any }) => {
         type: 'error',
         text1: result.error.message || 'An error occurred.',
       });
+      console.log("error")
     } else if (result.isSuccess) {
       // Handle success response
       const responseData = result.data;
@@ -39,6 +39,7 @@ export const HandleResult = ({ result }: { result: any }) => {
             type: 'error',
             text1: 'Invalid response data.',
           });
+        console.log("error")
       }
 
       Toast.show({

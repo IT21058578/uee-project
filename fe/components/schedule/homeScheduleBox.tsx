@@ -15,6 +15,7 @@ const HomeScheduleBox = (props : scheduleTypes) => {
   const handleNavigate = () => {
     // Navigate to the desired screen when the Pressable is pressed
     navigation.navigate("TaskDetail"); 
+
   };
 
     return(

@@ -18,6 +18,7 @@ import AppTextInput from "../components/AppTextInput";
 import { useRegisterMutation } from "../Redux/API/auth.api.slice";
 import { useState } from "react";
 import { HandleResult } from "../utils/HandleResults";
+import { ScrollView } from "react-native";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
 
@@ -44,7 +45,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
   
 
   return (
-    <SafeAreaView>
+    <ScrollView>
       <View
         style={{
           padding: Spacing * 2,
@@ -98,6 +99,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             onChangeText={(text) => handleChange("country", text)}/>
           <AppTextInput 
             placeholder="password"  
+            secureTextEntry
             onChangeText={(text) => handleChange("password", text)}/>
         </View>
 
@@ -215,7 +217,7 @@ const RegisterScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 };
 
