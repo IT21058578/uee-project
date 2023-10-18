@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { InjectModel } from '@nestjs/mongoose';
 import { Request } from 'express';
@@ -8,7 +13,7 @@ import ErrorMessage from 'src/common/enums/error-message.enum';
 import { CreateTaskDto } from './create-task.dto';
 import { SchedulesService } from 'src/schedules/schedules.service';
 import { SortOrder } from 'mongoose';
-import { PageBuilder } from 'src/common/util/page-builder';
+import { PageBuilder } from 'src/common/util/page.util';
 
 @Injectable()
 export class TasksService {

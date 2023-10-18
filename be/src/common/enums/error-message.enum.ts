@@ -22,6 +22,8 @@ const ErrorMessage = {
 
   // Misc
   INVALID_FILE_NAME: 'Invalid file name',
+  USER_ALREADY_IN_ROOM: 'User already in room',
+  USER_NOT_IN_ROOM: 'User not in room',
 } as const;
 
 export default ErrorMessage;

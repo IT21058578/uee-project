@@ -1,6 +1,8 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { SchedulesService } from './schedules.service';
 import { SchedulesTransformer } from './schedules.transformer';
+import { ValidateObjectIdPipe } from 'src/common/pipes/validate-object-id.pipe';
+import { TransformDatePipe } from 'src/common/pipes/transform-date.pipe';
 
 @Controller('schedules')
 export class SchedulesController {
@@ -11,9 +13,9 @@ export class SchedulesController {
 
   @Get('detailed')
   async getPopulatedRoomScheduleForUserByDay(
-    @Query('user-id') userId: string,
-    @Query('room-id') roomId: string,
-    @Query('date') date: Date,
+    @Query('user-id', ValidateObjectIdPipe) userId: string,
+    @Query('room-id', ValidateObjectIdPipe) roomId: string,
+    @Query('date', TransformDatePipe) date: Date,
   ) {
     return await this.schedulesService.getPopulatedScheduleByUserAndRoom(
       userId,
@@ -24,8 +26,8 @@ export class SchedulesController {
 
   @Get('detailed/all-rooms')
   async getDetailedScheduledForUserByDay(
-    @Query('user-id') userId: string,
-    @Query('date') date: Date,
+    @Query('user-id', ValidateObjectIdPipe) userId: string,
+    @Query('date', TransformDatePipe) date: Date,
   ) {
     const schedules =
       await this.schedulesService.getPopulatedSchedulesByUserAndDate(

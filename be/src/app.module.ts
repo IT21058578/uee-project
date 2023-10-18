@@ -14,8 +14,8 @@ import { ConfigService } from '@nestjs/config/dist';
 import { JwtTokenModule } from './jwt-token/jwt-token.module';
 import { JwtTokenService } from './jwt-token/jwt-token.service';
 import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './common/guards/auth-guard.guard';
-import { RolesGuard } from './common/guards/roles-guard.guard';
+import { AuthGuard } from './common/guards/auth.guard';
+import { RolesGuard } from './common/guards/roles.guard';
 import { EmailModule } from './email/email.module';
 import { EmailService } from './email/email.service';
 import { ConfigKey } from './common/enums/config-key.enum';
@@ -27,6 +27,7 @@ import { SchedulesModule } from './schedules/schedules.module';
 import { RoomsService } from './rooms/rooms.service';
 import { SchedulesService } from './schedules/schedules.service';
 import { TasksService } from './tasks/tasks.service';
+import { LogGuard } from './common/guards/log.guard';
 
 @Module({
   imports: [
@@ -101,6 +102,10 @@ import { TasksService } from './tasks/tasks.service';
     RoomsService,
     SchedulesService,
     TasksService,
+    {
+      provide: APP_GUARD,
+      useClass: LogGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
