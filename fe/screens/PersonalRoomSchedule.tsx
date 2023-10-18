@@ -7,6 +7,7 @@ import Calendar from "../components/Calendar/calender";
 import moment, { Moment } from 'moment';
 import { useState } from "react";
 import ScheduleScreen from "../components/RoomPSComp";
+import Colors from "../constants/Colors";
 
 
 const PersonalRoomSchedule = () => {
@@ -16,7 +17,12 @@ const PersonalRoomSchedule = () => {
     const handleDateSelect = (date: Moment) => {
       setSelectedDate(date);
     };
-  
+
+    const [selectedCategory, setSelectedCategory] = useState(null);
+
+    const handleButtonClick = (category:any) => {
+      setSelectedCategory(category);
+    };
 
     return (
         <View style={styles.body}>
@@ -41,7 +47,7 @@ const PersonalRoomSchedule = () => {
                 contentContainerStyle={styles.frameScrollViewContent}
             >
 
-                <NativeBaseProvider>
+                {/* <NativeBaseProvider>
                 <Stack mb="2.5" mt="1.5" direction={{
                             base: "row",
                             md: "row"
@@ -50,24 +56,71 @@ const PersonalRoomSchedule = () => {
                             md: "0"
                         }}>
                     <Button size="sm" variant="subtle" style={{borderRadius:20}}>
-                        PRIMARY
+                        OFFICE
                     </Button>
                     <Button size="sm" variant="subtle" colorScheme="secondary" style={{borderRadius:20}}>
-                        SECONDARY
+                        HOME
                     </Button>
                     <Button size="sm" variant="subtle" style={{borderRadius:20}}>
-                        PRIMARY
+                        EDUCATION
                     </Button>
                     <Button size="sm" variant="subtle" colorScheme="secondary" style={{borderRadius:20}}>
-                        SECONDARY
+                        BUSSINESS
                     </Button>
-                    <Button size="sm" variant="subtle" style={{borderRadius:20}}>
-                        PRIMARY
-                    </Button>
-                    <Button size="sm" variant="subtle" colorScheme="secondary" style={{borderRadius:20}}>
-                        SECONDARY
-                    </Button>   
                 </Stack>
+                </NativeBaseProvider> */}
+
+                <NativeBaseProvider>
+                    <Stack mb="2.5" mt="1.5" direction={{ base: 'row', md: 'row' }} space={4} mx={{ base: 'auto', md: '0' }} style={{paddingHorizontal:5}}>
+                        <Button
+                        size="sm"
+                        variant="subtle"
+                        style={{
+                            borderRadius: 20,
+                            backgroundColor: selectedCategory === 'OFFICE' ? Colors.lightPrimary : 'transparent',
+                        }}
+                        onPress={() => handleButtonClick('OFFICE')}
+                        >
+                        OFFICE
+                        </Button>
+                        <Button
+                        size="sm"
+                        variant="subtle"
+                        colorScheme="secondary"
+                        style={{
+                            borderRadius: 20,
+                            backgroundColor: selectedCategory === 'HOME' ? Colors.home : 'transparent',
+                        }}
+                        onPress={() => handleButtonClick('HOME')}
+                        >
+                        HOME
+                        </Button>
+                        <Button
+                        size="sm"
+                        variant="subtle"
+                        style={{
+                            borderRadius: 20,
+                            backgroundColor: selectedCategory === 'EDUCATION' ? Colors.edu : 'transparent',
+                        }}
+                        onPress={() => handleButtonClick('EDUCATION')}
+                        >
+                        EDUCATION
+                        </Button>
+                        <Button
+                        size="sm"
+                        variant="subtle"
+                        colorScheme="secondary"
+                        style={{
+                            borderRadius: 20,
+                            backgroundColor: selectedCategory === 'BUSINESS' ? Colors.bussiness : 'transparent',
+                        }}
+                        onPress={() => handleButtonClick('BUSINESS')}
+                        >
+                        BUSINESS
+                        </Button>
+                    </Stack>
+                    {/* {selectedCategory && <Text>Selected Category: {selectedCategory}</Text>} */}
+                    {/* <Text>Selected Date: {selectedDate ? moment(selectedDate).format('MMMM D, YYYY') : 'No date selected'}</Text> */}
                 </NativeBaseProvider>
 
             </ScrollView>
@@ -75,7 +128,7 @@ const PersonalRoomSchedule = () => {
                 <Calendar onSelectDate={handleDateSelect} selected={selectedDate} />
             </View>
             <View style={styles.datePicker}>
-                <ScheduleScreen/>
+                <ScheduleScreen selectedDate={selectedDate ? selectedDate.toDate() : null}  selectedCategory={selectedCategory}/>
             </View>
         </View>
         

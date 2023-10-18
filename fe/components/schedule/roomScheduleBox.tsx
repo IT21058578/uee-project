@@ -2,19 +2,19 @@ import React from "react";
 import { Text, StyleSheet, View } from "react-native";
 import { Button } from "react-native-paper";
 import Font from "../../constants/Font";
-import { scheduleTypes } from "../../types";
+import { Schedule } from "../../types";
 import { Color,FontSize, Padding, Border } from "../../Styles/GlobalStyles";
 
-const RoomScheduleBox = (props : scheduleTypes) => {
+const RoomScheduleBox = (props : Schedule) => {
     return(
       <View style={[styles.frameContainer, styles.frameLayout]}>
         <View style={[styles.frame4, styles.frameFlexBox]}>
           <View style={styles.frameChild} />
           <View style={styles.projectProgressMeetingParent}>
             <Text style={styles.projectProgressMeeting}>
-              {props.title}
+                {props.schedules[0].taskList[0].taskName}
             </Text>
-            <Text style={styles.text4}>{props.startTime} - {props.endTime}</Text>
+            <Text style={styles.text4}>{props.schedules[0].taskList[0].startTime} - {props.schedules[0].taskList[0].endTime}</Text>
           </View>
         </View>
       </View>

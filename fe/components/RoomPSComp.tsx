@@ -3,16 +3,12 @@ import { View, Text, StyleSheet, FlatList ,ScrollView } from 'react-native';
 import RoomScheduleBox from './schedule/roomScheduleBox';
 import Colors from '../constants/Colors';
 import Font from '../constants/Font';
-
-// Sample schedule data (replace with your own data)
-const scheduleData = [
-  { id: '1', startTime: '09:00 AM', endTime: '10:00 AM', title: 'Meeting 1' },
-  { id: '6', startTime: '09:30 AM', endTime: '10:30 AM', title: 'Meeting 2' },
-  { id: '2', startTime: '10:30 AM', endTime: '11:30 AM', title: 'Meeting 3' },
-  { id: '3', startTime: '09:30 AM', endTime: '10:30 AM', title: 'Lunch' },
-  { id: '4', startTime: '02:00 PM', endTime: '03:00 PM', title: 'Meeting 4' },
-  { id: '5', startTime: '02:01 PM', endTime: '05:00 PM', title: 'Meeting 5' },
-];
+import { useGetPopulatedRoomScheduleQuery } from '../Redux/API/schedules.api.slice';
+import { ActivityIndicator } from 'react-native';
+import { getItem } from '../utils/Genarals'
+import RoutePaths from '../utils/RoutePaths';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
 // Function to convert time to a sortable value
 function convertTimeToSortableValue(time: string): number {
@@ -21,20 +17,57 @@ function convertTimeToSortableValue(time: string): number {
   return ampm === 'PM' ? (hours % 12 + 12) * 60 + minutes : hours * 60 + minutes;
 }
 
-// Group the schedules by start time
-const groupedSchedules: { [key: string]: any[] } = {};
+interface ScheduleScreenProps {
+  selectedDate: Date | null;
+  selectedCategory: string | null;
+}
 
-scheduleData.forEach((schedule) => {
-//   const key = schedule.startTime.split(':')[0]; // Extract the hour from the start time
-  const key = schedule.startTime // Extract the  the start time
-  if (!groupedSchedules[key]) {
-    groupedSchedules[key] = [];
+const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ selectedDate, selectedCategory }) => {
+
+  const formattedDate = selectedDate?.toISOString().split('T')[0];
+
+  const [user, setUser] = useState<{ _id: string } | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = await getItem(RoutePaths.token);
+      if (token) {
+        const userData = await getItem("user");
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const userID = user?._id;
+
+  const { data, isLoading, isError } = useGetPopulatedRoomScheduleQuery({userID,formattedDate});
+
+  if (isLoading) {
+    return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;
   }
-  groupedSchedules[key].push(schedule);
-});
 
+  if (isError) {
+    return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;
+  }
 
-const ScheduleScreen = () => {
+  // Group the schedules by start time
+  const groupedSchedules: { [key: string]: any[] } = {};
+  
+  if (data) {
+    data?.content.forEach((schedule: any) => {
+      const key = schedule.startTime;
+      if (!groupedSchedules[key]) {
+        groupedSchedules[key] = [];
+      }
+      groupedSchedules[key].push(schedule);
+    });
+  }
+
   // Sort the keys (start times) in ascending order considering AM and PM
   const sortedKeys = Object.keys(groupedSchedules).sort(
     (a, b) =>
@@ -56,11 +89,7 @@ const ScheduleScreen = () => {
           <View style={styles.timeSlotContainer}>
             <Text style={styles.timeSlot}>{item[0]}</Text>
             {item[1].map((schedule: any) => (
-            //   <View key={schedule.id} style={styles.scheduleItem}>
-            //     <Text>{schedule.title}</Text>
-            //     <Text>{schedule.startTime} - {schedule.endTime}</Text>
-            //   </View>
-                <RoomScheduleBox {...schedule} key={schedule.id}/>
+                <RoomScheduleBox {...schedule} key={schedule._id}/>
             ))}
           </View>
         )}
@@ -70,6 +99,9 @@ const ScheduleScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    paddingVertical: 100,
+  },
   container: {
     padding: 25,
   },

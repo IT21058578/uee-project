@@ -3,12 +3,37 @@ import { Text, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import Font from "../constants/Font";
 import { FontSize, Color, Border } from "../Styles/GlobalStyles";
+import { getItem } from '../utils/Genarals'
+import RoutePaths from '../utils/RoutePaths';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
 const ContainerFrame = () => {
+
+  const [user, setUser] = useState<{ firstName: string } | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = await getItem(RoutePaths.token);
+      if (token) {
+        const userData = await getItem("user");
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const userName = user?.firstName;
+
+
   return (
     <View style={[styles.frame, styles.frameLayout]}>
       <View style={[styles.frame1, styles.frameLayout]}>
-        <Text style={styles.hiTharindu}>Hi, Tharindu</Text>
+        <Text style={styles.hiTharindu}>Hi, {userName}</Text>
         <Text style={styles.letsMakeThis}>Let’s make this day productive</Text>
       </View>
       <View style={styles.frame2}>

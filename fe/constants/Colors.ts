@@ -13,6 +13,10 @@ const colorAliceblue = "#f1f7ff";
 const colorLightgreen = "#4cd97b";
 const colorTomato = "#ff5959";
 const ppButtons = "#5B67CA";
+const office = "#ECEAFF";
+const home = "#FFEFEB";
+const edu = "#FFE9ED";
+const bussiness = "#D1FEFF";
 
 const colorWhite= "#fff";
 const colorGhostwhite= "#f9fafd";
@@ -44,5 +48,10 @@ export default {
   colorLavender: colorLavender,
   colorLightslategray: colorLightslategray,
   colorGray_100:colorGray_100,
+  office:office,
+  home:home,
+  edu:edu,
+  bussiness:bussiness,
+
 
 };

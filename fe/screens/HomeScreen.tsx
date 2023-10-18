@@ -9,15 +9,42 @@ import HomeScheduleBox from "../components/schedule/homeScheduleBox";
 import { schedulesApi } from "../data/virtualData";
 import { useGetDetailedScheduledForUserQuery } from "../Redux/API/schedules.api.slice";
 import { ActivityIndicator } from "react-native";
+import { Schedule } from "../types";
+import { getItem } from '../utils/Genarals'
+import RoutePaths from '../utils/RoutePaths';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
 const Home = () => {
+
+  const [user, setUser] = useState<{ _id: string } | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = await getItem(RoutePaths.token);
+      if (token) {
+        const userData = await getItem("user");
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const userID = user?._id;
+
+  const currentDate = new Date();
+  const formattedDate = currentDate.toISOString().split('T')[0];
 
   const {
     isLoading,
     data: scheduleList,
     isSuccess,
     isError,
-  } = useGetDetailedScheduledForUserQuery("api/schedules");
+  } = useGetDetailedScheduledForUserQuery({userID,formattedDate});
 
   return (
     <View style={styles.home}>
@@ -81,8 +108,8 @@ const Home = () => {
         {isLoading || isError? (
            <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>
         ) : (
-          scheduleList?.content.map((schedule: scheduleTypes) => (
-            <HomeScheduleBox {...schedule} key={schedule.id}/>
+          scheduleList?.content.map((schedule: Schedule) => (
+            <HomeScheduleBox {...schedule} key={schedule._id}/>
           ))
         )}
 

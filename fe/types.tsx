@@ -130,3 +130,55 @@ export type popTypes = {
   iconName: undefined;
   value: undefined;
 }
+
+
+// Types schdules
+
+interface PopulatedScheduleDto {
+  roomId: string;
+  userId: string;
+  date: Date;
+  tag: RoomTag;
+  totalScheduled: string;
+  taskList: Task[];
+}
+
+interface Task {
+  taskId: string;
+  taskName: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface Schedule {
+  _id:string;
+  userId: string;
+  date: Date;
+  schedules: PopulatedScheduleDto[];
+}
+
+enum RoomTag {
+  OFFICE = 'OFFICE',
+  HOME = 'HOME',
+  EDUCATION = 'EDUCATION',
+  BUSINESS = 'BUSINESS',
+}
+
+//tasks types
+
+enum TaskPriority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+}
+
+export interface Tasks {
+  _id:string;
+  name: string;
+  description: string;
+  duration: string;
+  date: Date;
+  priority: TaskPriority;
+  roomId: string;
+  assignedUserIds: string[];
+}

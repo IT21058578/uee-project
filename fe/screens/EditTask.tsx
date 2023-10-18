@@ -9,6 +9,7 @@ import { Checkbox, Button } from "native-base";
 import { TimerPickerModal } from "react-native-timer-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { Tasks } from "../types";
 
 
 // Define the formatTime function
@@ -16,7 +17,7 @@ function formatTime(hours: number, minutes: number, seconds: number): string {
     return `${hours}h ${minutes}m ${seconds}s`;
   }
 
-const EditTask = () => {
+const EditTask = ({task} : {task : Tasks}) => {
 
     const navigation = useNavigation();
 

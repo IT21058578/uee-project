@@ -11,26 +11,38 @@ import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { NativeBaseProvider, Button } from 'native-base';
 import Colors from "../../constants/Colors";
+import { Tasks } from "../../types";
+import { useDeletetaskMutation } from "../../Redux/API/tasks.api.slice";
+import { useGettaskQuery } from "../../Redux/API/tasks.api.slice";
 
-
-
-const EditableScheduleBox = (props : scheduleTypes) => {
+const EditableScheduleBox = (props : Tasks) => {
 
     const [isPopoverVisible, setPopoverVisible] = useState(false);
 
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
 
     const [modalVisible2, setModalVisible2] = useState(false);
 
-  
+    const [deleteTask, deletedResult] = useDeletetaskMutation();
+
+    const taskId = props._id;
+
+    const { data: task, isLoading, isError } = useGettaskQuery(taskId);
   
     const handleEdit = () => {
-      navigation.navigate("EditTask");
+      navigation.navigate("EditTask" , {
+        taskId: task.id,
+      });
       setPopoverVisible(false); // Close the popover
     };
   
     const handleDelete = () => {
       setModalVisible2(true);
+    };
+
+    const handleDeletePermission = (taskId: string) => {
+      setModalVisible2(true);
+      deleteTask(taskId);
     };
 
     const handleCancle = () => {
@@ -45,9 +57,9 @@ const EditableScheduleBox = (props : scheduleTypes) => {
           <View style={styles.frameChild} />
           <View style={styles.projectProgressMeetingParent}>
             <Text style={styles.projectProgressMeeting}>
-              {props.title}
+              {props.name}
             </Text>
-            <Text style={styles.text4}>{props.startTime} - {props.endTime}</Text>
+            <Text style={styles.text4}>{props.duration}</Text>
           </View>
         </View>
         
@@ -73,9 +85,9 @@ const EditableScheduleBox = (props : scheduleTypes) => {
                             <View style={styles.modalBackground}>
                             <View style={styles.centeredView}>
                             <View style={styles.modalView}>
-                                <Text style={styles.typoTitle1}>Delete Account</Text>
+                                <Text style={styles.typoTitle1}>Delete Task</Text>
                                     <View style={styles.box1}>
-                                        <Text style={styles.typoBoddy}>Are you sure to delete this account ?</Text>
+                                        <Text style={styles.typoBoddy}>Are you sure to delete this Task ?</Text>
                                     </View>
                                     <View style={styles.box1}>
                                         <NativeBaseProvider>
@@ -83,7 +95,7 @@ const EditableScheduleBox = (props : scheduleTypes) => {
                                                 <Button style={{ marginHorizontal: 20 }} variant="outline" colorScheme="fuchsia" onPress={handleCancle}>
                                                     Cancle
                                                 </Button>
-                                                <Button colorScheme="fuchsia">    Sure    </Button>
+                                                <Button colorScheme="fuchsia" onPress={() => handleDeletePermission(props._id)}>    Sure    </Button>
                                             </View>
                                         </NativeBaseProvider>
                                     </View>
@@ -103,7 +115,7 @@ const EditableScheduleBox = (props : scheduleTypes) => {
 
         <View style={[styles.altriumRoom01Wrapper, styles.wrapperLayout]}>
           <Text style={[styles.altriumRoom01, styles.altriumRoom01Typo]}>
-            {props.room}
+            {props.roomId}
           </Text>
         </View>
 

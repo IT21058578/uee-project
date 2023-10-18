@@ -7,14 +7,51 @@ import { scheduleTypes } from "../types";
 import { schedulesApi } from "../data/virtualData";
 import { useGetAllPersonalDaySchedulesQuery } from "../Redux/API/schedules.api.slice";
 import AppTextInput from "../components/AppTextInput";
+import { getItem } from '../utils/Genarals'
+import RoutePaths from '../utils/RoutePaths';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useGetAlltasksQuery } from "../Redux/API/tasks.api.slice";
+import { ActivityIndicator } from "react-native";
+import { Tasks } from "../types";
 
 const CreatedTasks = () => {
 
+
+    const [user, setUser] = useState<{ _id: string } | null>(null);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        const token = await getItem(RoutePaths.token);
+        if (token) {
+          const userData = await getItem("user");
+          if (userData) {
+            const parsedUser = JSON.parse(userData);
+            setUser(parsedUser);
+          }
+        }
+      };
+  
+      fetchData();
+    }, []);
+  
+    const userID = user?._id;
+  
     const {
-        data,
-        data: scheduleList,
-        isLoading,
-      } = useGetAllPersonalDaySchedulesQuery("api/scheduleApi");
+      isLoading,
+      data: taskList,
+      isSuccess,
+      isError,
+    } = useGetAlltasksQuery("api/tasks");
+
+
+    const [searchText, setSearchText] = useState('');
+
+    // Function to filter tasks based on search text
+    const filteredTasks = taskList?.filter((task: Tasks) =>
+    task.name.toLowerCase().includes(searchText.toLowerCase())
+  );
+
      
     return(
         <View style={styles.flexBox}>
@@ -28,7 +65,7 @@ const CreatedTasks = () => {
                 source={require("../assets/Tasks.png")}
                 />
             <View style={styles.Box2}>
-                <AppTextInput placeholder="🔍   Search tasks"/>
+                <AppTextInput placeholder="🔍   Search tasks"  onChangeText={text => setSearchText(text)}/>
             </View>
             <View style={styles.Box1}>
                 <ScrollView
@@ -39,11 +76,11 @@ const CreatedTasks = () => {
                     contentContainerStyle={styles.frameScrollViewContent}
                 >
 
-                    {isLoading ? (
-                    <Text>Loading...</Text>
+                    {isLoading || isError ? (
+                    <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>
                     ) : (
-                    schedulesApi.map((schedule: scheduleTypes) => (
-                        <EditableScheduleBox {...schedule} key={schedule.id}/>
+                    filteredTasks?.content.map((schedule: Tasks) => (
+                        <EditableScheduleBox {...schedule} key={schedule._id}/>
                     ))
                     )}
 
@@ -57,6 +94,10 @@ const CreatedTasks = () => {
 export default CreatedTasks;
 
 const styles = StyleSheet.create ({
+    contentContainer: {
+        paddingVertical: 100,
+        paddingHorizontal:150
+    },
     flexBox: {
         flex:1,
     },
