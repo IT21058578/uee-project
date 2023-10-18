@@ -22,13 +22,17 @@ export const HandleResult = ({ result }: { result: any }) => {
       // Handle success response
       const responseData = result.data;
 
-      if (responseData.tokens && responseData.user) {
-        setItem(RoutePaths.token, responseData.tokens.accessToken);
-
+      if (responseData?.tokens && responseData.user) {
+          setItem(RoutePaths.token, responseData.tokens.accessToken);
           setItem("user", responseData.user);
           dispatch(setUser(responseData.user));
 
-          navigation.navigate("Home");
+          Toast.show({
+            type: 'success',
+            text1: 'Sign In successful.',
+          });
+
+          navigation.navigate("BottomTab");
 
       } else {
         // Handle invalid response data
@@ -41,7 +45,7 @@ export const HandleResult = ({ result }: { result: any }) => {
 
       Toast.show({
         type: 'success',
-        text1: responseData.message || 'Login successful.',
+        text1: 'Login successful.',
       });
     }
   }, [result]);

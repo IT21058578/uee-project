@@ -9,7 +9,8 @@ export const roomApiSlice = createApi({
   reducerPath: "api/rooms",
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
-    prepareHeaders(headers) {
+  async prepareHeaders(headers) {
+    const token = await getItem(RoutePaths.token);
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }

@@ -126,7 +126,7 @@ const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => navigate("BottomTab")}
+          onPress={() => navigate("Register")}
           style={{
             padding: Spacing,
           }}

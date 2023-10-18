@@ -3,13 +3,13 @@ import { BASE_URL } from "../../utils/Genarals";
 import { getItem } from "../../utils/Genarals";
 import RoutePaths from "../../utils/RoutePaths";
 
-const token = getItem(RoutePaths.token);
 
 export const scheduleApi = createApi({
     reducerPath: "api/schedules",
     baseQuery: fetchBaseQuery({
         baseUrl: BASE_URL,
-        prepareHeaders(headers) {
+        async prepareHeaders(headers) {
+        const token = await getItem(RoutePaths.token);
         if (token) {
             headers.set("Authorization", `Bearer ${token}`);
         }

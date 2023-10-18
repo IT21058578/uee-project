@@ -29,6 +29,8 @@ const ContainerFrame = () => {
 
   const userName = user?.firstName;
 
+  console.log(userName)
+
 
   return (
     <View style={[styles.frame, styles.frameLayout]}>

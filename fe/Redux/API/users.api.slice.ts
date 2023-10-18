@@ -9,7 +9,8 @@ export const usersApiSlice = createApi({
     
     reducerPath : 'api/users',
     baseQuery : fetchBaseQuery({baseUrl : BASE_URL ,
-        prepareHeaders(headers) {
+    async prepareHeaders(headers) {
+        const token = await getItem(RoutePaths.token);
             if (token) {
               headers.set('Authorization', `Bearer ${token}`);
             }

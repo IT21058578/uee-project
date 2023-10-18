@@ -24,6 +24,7 @@ const Home = () => {
       const token = await getItem(RoutePaths.token);
       if (token) {
         const userData = await getItem("user");
+        console.log('user DATA',userData);
         if (userData) {
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
@@ -36,15 +37,17 @@ const Home = () => {
 
   const userID = user?._id;
 
+  console.log('user ID',userID);
+
   const currentDate = new Date();
-  const formattedDate = currentDate.toISOString().split('T')[0];
+  const date = currentDate.toISOString().split('T')[0];
 
   const {
     isLoading,
     data: scheduleList,
     isSuccess,
     isError,
-  } = useGetDetailedScheduledForUserQuery({userID,formattedDate});
+  } = useGetDetailedScheduledForUserQuery({userID,date});
 
   return (
     <View style={styles.home}>
