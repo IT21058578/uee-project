@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.getToken(request);
     if (!token) {
-      this.logger.debug(`Could not authenticate user`);
+      this.logger.debug(`Could not authenticate user as they had no token`);
       return true;
     }
     try {
@@ -34,12 +34,9 @@ export class AuthGuard implements CanActivate {
       this.logger.debug(`Authenticated user with id '${id}'`);
       request['user'] = userJson;
     } catch {
-      this.logger.debug(`Could not authenticate user`);
+      this.logger.debug(`Could not authenticate user as they had an invalid token`);
     }
-    this.logger.warn(
-      `User attempted to access resources with an invalid token`,
-    );
-    throw new UnauthorizedException(ErrorMessage.INVALID_TOKEN);
+    return true;
   }
 
   private getToken(request: Request): string | undefined {

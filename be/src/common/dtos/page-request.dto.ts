@@ -1,3 +1,4 @@
+import { IsNumber, IsObject, IsOptional } from 'class-validator';
 import { SortOrder } from 'mongoose';
 
 export const CriteriaOperator = {
@@ -13,12 +14,23 @@ export const CriteriaOperator = {
 export type CritieriaOperator = keyof typeof CriteriaOperator;
 
 export class PageRequest {
+  @IsOptional()
+  @IsNumber()
   pageNum: number;
+
+  @IsOptional()
+  @IsNumber()
   pageSize: number;
+
+  @IsObject()
+  @IsNumber()
   sort?: {
     field: string;
     direction: SortOrder;
   };
+
+  @IsOptional()
+  @IsObject()
   filter?: {
     [field: string]: { operator: CritieriaOperator; value: any };
   };

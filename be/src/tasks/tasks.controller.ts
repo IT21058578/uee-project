@@ -12,6 +12,7 @@ import { PageRequest } from 'src/common/dtos/page-request.dto';
 import { CreateTaskDto } from './create-task.dto';
 import { UserRole } from 'src/common/enums/user-roles.enum';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { ValidateObjectIdPipe } from 'src/common/pipes/validate-object-id.pipe';
 
 @Controller('tasks')
 export class TasksController {
@@ -23,28 +24,28 @@ export class TasksController {
   }
 
   @Get(':id')
-  async getTask(@Param('id') id: string) {
+  async getTask(@Param('id', ValidateObjectIdPipe) id: string) {
     return this.tasksService.getTask(id);
   }
 
   @Put(':id')
   @Roles(...Object.values(UserRole))
-  async editTask(@Param('id') id: string, @Body() editTaskDto: CreateTaskDto) {
+  async editTask(
+    @Param('id', ValidateObjectIdPipe) id: string,
+    @Body() editTaskDto: CreateTaskDto,
+  ) {
     return this.tasksService.editTask(id, editTaskDto);
   }
 
   @Delete(':id')
   @Roles(...Object.values(UserRole))
-  async deleteTask(@Param('id') id: string) {
+  async deleteTask(@Param('id', ValidateObjectIdPipe) id: string) {
     await this.tasksService.deleteTask(id);
   }
 
   @Post()
   @Roles(...Object.values(UserRole))
-  async createTask(
-    @Param('id') id: string,
-    @Body() createTaskDto: CreateTaskDto,
-  ) {
+  async createTask(@Body() createTaskDto: CreateTaskDto) {
     return this.tasksService.createTask(createTaskDto);
   }
 }

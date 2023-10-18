@@ -1,8 +1,13 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, FlatUser } from './user.schema';
 import { Model } from 'mongoose';
-import { Page, PageBuilder } from 'src/common/util/page-builder';
+import { Page, PageBuilder } from 'src/common/util/page.util';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
 import ErrorMessage from 'src/common/enums/error-message.enum';
 import { PageRequest } from 'src/common/dtos/page-request.dto';
@@ -44,7 +49,7 @@ export class UsersService {
         description: `User with id '${id}' was not found`,
       });
     }
-    return updatedUser.toJSON();
+    return updatedUser;
   }
 
   async getUser(id: string): Promise<UserDocument> {
@@ -58,12 +63,12 @@ export class UsersService {
       });
     }
 
-    return existingUser.toJSON();
+    return existingUser;
   }
 
   async getUserByEmail(email: string): Promise<UserDocument> {
     this.logger.log(`Attempting to find user with email '${email}'`);
-    const existingUser = await this.userModel.findOne({ email });
+    const existingUser = (await this.userModel.find({ email })).pop() ?? null;
 
     if (existingUser === null) {
       this.logger.warn(`Could not find an existing user with email '${email}'`);
@@ -72,7 +77,7 @@ export class UsersService {
       });
     }
 
-    return existingUser.toJSON();
+    return existingUser;
   }
 
   async deleteUser(id: string) {
@@ -85,8 +90,7 @@ export class UsersService {
         description: `User with id '${id}' was not found`,
       });
     }
-
-    // TODO: Delete orders, reviews.
+    this.logger.log(`Deleted user with id '${id}'`);
   }
 
   async getUserPage({
@@ -124,10 +128,34 @@ export class UsersService {
 
   async assignToRoom(userId: string, roomId: string) {
     const existingUser = await this.getUser(userId);
-    if (!existingUser.roomIds.includes(roomId)) {
-      existingUser.roomIds.push(roomId);
-      await existingUser.save();
+    if (existingUser.roomIds.includes(roomId)) {
+      this.logger.warn(
+        `User with id ${userId} has already been added to room with id ${roomId}`,
+      );
+      throw new ConflictException(
+        ErrorMessage.USER_ALREADY_IN_ROOM,
+        `User with id ${userId} has already been added to room with id ${roomId}`,
+      );
     }
+
+    existingUser.roomIds.push(roomId);
+    await existingUser.save();
+  }
+
+  async unassignFromRoom(userId: string, roomId: string) {
+    const existingUser = await this.getUser(userId);
+    if (!existingUser.roomIds.includes(roomId)) {
+      this.logger.warn(
+        `User with id ${userId} is not assigned to room with id ${roomId}`,
+      );
+      throw new ConflictException(
+        ErrorMessage.USER_NOT_IN_ROOM,
+        `User with id ${userId} is not assigned to room with id ${roomId}`,
+      );
+    }
+
+    existingUser.roomIds = existingUser?.roomIds?.filter((id) => id !== roomId) ?? [];
+    await existingUser.save();
   }
 
   async unassignAllFromRoom(roomId: string) {
