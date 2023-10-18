@@ -40,19 +40,13 @@ export class AuthService {
         throw Error();
       }
 
-      if (!existingUser.isAuthorized) {
-        this.logger.warn(
-          `User with id ${existingUser.id} attempted login but has not verified their email`,
-        );
-        throw Error();
-      }
-
       const [accessToken, refreshToken] = await Promise.all([
         this.jwtTokenService.getAccessToken(existingUser.id),
         this.jwtTokenService.getRefreshToken(existingUser.id),
       ]);
 
-      const { password: userPassword, ...sanitizedUser } = existingUser;
+      const { password: userPassword, ...sanitizedUser } =
+        existingUser.toJSON();
       return { tokens: { accessToken, refreshToken }, user: sanitizedUser };
     } catch (error) {
       this.logger.warn(`Failed to login user with email '${email}'`);
