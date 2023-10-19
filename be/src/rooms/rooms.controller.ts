@@ -30,7 +30,8 @@ export class RoomsController {
   @Post()
   @Roles(...Object.values(UserRole))
   async createRoom(@Body() createRoomDto: CreateRoomDto) {
-    return await this.roomsService.createRoom(createRoomDto);
+    const savedRoom = await this.roomsService.createRoom(createRoomDto);
+    return savedRoom;
   }
 
   @Put(':id')
