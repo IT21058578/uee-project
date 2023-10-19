@@ -1,12 +1,11 @@
-import { Duration } from 'dayjs/plugin/duration';
 import { TaskPriority } from './task-priority.enum';
 import {
   IsArray,
-  IsDate,
+  IsDateString,
   IsIn,
   IsMongoId,
   IsNotEmpty,
-  IsObject,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -20,15 +19,15 @@ export class CreateTaskDto {
   @IsOptional()
   description: string;
 
-  @IsObject()
+  @IsNumber()
   @IsNotEmpty()
-  duration: Duration;
+  duration: number;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
   date: Date;
 
-  @IsDate()
+  @IsNotEmpty()
   @IsIn(Object.values(TaskPriority))
   priority: TaskPriority;
 

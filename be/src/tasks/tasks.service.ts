@@ -14,6 +14,9 @@ import { CreateTaskDto } from './create-task.dto';
 import { SchedulesService } from 'src/schedules/schedules.service';
 import { SortOrder } from 'mongoose';
 import { PageBuilder } from 'src/common/util/page.util';
+import dayjs, { duration } from 'dayjs';
+import plugin from 'dayjs/plugin/duration';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class TasksService {
@@ -21,8 +24,11 @@ export class TasksService {
     @Inject(REQUEST) private readonly req: Request,
     @Inject(forwardRef(() => SchedulesService))
     private readonly schedulesService: SchedulesService,
+    private readonly usersService: UsersService,
     @InjectModel(Task.name) private readonly taskModel: TaskModel,
-  ) {}
+  ) {
+    dayjs.extend(duration);
+  }
 
   async getTask(id: string) {
     const existingTask = await this.taskModel.findById(id);
@@ -40,6 +46,7 @@ export class TasksService {
       editTaskDto;
     name = name.trim();
     description = description.trim();
+    const newDuration = dayjs.duration(duration) as plugin.Duration;
 
     const existingTask = await this.getTask(id);
     const tasksWithSimilarNames = await this.taskModel.find({
@@ -56,7 +63,7 @@ export class TasksService {
 
     existingTask.date = date ?? existingTask.date;
     existingTask.description = description;
-    existingTask.duration = duration ?? existingTask.duration;
+    existingTask.duration = newDuration ?? existingTask.duration;
     existingTask.name = name ?? existingTask.name;
     existingTask.priority = priority ?? existingTask.priority;
     existingTask.assignedUserIds =
@@ -78,10 +85,10 @@ export class TasksService {
       name,
       priority,
       roomId,
-      assignedUserIds,
+      assignedUserIds = [],
     } = createTaskDto;
-    name = name.trim();
-    description = description.trim();
+    name = name?.trim();
+    description = description?.trim();
 
     const tasksWithSimilarNames = await this.taskModel.find({
       roomId,
@@ -173,5 +180,38 @@ export class TasksService {
 
   async deleteAllTasksFromRoom(roomId: string) {
     await this.taskModel.deleteMany({ roomId });
+  }
+
+  async assignUserToTask(userId: string, taskId: string) {
+    await this.usersService.getUser(userId);
+    const existingTask = await this.getTask(taskId);
+
+    const distinctUserIds = new Set([...existingTask.assignedUserIds, userId]);
+    existingTask.assignedUserIds = [...distinctUserIds];
+
+    await Promise.all([
+      existingTask.save(),
+      this.schedulesService.updateRoomSchedulesOfUsers(
+        existingTask.roomId,
+        existingTask.assignedUserIds,
+      ),
+    ]);
+  }
+
+  async unassignUserFromTask(userId: string, taskId: string) {
+    await this.usersService.getUser(userId);
+    const existingTask = await this.getTask(taskId);
+    existingTask.assignedUserIds = existingTask.assignedUserIds.filter(
+      (id) => id !== userId,
+    );
+    const distinctUserIds = new Set(existingTask.assignedUserIds);
+    existingTask.assignedUserIds = [...distinctUserIds];
+
+    await Promise.all([
+      existingTask.save(),
+      this.schedulesService.updateRoomSchedulesOfUsers(existingTask.roomId, [
+        userId,
+      ]),
+    ]);
   }
 }

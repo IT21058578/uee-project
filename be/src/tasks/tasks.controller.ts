@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { PageRequest } from 'src/common/dtos/page-request.dto';
@@ -26,6 +27,24 @@ export class TasksController {
   @Get(':id')
   async getTask(@Param('id', ValidateObjectIdPipe) id: string) {
     return this.tasksService.getTask(id);
+  }
+
+  @Put('unassign')
+  @Roles(...Object.values(UserRole))
+  async unassignUserFromTask(
+    @Query('user-id', ValidateObjectIdPipe) userId: string,
+    @Query('task-id', ValidateObjectIdPipe) taskId: string,
+  ) {
+    await this.tasksService.unassignUserFromTask(userId, taskId);
+  }
+
+  @Put('assign')
+  @Roles(...Object.values(UserRole))
+  async assignUserToTask(
+    @Query('user-id', ValidateObjectIdPipe) userId: string,
+    @Query('task-id', ValidateObjectIdPipe) taskId: string,
+  ) {
+    await this.tasksService.assignUserToTask(userId, taskId);
   }
 
   @Put(':id')

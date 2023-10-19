@@ -1,4 +1,4 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { FlattenMaps, HydratedDocument, Model } from 'mongoose';
 import { Audit } from 'src/common/schema/audit.schema';
 
@@ -6,6 +6,7 @@ export type FlatSchedule = FlattenMaps<Schedule & { _id: string }>;
 export type ScheduleModel = Model<Schedule>;
 export type ScheduleDocument = HydratedDocument<Schedule>;
 
+@Schema()
 export class Schedule extends Audit {
   @Prop({ isRequired: true })
   roomId: string;

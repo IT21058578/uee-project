@@ -125,15 +125,20 @@ export class SchedulesService {
       const assignedTasks = allTasks.filter((task) =>
         task.assignedUserIds.includes(userId),
       );
-      const assignedDates = [
-        ...new Set(assignedTasks.map((task) => task.date)),
-      ];
+      const assignedDates = new Set(
+        assignedTasks.map((task) => task.date.toISOString().split('T')[0]),
+      );
       assignedDates.forEach(async (date) => {
-        const tasksForDate = assignedTasks.filter((task) => task.date === date);
-        const taskList = this.buildScheduleTaskList(date, tasksForDate);
+        const tasksForDate = assignedTasks.filter((task) =>
+          dayjs(task.date).isSame(date, 'day'),
+        );
+        const taskList = this.buildScheduleTaskList(
+          new Date(date),
+          tasksForDate,
+        );
         const existingSchedule = allExistingSchedules.find((schedule) => {
           const isSameUser = schedule.userId === userId;
-          const isSameDate = schedule.date === date;
+          const isSameDate = dayjs(schedule.date).isSame(date, 'day');
           return isSameUser && isSameDate;
         });
 
