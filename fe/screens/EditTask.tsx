@@ -19,6 +19,7 @@ import duration from 'dayjs/plugin/duration';
 import Calendar from "../components/Calendar/calender";
 import moment, { Moment } from 'moment';
 import  Toast from 'react-native-toast-message';
+dayjs.extend(duration)
 
 const EditTask = ({ route }:{ route: any }) => {
 
@@ -34,7 +35,7 @@ const EditTask = ({ route }:{ route: any }) => {
         navigation.goBack();
     }
 
-    const [selectedDate, setSelectedDate] = useState<Moment | null>(task?.date || '');
+    const [selectedDate, setSelectedDate] = useState<Moment | null>();
 
     const handleDateSelect = (date: Moment) => {
       setSelectedDate(date);
@@ -43,7 +44,7 @@ const EditTask = ({ route }:{ route: any }) => {
     // Track the selected user IDs
     const [selectedUserIds, setSelectedUserIds] = useState<string[]>(task?.assignedUserIds || []);
 
-    const [title , setTitle] = useState(task?.title || '');
+    const [name , setTitle] = useState(task?.name || '');
     const [description,setDescription] = useState(task?.description || '');
     const [priority,setPriority] = useState(task?.priority || '');
 
@@ -56,6 +57,7 @@ const EditTask = ({ route }:{ route: any }) => {
         }
     };
 
+    console.log('value',task)
 
     const [showPicker, setShowPicker] = useState(false);
     const [alarmString, setAlarmString] = useState<string | null>(task?.duration || '');
@@ -83,25 +85,27 @@ const EditTask = ({ route }:{ route: any }) => {
       setShowPicker(false);
     };
 
+
     const handleCreateTask = async () => {
 
         const formData = {
-            name: title, 
+            name: name, 
             description: description, 
             duration: alarmString,
             date: selectedDate,
             priority: priority,
             assignedUserIds: selectedUserIds,
         }
+
+        console.log(alarmString)
         const response = await updateTask({taskId,formData}).unwrap()
-        
         if(response){
             Toast.show({
                 type: 'success',
                 text1: 'Task edited successful.',
               });
     
-            navigation.navigate("CTasks");
+            navigation.navigate("Home");
         }else {
             Toast.show({
                 type: 'error',
@@ -129,7 +133,7 @@ const EditTask = ({ route }:{ route: any }) => {
             </View>
             <View style={styles.box1}>
                 <NativeBaseProvider>
-                    <Input variant="underlined" placeholder="Enter Title" onChangeText={setTitle} />
+                    <Input variant="underlined" placeholder="Enter Title" onChangeText={setTitle} value={name}/>
                 </NativeBaseProvider>
             </View>
             <View style={styles.box1}>
@@ -149,6 +153,7 @@ const EditTask = ({ route }:{ route: any }) => {
                     w="100%"
                     backgroundColor={Colors.colorGhostwhite}
                     maxW={400} 
+                    value={description}
                     onChangeText={setDescription}
                     autoCompleteType="off" 
                     />
@@ -159,7 +164,7 @@ const EditTask = ({ route }:{ route: any }) => {
             </View>
             <View style={styles.box2}>
                 <NativeBaseProvider>
-                    <Input variant="underlined" placeholder="Enter Priority" onChangeText={setPriority} />
+                    <Input variant="underlined" placeholder="Enter Priority" onChangeText={setPriority}  value={priority}/>
                 </NativeBaseProvider>
             </View>
             <View style={styles.box1}>
@@ -167,14 +172,14 @@ const EditTask = ({ route }:{ route: any }) => {
             </View>
             <View style={styles.box3}>
                 {userData?.content.map((user:any) => (
-                    <View style={styles.box4} key={user.id}>
-                        <Text style={styles.typoBoddy}>{user.name}</Text>
+                    <View style={styles.box4} key={user._id}>
+                        <Text style={styles.typoBoddy}>{user.firstName}</Text>
                         <NativeBaseProvider>
                         <View style={styles.CheckboxSpace1}>
                             <Checkbox
-                            value={selectedUserIds?.includes(user.id).toString()}
+                            value={selectedUserIds?.includes(user._id).toString()}
                             colorScheme="purple"
-                            onChange={() => handleCheckboxChange(user.id)}
+                            onChange={() => handleCheckboxChange(user._id)}
                             aria-label="Purple Checkbox"
                             />
                         </View>
@@ -203,8 +208,8 @@ const EditTask = ({ route }:{ route: any }) => {
                 theme: "light"
                 }}
             />
+                    <Toast/>
         </ScrollView>
-        <Toast/>
         </View>
     );
 };

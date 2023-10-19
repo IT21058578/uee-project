@@ -11,9 +11,13 @@ import { Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from '@expo/vector-icons'; 
 import { AntDesign } from '@expo/vector-icons'; 
-
+import { useGetAlltasksQuery } from "../../Redux/API/tasks.api.slice";
+import { setRoomID } from "../../Redux/slices/userSlice";
+import { useDispatch } from "react-redux";
 
 const RoomBox: React.FC<IRoom> = (props) => {
+
+  const dispatch = useDispatch();
   const [isPopoverVisible, setPopoverVisible] = useState(false);
 
   const navigation = useNavigation<any>();
@@ -32,20 +36,22 @@ const RoomBox: React.FC<IRoom> = (props) => {
   };
 
   const handleNavigate = () => {
+
+    dispatch(setRoomID(roomId));
     // Navigate to the desired screen when the Pressable is pressed
-    navigation.navigate("AdminRoom" ,{
-      roomId : roomId,
-    });
+    navigation.navigate("AdminRoom");
   };
 
-  const propCount = Object.keys(props).length;
+  const {data:taskList , isLoading ,isError} = useGetAlltasksQuery('');
+  console.log(taskList)
+  const taskCount = taskList?.content?.length
 
   return (
     <View style={styles.roomManagmentProfileSetti}>
       <View style={styles.groupParent}>
         <View style={[styles.rectangleParent, styles.groupChildPosition]}>
           <View style={[styles.groupChild, styles.groupLayout]} />
-          <Text style={[styles.task, styles.taskTypo]}>{propCount} Tasks</Text>
+          <Text style={[styles.task, styles.taskTypo]}>{taskCount} Tasks</Text>
           <Text style={[styles.seProjectGroup, styles.taskTypo]}>
             {props.name}
           </Text>

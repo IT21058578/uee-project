@@ -5,7 +5,7 @@ import Font from "../../constants/Font";
 import FontSize from "../../constants/FontSize";
 import { IRoom } from "../../types";
 import { useNavigation } from "@react-navigation/native";
-
+import { useGetAlltasksQuery } from "../../Redux/API/tasks.api.slice";
 
 
 const NonAdminRoomBox: React.FC<IRoom> = (props) => {
@@ -21,6 +21,10 @@ const NonAdminRoomBox: React.FC<IRoom> = (props) => {
     }); 
   };
 
+  const {data:taskList , isLoading ,isError} = useGetAlltasksQuery('');
+  console.log(taskList)
+  const taskCount = taskList?.content?.length
+
   const propCount = Object.keys(props).length;
 
   return (
@@ -28,7 +32,7 @@ const NonAdminRoomBox: React.FC<IRoom> = (props) => {
       <View style={styles.groupParent}>
         <View style={[styles.rectangleParent, styles.groupChildPosition]}>
           <View style={[styles.groupChild, styles.groupLayout]} />
-          <Text style={[styles.task, styles.taskTypo]}>{propCount} Tasks</Text>
+          <Text style={[styles.task, styles.taskTypo]}>{taskCount} Tasks</Text>
           <Text style={[styles.seProjectGroup, styles.taskTypo]}>
             {props.name}
           </Text>

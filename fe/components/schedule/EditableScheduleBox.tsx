@@ -40,7 +40,7 @@ const EditableScheduleBox = (props : Tasks) => {
     };
 
     const handleDeletePermission = (taskId: string) => {
-      setModalVisible2(true);
+      setModalVisible2(!modalVisible2);
       deleteTask(taskId);
     };
 

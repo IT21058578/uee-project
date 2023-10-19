@@ -52,9 +52,9 @@ const userID = user?._id;
   } = useGetAllroomsQuery(userID);
 
     const roomPairs = [];
-    for (let i = 0; i < roomList?.content?.length; i += 2) {
-      const room1 = roomList?.content[i];
-      const room2 = i + 1 < roomList?.content?.length ? roomList?.content[i + 1] : null;
+    for (let i = 0; i < roomList?.length; i += 2) {
+      const room1 = roomList?.[i];
+      const room2 = i + 1 < roomList?.length ? roomList?.[i + 1] : null;
       
       roomPairs.push( 
         <View key={i} style={{ flexDirection: 'row' }}>
@@ -101,9 +101,9 @@ const userID = user?._id;
   } = useGetAllroomsQuery(userID);
 
   const roomPairs = [];
-  for (let i = 0; i < roomList?.content?.length; i += 2) {
-    const room1 = roomList?.content[i];
-    const room2 = i + 1 < roomList?.content?.length ? roomList?.content[i + 1] : null;
+  for (let i = 0; i < roomList?.length; i += 2) {
+    const room1 = roomList?.[i];
+    const room2 = i + 1 < roomList?.length ? roomList?.[i + 1] : null;
 
     roomPairs.push(
       <View key={i} style={{ flexDirection: 'row' }}>

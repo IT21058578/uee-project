@@ -1,22 +1,23 @@
-import React from "react";
+import React, { FC } from "react";
 import { Text, StyleSheet, View } from "react-native";
 import { Button } from "react-native-paper";
 import Font from "../../constants/Font";
-import { Schedule } from "../../types";
+import { TaskType } from "../../types";
 import { Color,FontSize, Padding, Border } from "../../Styles/GlobalStyles";
 import DotMenu from "../PopUpMenu";
 import { TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-const HomeScheduleBox = (props : Schedule) => {
+const HomeScheduleBox:FC<TaskType & {tag:string}> = ( props ) => {
 
-  const navigation = useNavigation();
+    const navigation = useNavigation<any>();
 
-  const handleNavigate = () => {
-    // Navigate to the desired screen when the Pressable is pressed
-    navigation.navigate("TaskDetail"); 
-
-  };
+    const handleNavigate = () => {
+      // Navigate to the desired screen when the Pressable is pressed
+      navigation.navigate("TaskDetail" , {
+        taskId : props.taskId,
+      }); 
+    };
 
     return(
         <View style={[styles.frameContainer, styles.frameLayout]}>
@@ -26,9 +27,9 @@ const HomeScheduleBox = (props : Schedule) => {
           <View style={styles.frameChild} />
           <View style={styles.projectProgressMeetingParent}>
             <Text style={styles.projectProgressMeeting}>
-              {props.schedules[0].taskList[0].taskName}
+              {props.taskName}
             </Text>
-            <Text style={styles.text4}>{props.schedules[0].taskList[0].startTime} - {props.schedules[0].taskList[0].endTime}</Text>
+            <Text style={styles.text4}>{props.startTime} - {props.endTime}</Text>
           </View>
         </View>
         </TouchableOpacity>
@@ -40,7 +41,7 @@ const HomeScheduleBox = (props : Schedule) => {
         <TouchableOpacity onPress={handleNavigate}>
         <View style={[styles.altriumRoom01Wrapper, styles.wrapperLayout]}>
           <Text style={[styles.altriumRoom01, styles.altriumRoom01Typo]}>
-            {props.schedules[0].tag}
+            {props.tag}
           </Text>
         </View>
         </TouchableOpacity>

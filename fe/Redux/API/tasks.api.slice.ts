@@ -32,7 +32,7 @@ export const taskApiSlice = createApi({
     }),
 
     createtask: builder.mutation({
-      query: ({ formData }) => ({
+      query: (formData) => ({
         url: "/tasks",
         method: "POST",
         body: formData,

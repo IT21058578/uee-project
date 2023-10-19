@@ -7,9 +7,13 @@ import Calendar from "../../components/Calendar/calender";
 import moment, { Moment } from 'moment';
 import { useState } from "react";
 import AdminScheduleScreen from "../../components/AdminRoomPSComp";
+import { useAppSelector } from "../../hooks/redux-hooks";
+
 
 
 const AdminRoomSchedule = () => {
+
+    const roomId = useAppSelector(state => state.user.roomId)
 
     const [selectedDate, setSelectedDate] = useState<Moment | null>(null);
 

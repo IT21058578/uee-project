@@ -141,10 +141,10 @@ interface PopulatedScheduleDto {
   date: Date;
   tag: RoomTag;
   totalScheduled: string;
-  taskList: Task[];
+  taskList: TaskType[];
 }
 
-interface Task {
+export interface TaskType {
   taskId: string;
   taskName: string;
   startTime: string;

@@ -5,14 +5,25 @@ import Colors from "../constants/Colors";
 import FontSize from "../constants/FontSize";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { TaskType } from "../types";
+import { useGettaskQuery } from "../Redux/API/tasks.api.slice";
 
-const TaskDetail = () => {
+const TaskDetail = (props:{route:any}) => {
+
+    const {route} = props
+    const taskId = route?.params?.taskId;
+
+    console.log('task id in detail',props)
 
     const navigate = useNavigation();
+
+    const { data: task } = useGettaskQuery(taskId);
 
     const handleBackNav = () => {
         navigate.goBack();
     }
+
+    const date = task?.date.split('T')[0];
 
     return(
         <View>
@@ -26,7 +37,7 @@ const TaskDetail = () => {
         </View>
         <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.box1}>
-                <Text style={styles.typoTitle}>Task : Project Progress</Text>
+                <Text style={styles.typoTitle}>Task : {task?.name}</Text>
             </View>
             <View style={styles.box2}>
                 <LinearGradient
@@ -35,7 +46,7 @@ const TaskDetail = () => {
                     colors={["#fe9d9d", "#e77d7d"]}
                 >
                     <Text style={[styles.typoBoddy,{color:Colors.colorGray_100,fontFamily:Font['poppins-bold']}]}>Est. Date</Text>
-                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>14 August 2023</Text>
+                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>{date}</Text>
                 </LinearGradient>
                 <LinearGradient
                     style={styles.box11}
@@ -43,7 +54,7 @@ const TaskDetail = () => {
                     colors={["#fe9d9d", "#e77d7d"]}
                 >
                     <Text style={[styles.typoBoddy,{color:Colors.colorGray_100,fontFamily:Font['poppins-bold']}]}>Est. Time</Text>
-                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>07:00 - 07:15 AM</Text>
+                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>{task?.duration}</Text>
                 </LinearGradient>
             </View>
             <View style={styles.box1}>
@@ -53,14 +64,14 @@ const TaskDetail = () => {
                     colors={["#fe9d9d", "#e77d7d"]}
                 >
                     <Text style={[styles.typoBoddy,{color:Colors.colorGray_100,fontFamily:Font['poppins-bold']}]}>Description</Text>
-                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>This Room is created for manage group assignments though the entire semester.</Text>
+                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>{task?.description}</Text>
                 </LinearGradient>
             </View>
             <View style={styles.box1}>
                 <Text style={styles.typoBoddy}>Room</Text>
             </View>
             <View style={styles.box1}>
-                <Text style={[styles.typoBoddy,{color:Colors.darkblue,fontFamily:Font['poppins-bold']}]}>SE Project Group</Text>
+                <Text style={[styles.typoBoddy,{color:Colors.darkblue,fontFamily:Font['poppins-bold']}]}>{task?.roomId}</Text>
             </View>
             <View style={styles.box1}>
                 <Image source={require('../assets/Line_19.png')} />
@@ -132,7 +143,7 @@ const styles = StyleSheet.create ({
     },
     box11: {
         borderRadius:10,
-        paddingHorizontal:20,
+        paddingHorizontal:45,
         marginRight:12,
         paddingVertical:20,
         marginBottom: 20,

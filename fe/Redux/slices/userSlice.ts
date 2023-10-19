@@ -4,7 +4,7 @@ export const userSlice = createSlice({
     
     name : 'user',
 
-    initialState : {},
+    initialState : {} as any,
 
     reducers : {
 
@@ -12,6 +12,11 @@ export const userSlice = createSlice({
 
             state = action.payload;
 
+            return state;
+        },
+
+        setRoomID : (state , action) => {
+            state.roomId = action.payload;
             return state;
         },
 
@@ -25,4 +30,4 @@ export const userSlice = createSlice({
 
 })
 
-export const { setUser, logoutCurrentUser } = userSlice.actions;
+export const { setUser, setRoomID ,logoutCurrentUser } = userSlice.actions;

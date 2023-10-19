@@ -4,7 +4,7 @@ import { Button } from "react-native-paper";
 import ContainerFrame from "../components/ContainerFrame";
 import Font from "../constants/Font";
 import { Color, FontSize, Padding, Border } from "../Styles/GlobalStyles";
-import { scheduleTypes } from "../types";
+import { TaskType, scheduleTypes } from "../types";
 import HomeScheduleBox from "../components/schedule/homeScheduleBox";
 import { schedulesApi } from "../data/virtualData";
 import { useGetDetailedScheduledForUserQuery } from "../Redux/API/schedules.api.slice";
@@ -48,6 +48,8 @@ const Home = () => {
     isSuccess,
     isError,
   } = useGetDetailedScheduledForUserQuery({userID , date});
+
+  console.log('schedule list', scheduleList)
 
   return (
     <View style={styles.home}>
@@ -111,8 +113,8 @@ const Home = () => {
         {isLoading || isError? (
            <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>
         ) : (
-          scheduleList?.content.map((schedule: Schedule) => (
-            <HomeScheduleBox {...schedule} key={schedule._id}/>
+          scheduleList?.schedules[0]?.taskList.map((schedule: TaskType) => (
+            <HomeScheduleBox {...schedule} tag={scheduleList?.schedules[0].tag} key={schedule.taskId}/>
           ))
         )}
 

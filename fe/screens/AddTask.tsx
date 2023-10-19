@@ -17,10 +17,13 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import { useGetAllUsersQuery } from "../Redux/API/users.api.slice";
 import  Toast from 'react-native-toast-message';
+import { useAppSelector } from "../hooks/redux-hooks";
 
 
 const AddTask = () => {
 
+    const roomId = useAppSelector(state => state.user.roomId)
+    
     const [newTask ,taskResult] = useCreatetaskMutation();
     const { data: userData, isLoading, isError } = useGetAllUsersQuery('api/users');
       
@@ -83,27 +86,31 @@ const AddTask = () => {
             duration: alarmString,
             date: selectedDate,
             priority: priority,
-            roomId: 'room_id',
+            roomId: roomId,
             assignedUserIds: selectedUserIds,
         }
 
-        const response = await newTask(taskdata).unwrap();
+        console.log(taskdata);
 
-        if(response){
-            Toast.show({
-                type: 'success',
-                text1: 'Task Adding successful.',
-              });
-    
-            navigation.navigate("CTasks");
-        }else {
-            Toast.show({
-                type: 'error',
-                text1: 'Task Adding is unsuccessful.',
-              });
-            console.log("error")
+        try {
+            const response = await newTask(taskdata).unwrap();
+
+            if(response){
+                Toast.show({
+                    type: 'success',
+                    text1: 'Task Adding successful.',
+                });
+        
+                navigation.navigate("CTasks");
+            }
+          } catch (error) {
+                Toast.show({
+                    type: 'error',
+                    text1: 'Task Adding is unsuccessful.',
+                });
+                console.log("error")
+          }
         }
-    }
 
     return (
        <View>
@@ -158,15 +165,15 @@ const AddTask = () => {
                 <Text style={styles.typoBoddy}>Assign Members</Text>
             </View>
             <View style={styles.box3}>
-                {userData.map((user:any) => (
-                    <View style={styles.box4} key={user.id}>
-                        <Text style={styles.typoBoddy}>{user.name}</Text>
+                {userData?.content.map((user:any) => (
+                    <View style={styles.box4} key={user._id}>
+                        <Text style={styles.typoBoddy}>{user.firstName}</Text>
                         <NativeBaseProvider>
                         <View style={styles.CheckboxSpace1}>
                             <Checkbox
-                            value={selectedUserIds.includes(user.id).toString()}
+                            value={selectedUserIds.includes(user._id).toString()}
                             colorScheme="purple"
-                            onChange={() => handleCheckboxChange(user.id)}
+                            onChange={() => handleCheckboxChange(user._id)}
                             aria-label="Purple Checkbox"
                             />
                         </View>
