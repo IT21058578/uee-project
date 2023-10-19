@@ -19,12 +19,15 @@ export const taskApiSlice = createApi({
 
   endpoints: (builder) => ({
     getAlltasks: builder.query({
-      query: () => "/tasks/search",
-      providesTags: ["tasks"],
+      query: () =>  ({
+        url:"/tasks/search",
+        method: "POST",
+        invalidatesTags: ["tasks"],
+      }),
     }),
 
     gettask: builder.query({
-      query: (id: string) => `/tasks/${id}`,
+      query: (taskId: string) => `/tasks/${taskId}`,
       providesTags: ["tasks"],
     }),
 

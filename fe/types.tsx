@@ -1,4 +1,5 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import dayjs, { Dayjs } from 'dayjs';
 
 declare global {
   namespace ReactNavigation {
@@ -176,9 +177,19 @@ export interface Tasks {
   _id:string;
   name: string;
   description: string;
-  duration: string;
+  duration: Dayjs;
   date: Date;
   priority: TaskPriority;
   roomId: string;
   assignedUserIds: string[];
+}
+
+//rooms 
+
+export interface IRoom {
+  _id:string;
+  name: string;
+  description: string;
+  organization: string;
+  tag: RoomTag;
 }

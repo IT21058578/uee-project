@@ -26,15 +26,15 @@ export const scheduleApi = createApi({
         })),
         
         getPopulatedRoomSchedule: builder.query({
-            query: ({ userId, roomId, date }) => {
-                return `/schedules/detailed?user-id=${userId}&room-id=${roomId}&date=${date}`;
+            query: ({ userID, roomId, date }) => {
+                return `/schedules/detailed?user-id=${userID}&room-id=${roomId}&date=${date}`;
             },
             providesTags : ['schedules'],
         }),
 
         getDetailedScheduledForUser: builder.query({
-            query: ({ userId, date }) => {
-              return `/schedules/detailed/all-rooms?user-id=${userId}&date=${date}`;
+            query: ({ userID, date }) => {
+              return `/schedules/detailed/all-rooms?user-id=${userID}&date=${date}`;
             },
             providesTags : ['schedules'],
         }),

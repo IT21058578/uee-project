@@ -15,6 +15,7 @@ import { Tasks } from "../../types";
 import { useDeletetaskMutation } from "../../Redux/API/tasks.api.slice";
 import { useGettaskQuery } from "../../Redux/API/tasks.api.slice";
 
+
 const EditableScheduleBox = (props : Tasks) => {
 
     const [isPopoverVisible, setPopoverVisible] = useState(false);
@@ -25,13 +26,11 @@ const EditableScheduleBox = (props : Tasks) => {
 
     const [deleteTask, deletedResult] = useDeletetaskMutation();
 
-    const taskId = props._id;
-
-    const { data: task, isLoading, isError } = useGettaskQuery(taskId);
+    const taskId = props?._id;
   
     const handleEdit = () => {
       navigation.navigate("EditTask" , {
-        taskId: task.id,
+        taskId: taskId,
       });
       setPopoverVisible(false); // Close the popover
     };

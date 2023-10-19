@@ -36,7 +36,7 @@ const AdminRoomSchedule = () => {
                 <Calendar onSelectDate={handleDateSelect} selected={selectedDate} />
             </View>
             <View style={styles.datePicker}>
-                <AdminScheduleScreen/>
+                <AdminScheduleScreen selectedDate={selectedDate} roomId={roomId}/>
             </View>
         </View>
         

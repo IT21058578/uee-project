@@ -1,11 +1,51 @@
 import React from "react";
 import { Text, StyleSheet, View , Pressable} from "react-native";
-import { Button } from "react-native-paper";
+import { NativeBaseProvider, Button } from 'native-base';
 import Font from "../../constants/Font";
-import { scheduleTypes } from "../../types";
+import { Schedule } from "../../types";
 import { Color,FontSize, Padding, Border } from "../../Styles/GlobalStyles";
+import { useNavigation } from "@react-navigation/native";
+import { useDeletetaskMutation } from "../../Redux/API/tasks.api.slice";
+import { Entypo } from "@expo/vector-icons";
+import Popover from 'react-native-popover-view';
+import { TouchableWithoutFeedback , TouchableOpacity ,Modal ,Alert } from "react-native";
+import { useState } from "react";
+import Colors from "../../constants/Colors";
 
-const AdminRoomScheduleBox = (props : scheduleTypes) => {
+const AdminRoomScheduleBox = (props : Schedule) => {
+
+  const [isPopoverVisible, setPopoverVisible] = useState(false);
+
+  const navigation = useNavigation<any>();
+
+  const [modalVisible2, setModalVisible2] = useState(false);
+
+  const [deleteTask, deletedResult] = useDeletetaskMutation();
+
+
+  const taskId = props.schedules[0].taskList[0].taskId
+
+  const handleEdit = () => {
+    navigation.navigate("EditTask" , {
+      taskId: taskId,
+    });
+    setPopoverVisible(false); // Close the popover
+  };
+
+  const handleDelete = () => {
+    setModalVisible2(true);
+  };
+
+  const handleDeletePermission = (taskId: string) => {
+    setModalVisible2(true);
+    deleteTask(taskId);
+  };
+
+  const handleCancle = () => {
+      setModalVisible2(!modalVisible2)
+      setPopoverVisible(false); // Close the popover
+  }
+
     return(
         <View style={styles.roomManagmentProfileSetti}>
         <View style={styles.roomManagmentProfileSettiInner}>
@@ -15,9 +55,9 @@ const AdminRoomScheduleBox = (props : scheduleTypes) => {
               <View style={styles.projectProgressParent}>
                 <Text
                   style={[styles.projectProgress, styles.textPosition]}
-                >{props.title}</Text>
+                >{props.schedules[0].taskList[0].taskName}</Text>
                 <Text style={[styles.text, styles.textPosition]}>
-                {props.startTime} - {props.endTime}
+                  {props.schedules[0].taskList[0].startTime} - {props.schedules[0].taskList[0].endTime}
                 </Text>
               </View>
               <View
@@ -28,12 +68,57 @@ const AdminRoomScheduleBox = (props : scheduleTypes) => {
               />
               <View style={[styles.groupItem, styles.groupItemPosition]} />
             </View>
-            <Pressable style={[styles.groupInner, styles.groupInnerLayout]} />
-            <Text style={[styles.remove, styles.removeTypo]}>Remove</Text>
-            <Pressable
-              style={[styles.rectanglePressable, styles.groupInnerLayout]}
-            />
-            <Text style={[styles.reschedule, styles.removeTypo]}>Reschedule</Text>
+
+            <Popover
+            isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
+            onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
+                from={(
+                      <TouchableWithoutFeedback  onPress={() => setPopoverVisible(!isPopoverVisible)}>
+                        <View style={styles.doted}>
+                            <Entypo name="dots-three-vertical" size={10} color="black" />
+                        </View>
+                      </TouchableWithoutFeedback>
+                )}>
+                    {/* Model to change the Language */}
+                    <Modal
+                            animationType="fade"
+                            transparent={true}
+                            visible={modalVisible2}
+                            onRequestClose={() => {
+                                Alert.alert('Modal has been closed.');
+                                setModalVisible2(!modalVisible2);
+                                }}>
+                                <View style={styles.modalBackground}>
+                                <View style={styles.centeredView}>
+                                <View style={styles.modalView}>
+                                    <Text style={styles.typoTitle1}>Delete Task</Text>
+                                        <View style={styles.box1}>
+                                            <Text style={styles.typoBoddy}>Are you sure to delete this Task ?</Text>
+                                        </View>
+                                        <View style={styles.box1}>
+                                            <NativeBaseProvider>
+                                                <View style={{ flexDirection: "row", marginHorizontal: 20 }}>
+                                                    <Button style={{ marginHorizontal: 20 }} variant="outline" colorScheme="fuchsia" onPress={handleCancle}>
+                                                        Cancle
+                                                    </Button>
+                                                    <Button colorScheme="fuchsia" onPress={() => handleDeletePermission(props._id)}>    Sure    </Button>
+                                                </View>
+                                            </NativeBaseProvider>
+                                        </View>
+                                </View>
+                                </View>
+                                </View>
+                        </Modal>   
+
+                        <Pressable style={[styles.groupInner, styles.groupInnerLayout]} />
+                        <Text style={[styles.remove, styles.removeTypo]} onPress={handleDelete}>Remove</Text>
+                        <Pressable
+                          style={[styles.rectanglePressable, styles.groupInnerLayout]}
+                        />
+                        <Text style={[styles.reschedule, styles.removeTypo]} onPress={handleEdit}>Reschedule</Text>
+
+                      </Popover>
+
           </View>
         </View>
       </View>
@@ -152,6 +237,57 @@ const styles = StyleSheet.create ({
         height: 140,
         overflow: "hidden",
       },
+
+       //Modal
+    modalBackground: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
+      justifyContent: 'center',
+      alignItems: 'center',
+  },
+
+  // Model Styles
+  centeredView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 22,
+  },
+  modalView: {
+      margin: 20,
+      backgroundColor: 'white',
+      borderRadius: 20,
+      padding: 35,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+  },
+  typoTitle1: {
+      color: Colors.darkblue,
+      fontFamily: Font['poppins-semiBold'],
+      fontSize: FontSize.size_xl,
+  },
+  typoBoddy: {
+      color: Colors.darkblue,
+      fontFamily: Font['poppins-regular'],
+      fontSize: FontSize.size_base,
+  },
+  box1: {
+      flex:1,
+      flexDirection:'row',
+      maxHeight:50
+  },
+  doted: {
+    top: 20,
+    left: 300,
+},
+
 })
 
 export default AdminRoomScheduleBox;

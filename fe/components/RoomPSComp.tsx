@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, FlatList ,ScrollView } from 'react-native';
 import RoomScheduleBox from './schedule/roomScheduleBox';
 import Colors from '../constants/Colors';
 import Font from '../constants/Font';
-import { useGetPopulatedRoomScheduleQuery } from '../Redux/API/schedules.api.slice';
+import { useGetDetailedScheduledForUserQuery } from '../Redux/API/schedules.api.slice';
 import { ActivityIndicator } from 'react-native';
 import { getItem } from '../utils/Genarals'
 import RoutePaths from '../utils/RoutePaths';
@@ -24,7 +24,7 @@ interface ScheduleScreenProps {
 
 const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ selectedDate, selectedCategory }) => {
 
-  const formattedDate = selectedDate?.toISOString().split('T')[0];
+  const date = selectedDate?.toISOString().split('T')[0];
 
   const [user, setUser] = useState<{ _id: string } | null>(null);
 
@@ -45,7 +45,7 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ selectedDate, selectedC
 
   const userID = user?._id;
 
-  const { data, isLoading, isError } = useGetPopulatedRoomScheduleQuery({userID,formattedDate});
+  const { data, isLoading, isError } = useGetDetailedScheduledForUserQuery({userID,date});
 
   if (isLoading) {
     return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;

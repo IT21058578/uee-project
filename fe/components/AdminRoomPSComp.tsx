@@ -3,43 +3,38 @@ import { View, Text, StyleSheet, FlatList ,ScrollView } from 'react-native';
 import AdminRoomScheduleBox from './schedule/AdminRoomScheduleBox';
 import Colors from '../constants/Colors';
 import Font from '../constants/Font';
+import { Schedule } from '../types';
+import { useGetPopulatedRoomScheduleQuery } from '../Redux/API/schedules.api.slice';
 
-// Sample schedule data (replace with your own data)
-const scheduleData = [
-  { id: '1', startTime: '09:00 AM', endTime: '10:00 AM', title: 'Meeting 1' },
-  { id: '6', startTime: '09:30 AM', endTime: '10:30 AM', title: 'Meeting 2' },
-  { id: '2', startTime: '10:30 AM', endTime: '11:30 AM', title: 'Meeting 3' },
-  { id: '3', startTime: '09:30 AM', endTime: '10:30 AM', title: 'Lunch' },
-  { id: '4', startTime: '02:00 PM', endTime: '03:00 PM', title: 'Meeting 4' },
-  { id: '5', startTime: '02:01 PM', endTime: '05:00 PM', title: 'Meeting 5' },
-];
+// // Sample schedule data (replace with your own data)
+// const scheduleData = [
+//   { id: '1', startTime: '09:00 AM', endTime: '10:00 AM', title: 'Meeting 1' },
+//   { id: '6', startTime: '09:30 AM', endTime: '10:30 AM', title: 'Meeting 2' },
+//   { id: '2', startTime: '10:30 AM', endTime: '11:30 AM', title: 'Meeting 3' },
+//   { id: '3', startTime: '09:30 AM', endTime: '10:30 AM', title: 'Lunch' },
+//   { id: '4', startTime: '02:00 PM', endTime: '03:00 PM', title: 'Meeting 4' },
+//   { id: '5', startTime: '02:01 PM', endTime: '05:00 PM', title: 'Meeting 5' },
+// ];
 
-// Function to convert time to a sortable value
-function convertTimeToSortableValue(time: string): number {
-  const [hourMinute, ampm] = time.split(' ');
-  const [hours, minutes] = hourMinute.split(':').map((str) => parseInt(str));
-  return ampm === 'PM' ? (hours % 12 + 12) * 60 + minutes : hours * 60 + minutes;
-}
+const AdminScheduleScreen = (selectedDate:any,roomId:any) => {
 
-// Group the schedules by start time
-const groupedSchedules: { [key: string]: any[] } = {};
+  const { data:scheduleList , isError , isLoading} = useGetPopulatedRoomScheduleQuery({});
 
-scheduleData.forEach((schedule) => {
-//   const key = schedule.startTime.split(':')[0]; // Extract the hour from the start time
-  const key = schedule.startTime // Extract the  the start time
-  if (!groupedSchedules[key]) {
-    groupedSchedules[key] = [];
-  }
-  groupedSchedules[key].push(schedule);
-});
+  const groupedSchedules: { [key: string]: any[] } = {};
 
+  scheduleList?.content.forEach((schedule: Schedule) => {
+    const key = schedule.date.toISOString(); // Use the date as a string
+    if (!groupedSchedules[key]) {
+      groupedSchedules[key] = [];
+    }
+    groupedSchedules[key].push(schedule);
+  });
 
-const AdminScheduleScreen = () => {
-  // Sort the keys (start times) in ascending order considering AM and PM
-  const sortedKeys = Object.keys(groupedSchedules).sort(
-    (a, b) =>
-      convertTimeToSortableValue(a) - convertTimeToSortableValue(b)
-  );
+  // Sort the keys (start times) in ascending order
+  const sortedKeys = Object.keys(groupedSchedules).sort((a, b) => {
+    // You can use the date strings for comparison directly
+    return a.localeCompare(b);
+  });
 
   return (
     <View style={styles.container}>
@@ -55,12 +50,12 @@ const AdminScheduleScreen = () => {
         renderItem={({ item }) => (
           <View style={styles.timeSlotContainer}>
             <Text style={styles.timeSlot}>{item[0]}</Text>
-            {item[1].map((schedule: any) => (
+            {item[1].map((schedule: Schedule) => (
             //   <View key={schedule.id} style={styles.scheduleItem}>
             //     <Text>{schedule.title}</Text>
             //     <Text>{schedule.startTime} - {schedule.endTime}</Text>
             //   </View>
-                <AdminRoomScheduleBox {...schedule} key={schedule.id}/>
+                <AdminRoomScheduleBox {...schedule} key={schedule._id}/>
             ))}
           </View>
         )}

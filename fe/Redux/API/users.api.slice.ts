@@ -20,10 +20,13 @@ export const usersApiSlice = createApi({
 
     endpoints : (builder) => ({
 
-        getAllUsers : builder.query(({
-            query : () => '/users/search',
-            providesTags : ['Users'],
-        })),
+        getAllUsers: builder.query({
+            query: () =>  ({
+              url:"/users/search",
+              method: "POST",
+              invalidatesTags: ["Users"],
+            }),
+        }),
 
         getUser : builder.query({
             query : (id) => `/users/${id}`,

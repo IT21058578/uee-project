@@ -3,26 +3,32 @@ import { StyleSheet, View, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
 import Font from "../../constants/Font";
 import FontSize from "../../constants/FontSize";
-import { RoomType } from "../../types";
+import { IRoom } from "../../types";
 import { useNavigation } from "@react-navigation/native";
 
 
 
-const NonAdminRoomBox: React.FC<RoomType> = (props) => {
+const NonAdminRoomBox: React.FC<IRoom> = (props) => {
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
+
+  const roomId = props._id;
 
   const handleNavigate = () => {
     // Navigate to the desired screen when the Pressable is pressed
-    navigation.navigate("RoomDetails"); 
+    navigation.navigate("RoomDetails", {
+      roomId: roomId,
+    }); 
   };
+
+  const propCount = Object.keys(props).length;
 
   return (
     <View style={styles.roomManagmentProfileSetti}>
       <View style={styles.groupParent}>
         <View style={[styles.rectangleParent, styles.groupChildPosition]}>
           <View style={[styles.groupChild, styles.groupLayout]} />
-          <Text style={[styles.task, styles.taskTypo]}>{props.tasks.length} Tasks</Text>
+          <Text style={[styles.task, styles.taskTypo]}>{propCount} Tasks</Text>
           <Text style={[styles.seProjectGroup, styles.taskTypo]}>
             {props.name}
           </Text>

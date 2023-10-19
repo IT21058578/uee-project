@@ -47,7 +47,7 @@ const Home = () => {
     data: scheduleList,
     isSuccess,
     isError,
-  } = useGetDetailedScheduledForUserQuery({userID,date});
+  } = useGetDetailedScheduledForUserQuery({userID , date});
 
   return (
     <View style={styles.home}>

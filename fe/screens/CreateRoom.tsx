@@ -21,7 +21,7 @@ const CreateRoom = () => {
                 <Pressable style={styles.rectangle} onPress={handleBackNav}>
                     <Image style={styles.backImg} source={require('../assets/Arrow.png')} />
                 </Pressable>
-                <Text style={styles.typo1}>Edit Room</Text>
+                <Text style={styles.typo1}>Create Room</Text>
             </View>
         </View>
         <ScrollView contentContainerStyle={styles.container}>

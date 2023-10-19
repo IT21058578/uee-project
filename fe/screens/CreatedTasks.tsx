@@ -48,7 +48,7 @@ const CreatedTasks = () => {
     const [searchText, setSearchText] = useState('');
 
     // Function to filter tasks based on search text
-    const filteredTasks = taskList?.filter((task: Tasks) =>
+    const filteredTasks = taskList?.content.filter((task: Tasks) =>
     task.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
@@ -79,7 +79,7 @@ const CreatedTasks = () => {
                     {isLoading || isError ? (
                     <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>
                     ) : (
-                    filteredTasks?.content.map((schedule: Tasks) => (
+                    filteredTasks?.map((schedule: Tasks) => (
                         <EditableScheduleBox {...schedule} key={schedule._id}/>
                     ))
                     )}

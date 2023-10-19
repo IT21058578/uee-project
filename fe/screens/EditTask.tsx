@@ -10,14 +10,23 @@ import { TimerPickerModal } from "react-native-timer-picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { Tasks } from "../types";
+import { useUpdatetaskMutation } from "../Redux/API/tasks.api.slice";
+import { useGetAllUsersQuery } from "../Redux/API/users.api.slice";
+import { useRoute } from '@react-navigation/native';
+import { useGettaskQuery } from "../Redux/API/tasks.api.slice";
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import Calendar from "../components/Calendar/calender";
+import moment, { Moment } from 'moment';
+import  Toast from 'react-native-toast-message';
 
+const EditTask = ({ route }:{ route: any }) => {
 
-// Define the formatTime function
-function formatTime(hours: number, minutes: number, seconds: number): string {
-    return `${hours}h ${minutes}m ${seconds}s`;
-  }
+    const taskId = route?.params?.taskId;
 
-const EditTask = ({task} : {task : Tasks}) => {
+    const { data: task } = useGettaskQuery(taskId);
+    const [updateTask , updateResult] = useUpdatetaskMutation();
+    const { data: userData, isLoading, isError } = useGetAllUsersQuery('api/users');
 
     const navigation = useNavigation();
 
@@ -25,24 +34,84 @@ const EditTask = ({task} : {task : Tasks}) => {
         navigation.goBack();
     }
 
-    const [open, setOpen] = useState(false);
-    const [value, setValue] = useState(null);
-    const [items, setItems] = useState([
-      { label: 'Apple', value: 'apple' },
-      { label: 'Banana', value: 'banana' }
-    ]);
+    const [selectedDate, setSelectedDate] = useState<Moment | null>(task?.date || '');
 
-    const [isSelect, setIsSelect] = useState<boolean>(false);
-
-    const handleCheckboxChange = () => {
-      setIsSelect(!isSelect); // Toggle the state when the checkbox is clicked
+    const handleDateSelect = (date: Moment) => {
+      setSelectedDate(date);
     };
 
-    //Time Picker
+    // Track the selected user IDs
+    const [selectedUserIds, setSelectedUserIds] = useState<string[]>(task?.assignedUserIds || []);
+
+    const [title , setTitle] = useState(task?.title || '');
+    const [description,setDescription] = useState(task?.description || '');
+    const [priority,setPriority] = useState(task?.priority || '');
+
+    // Function to handle checkbox change
+    const handleCheckboxChange = (userId: string) => {
+        if (selectedUserIds?.includes(userId)) {
+        setSelectedUserIds(selectedUserIds?.filter((id) => id !== userId));
+        } else {
+        setSelectedUserIds([...selectedUserIds, userId]);
+        }
+    };
+
+
     const [showPicker, setShowPicker] = useState(false);
-    const [alarmString, setAlarmString] = useState<
-            string | null
-        >(null);
+    const [alarmString, setAlarmString] = useState<string | null>(task?.duration || '');
+  
+    const handleDurationSelection = (pickedDuration:any) => {
+      const { hours, minutes, seconds } = pickedDuration;
+  
+      // Create a dayjs duration object
+      const duration = dayjs.duration({
+        hours,
+        minutes,
+        seconds
+      });
+  
+      // Format the duration as a string (e.g., "HH:mm:ss")
+      const formattedDuration = duration.format("HH:mm:ss");
+  
+      // Set the formatted duration as the alarmString state
+      setAlarmString(formattedDuration);
+
+      // Call the api to add task
+      handleCreateTask();
+      
+      // Close the picker
+      setShowPicker(false);
+    };
+
+    const handleCreateTask = async () => {
+
+        const formData = {
+            name: title, 
+            description: description, 
+            duration: alarmString,
+            date: selectedDate,
+            priority: priority,
+            assignedUserIds: selectedUserIds,
+        }
+        const response = await updateTask({taskId,formData}).unwrap()
+        
+        if(response){
+            Toast.show({
+                type: 'success',
+                text1: 'Task edited successful.',
+              });
+    
+            navigation.navigate("CTasks");
+        }else {
+            Toast.show({
+                type: 'error',
+                text1: 'Task edit is unsuccessful.',
+              });
+            console.log("error")
+        }
+
+    }
+
 
     return (
        <View>
@@ -60,8 +129,14 @@ const EditTask = ({task} : {task : Tasks}) => {
             </View>
             <View style={styles.box1}>
                 <NativeBaseProvider>
-                    <Input variant="underlined" placeholder="Enter Title" />
+                    <Input variant="underlined" placeholder="Enter Title" onChangeText={setTitle} />
                 </NativeBaseProvider>
+            </View>
+            <View style={styles.box1}>
+                <Text style={styles.typoBoddy}>Date</Text>
+            </View>
+            <View style={styles.box2}>
+                <Calendar onSelectDate={handleDateSelect} selected={selectedDate} />
             </View>
             <View style={styles.box1}>
                 <Text style={styles.typoBoddy}>Description</Text>
@@ -74,6 +149,7 @@ const EditTask = ({task} : {task : Tasks}) => {
                     w="100%"
                     backgroundColor={Colors.colorGhostwhite}
                     maxW={400} 
+                    onChangeText={setDescription}
                     autoCompleteType="off" 
                     />
                 </NativeBaseProvider>
@@ -82,33 +158,29 @@ const EditTask = ({task} : {task : Tasks}) => {
                 <Text style={styles.typoBoddy}>Priority</Text>
             </View>
             <View style={styles.box2}>
-                <DropDownPicker
-                    open={open}
-                    value={value}
-                    items={items}
-                    setOpen={setOpen}
-                    setValue={setValue}
-                    setItems={setItems}
-                    style={{ backgroundColor: "white" }}
-                />
+                <NativeBaseProvider>
+                    <Input variant="underlined" placeholder="Enter Priority" onChangeText={setPriority} />
+                </NativeBaseProvider>
             </View>
             <View style={styles.box1}>
                 <Text style={styles.typoBoddy}>Assign Members</Text>
             </View>
             <View style={styles.box3}>
-                <View style={styles.box4}>
-                    <Text style={styles.typoBoddy}>Disira</Text>
-                    <NativeBaseProvider>
+                {userData?.content.map((user:any) => (
+                    <View style={styles.box4} key={user.id}>
+                        <Text style={styles.typoBoddy}>{user.name}</Text>
+                        <NativeBaseProvider>
                         <View style={styles.CheckboxSpace1}>
                             <Checkbox
-                                value={String(isSelect)}
-                                colorScheme="purple"
-                                onChange={handleCheckboxChange}
-                                aria-label="Purple Checkbox"
-                                />
+                            value={selectedUserIds?.includes(user.id).toString()}
+                            colorScheme="purple"
+                            onChange={() => handleCheckboxChange(user.id)}
+                            aria-label="Purple Checkbox"
+                            />
                         </View>
-                    </NativeBaseProvider>
-                </View>
+                        </NativeBaseProvider>
+                    </View>
+                ))}
             </View>
             <View style={styles.box1}>
             <NativeBaseProvider>
@@ -122,23 +194,17 @@ const EditTask = ({task} : {task : Tasks}) => {
             <TimerPickerModal
                 visible={showPicker}
                 setIsVisible={setShowPicker}
-                onConfirm={(pickedDuration) => {
-                // Extract hours, minutes, and seconds from pickedDuration
-                const { hours, minutes, seconds } = pickedDuration;
-
-                // Call formatTime with numeric values
-                setAlarmString(formatTime(hours, minutes, seconds));
-                setShowPicker(false);
-                }}
+                onConfirm={handleDurationSelection}
                 modalTitle="Set Task Duration"
                 onCancel={() => setShowPicker(false)}
                 closeOnOverlayPress
                 LinearGradient={LinearGradient}
                 styles={{
-                theme: "light",
+                theme: "light"
                 }}
             />
         </ScrollView>
+        <Toast/>
         </View>
     );
 };

@@ -14,15 +14,49 @@ import Popover from 'react-native-popover-view';
 import { Ionicons } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons'; 
 import NonAdminRoomBox from "../components/Rooms/NonAdminRoomBox";
-
+import { useGetAllroomsQuery } from "../Redux/API/rooms.api.slice";
+import { ActivityIndicator } from "react-native";
+import { getItem } from '../utils/Genarals'
+import RoutePaths from '../utils/RoutePaths';
+import { useEffect } from 'react';
+import { removeItem } from "../utils/Genarals";
+import { logoutCurrentUser } from "../Redux/slices/userSlice";
+import { useAppDispatch } from "../hooks/redux-hooks";
 
 const AdminRoomComponent = () => {
+
+  const [user, setUser] = useState<{ _id: string } | null>(null);
+
+  useEffect(() => {
+  const fetchData = async () => {
+    const token = await getItem(RoutePaths.token);
+    if (token) {
+      const userData = await getItem("user");
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+      }
+    }
+  };
+
+  fetchData();
+}, []);
+
+const userID = user?._id;
+
+  const {
+    isLoading,
+    data: roomList,
+    isSuccess,
+    isError,
+  } = useGetAllroomsQuery(userID);
+
     const roomPairs = [];
-    for (let i = 0; i < roomsApi.length; i += 2) {
-      const room1 = roomsApi[i];
-      const room2 = i + 1 < roomsApi.length ? roomsApi[i + 1] : null;
-  
-      roomPairs.push(
+    for (let i = 0; i < roomList?.content?.length; i += 2) {
+      const room1 = roomList?.content[i];
+      const room2 = i + 1 < roomList?.content?.length ? roomList?.content[i + 1] : null;
+      
+      roomPairs.push( 
         <View key={i} style={{ flexDirection: 'row' }}>
           <RoomBox {...room1} />
           {room2 && <RoomBox {...room2} />}
@@ -30,14 +64,46 @@ const AdminRoomComponent = () => {
       );
     }
 
+    if (isLoading || isError) {
+      return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;
+    }
+
     return <View>{roomPairs}</View>;
 }
 
 const RoomComponent = () => {
+
+
+  const [user, setUser] = useState<{ _id: string } | null>(null);
+
+useEffect(() => {
+  const fetchData = async () => {
+    const token = await getItem(RoutePaths.token);
+    if (token) {
+      const userData = await getItem("user");
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+      }
+    }
+  };
+
+  fetchData();
+}, []);
+
+const userID = user?._id;
+
+  const {
+    isLoading,
+    data: roomList,
+    isSuccess,
+    isError,
+  } = useGetAllroomsQuery(userID);
+
   const roomPairs = [];
-  for (let i = 0; i < roomsApi.length; i += 2) {
-    const room1 = roomsApi[i];
-    const room2 = i + 1 < roomsApi.length ? roomsApi[i + 1] : null;
+  for (let i = 0; i < roomList?.content?.length; i += 2) {
+    const room1 = roomList?.content[i];
+    const room2 = i + 1 < roomList?.content?.length ? roomList?.content[i + 1] : null;
 
     roomPairs.push(
       <View key={i} style={{ flexDirection: 'row' }}>
@@ -47,10 +113,16 @@ const RoomComponent = () => {
     );
   }
 
+  if (isLoading || isError) {
+    return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;
+  }
+
   return <View>{roomPairs}</View>;
 }
 
 const RoomManagmentProfileSetti = () => {
+
+  const dispatch = useAppDispatch()
 
   const [isPopoverVisible, setPopoverVisible] = useState(false);
 
@@ -63,6 +135,10 @@ const RoomManagmentProfileSetti = () => {
   };
 
   const handleLogout = () => {
+    removeItem(RoutePaths.token);
+    removeItem('user');
+    dispatch(logoutCurrentUser);
+    navigation.navigate("Login");
     setPopoverVisible(false); // Close the popover
   };
 
@@ -119,7 +195,7 @@ const RoomManagmentProfileSetti = () => {
                         <Text><AntDesign name="setting" size={14} color="black" />  Settings</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handleLogout} style={styles.textRow}>
-                        <Text><Ionicons name="log-out-outline" size={14} color="black" />  Log Out</Text>
+                        <Text><Ionicons name="log-out-outline" size={14} color="black" onPress={handleLogout}/>  Log Out</Text>
                     </TouchableOpacity>
             </View>
         </Popover>
@@ -159,7 +235,10 @@ const RoomManagmentProfileSetti = () => {
 };
 
 const styles = StyleSheet.create({
-
+  contentContainer: {
+    paddingVertical: 100,
+    paddingRight: 70,
+  },
   textRow: {
     marginVertical:10,
   },

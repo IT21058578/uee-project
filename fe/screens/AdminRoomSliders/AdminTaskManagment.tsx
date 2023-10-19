@@ -6,10 +6,15 @@ import Font from "../../constants/Font";
 import HomeScheduleBox from "../../components/schedule/homeScheduleBox";
 import { scheduleTypes } from "../../types";
 import { schedulesApi } from "../../data/virtualData";
-import { useGetAllPersonalDaySchedulesQuery } from "../../Redux/API/schedules.api.slice";
 import AppTextInput from "../../components/AppTextInput";
 import { TouchableWithoutFeedback } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { Tasks } from "../../types";
+import { useGetAlltasksQuery } from "../../Redux/API/tasks.api.slice";
+import EditableScheduleBox from "../../components/schedule/EditableScheduleBox";
+import { ActivityIndicator } from "react-native";
+import { useState } from "react";
+
 
 const AdminCreatedTasks = () => {
 
@@ -22,16 +27,26 @@ const AdminCreatedTasks = () => {
 
 
     const {
-        data,
-        data: scheduleList,
         isLoading,
-      } = useGetAllPersonalDaySchedulesQuery("api/scheduleApi");
+        data: taskList,
+        isSuccess,
+        isError,
+      } = useGetAlltasksQuery("api/tasks");
+  
+  
+      const [searchText, setSearchText] = useState('');
+  
+      // Function to filter tasks based on search text
+      const filteredTasks = taskList?.content.filter((task: Tasks) =>
+      task.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+  
      
     return(
         <View style={styles.flexBox}>
 
             <View style={styles.Box2}>
-                <AppTextInput placeholder="🔍   Search tasks"/>
+                <AppTextInput placeholder="🔍   Search tasks" onChangeText={text => setSearchText(text)}/>
             </View>
             <View style={styles.Box3}>
                 <View style={styles.roomManagmentProfileSetti}>
@@ -57,13 +72,14 @@ const AdminCreatedTasks = () => {
                     contentContainerStyle={styles.frameScrollViewContent}
                 >
 
-                    {isLoading ? (
-                    <Text>Loading...</Text>
+
+                {isLoading || isError ? (
+                    <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>
                     ) : (
-                    schedulesApi.map((schedule: scheduleTypes) => (
-                        <HomeScheduleBox {...schedule} key={schedule.id}/>
+                    filteredTasks?.map((schedule: Tasks) => (
+                        <EditableScheduleBox {...schedule} key={schedule._id}/>
                     ))
-                    )}
+                )}
 
                 </ScrollView>
 
@@ -75,6 +91,10 @@ const AdminCreatedTasks = () => {
 export default AdminCreatedTasks;
 
 const styles = StyleSheet.create ({
+    contentContainer: {
+        paddingVertical: 100,
+        paddingHorizontal:150
+    },
     groupChild: {
         height: "100%",
         top: "0%",

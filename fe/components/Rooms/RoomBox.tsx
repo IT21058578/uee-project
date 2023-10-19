@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
 import Font from "../../constants/Font";
 import FontSize from "../../constants/FontSize";
-import { RoomType } from "../../types";
+import { IRoom, RoomType } from "../../types";
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import Popover from 'react-native-popover-view';
@@ -13,14 +13,17 @@ import { Feather } from '@expo/vector-icons';
 import { AntDesign } from '@expo/vector-icons'; 
 
 
-const RoomBox: React.FC<RoomType> = (props) => {
+const RoomBox: React.FC<IRoom> = (props) => {
   const [isPopoverVisible, setPopoverVisible] = useState(false);
 
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
 
+  const roomId = props._id;
 
   const handleEdit = () => {
-    navigation.navigate("EditRoom");
+    navigation.navigate("EditRoom", {
+      roomId : roomId,
+    });
     setPopoverVisible(false); // Close the popover
   };
 
@@ -30,15 +33,19 @@ const RoomBox: React.FC<RoomType> = (props) => {
 
   const handleNavigate = () => {
     // Navigate to the desired screen when the Pressable is pressed
-    navigation.navigate("AdminRoom"); 
+    navigation.navigate("AdminRoom" ,{
+      roomId : roomId,
+    });
   };
+
+  const propCount = Object.keys(props).length;
 
   return (
     <View style={styles.roomManagmentProfileSetti}>
       <View style={styles.groupParent}>
         <View style={[styles.rectangleParent, styles.groupChildPosition]}>
           <View style={[styles.groupChild, styles.groupLayout]} />
-          <Text style={[styles.task, styles.taskTypo]}>{props.tasks.length} Tasks</Text>
+          <Text style={[styles.task, styles.taskTypo]}>{propCount} Tasks</Text>
           <Text style={[styles.seProjectGroup, styles.taskTypo]}>
             {props.name}
           </Text>
