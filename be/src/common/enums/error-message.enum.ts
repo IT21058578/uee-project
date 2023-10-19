@@ -25,6 +25,7 @@ const ErrorMessage = {
   USER_ALREADY_IN_ROOM: 'User already in room',
   USER_NOT_IN_ROOM: 'User not in room',
   USER_ALREADY_ADMIN: 'User already admin',
+  USER_NOT_ADMIN: 'User not admin',
 } as const;
 
 export default ErrorMessage;

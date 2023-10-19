@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { RoomsService } from './rooms.service';
 import { CreateRoomDto } from './create-room.dto';
@@ -32,6 +33,22 @@ export class RoomsController {
   async createRoom(@Body() createRoomDto: CreateRoomDto) {
     const savedRoom = await this.roomsService.createRoom(createRoomDto);
     return savedRoom;
+  }
+
+  @Put('/assign')
+  async assignRoomAdmin(
+    @Query('user-id', ValidateObjectIdPipe) userId: string,
+    @Query('room-id', ValidateObjectIdPipe) roomId: string,
+  ) {
+    await this.roomsService.assignRoomAdmin(userId, roomId);
+  }
+
+  @Put('/assign')
+  async unassignRoomAdmin(
+    @Query('user-id', ValidateObjectIdPipe) userId: string,
+    @Query('room-id', ValidateObjectIdPipe) roomId: string,
+  ) {
+    await this.roomsService.unassignRoomAdmin(userId, roomId);
   }
 
   @Put(':id')
