@@ -17,18 +17,13 @@ const AdminUserManage = () => {
     const [modalVisible1, setModalVisible1] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
 
-    const navigate = useNavigation();
-
-    const HandleNavigate = () => {
-        navigate.goBack();
-        console.log("Hi the button");
-    }
-
     const toast = useToast();
 
     const sendEmail = () => {
-        // Simulate sending an email. In a real application, you would have your email sending logic here.
-        const emailSentSuccessfully = true; // Set this to true for success, false for an error.
+
+        console.log("Hi the button");
+
+        const emailSentSuccessfully = true; 
       
         if (emailSentSuccessfully) {
           // Show a toast notification for successful email sending.
@@ -108,7 +103,7 @@ const AdminUserManage = () => {
                                 </View>
                             </View>
                             </Modal>
-                            <Button leftIcon={<Ionicons name="add-outline" size={24} color="white" />} size={'sm'} width={125} backgroundColor={'#858FE9'} onPress={sendEmail}>
+                            <Button leftIcon={<Ionicons name="add-outline" size={24} color="white" />} size={'sm'} width={125} backgroundColor={'#858FE9'} onPress={() => setModalVisible1(true)} >
                                 New Member
                             </Button>
                         </NativeBaseProvider>
@@ -124,43 +119,48 @@ const AdminUserManage = () => {
                             <View style={styles.CheckboxSpace1}>
                                 <Text style={styles.text}>Make Admin</Text>
                             </View>
-
-                            {/* Model Remove a member */}
-                            <Modal
-                                animationType="fade"
+                            <NativeBaseProvider>
+                                <Modal
+                                animationType="slide"
                                 transparent={true}
                                 visible={modalVisible2}
                                 onRequestClose={() => {
                                     setModalVisible2(!modalVisible2);
-                                }}>
+                                }}
+                                >
                                 <View style={styles.modalBackground}>
                                     <View style={styles.centeredView}>
-                                        <View style={styles.modalView}>
-                                            <Text style={styles.typoTitle1}>Remove User</Text>
+                                    <View style={styles.simpleModalView}>
+                                        <Text style={styles.typoTitle1}>Delete Member</Text>
                                             <View style={styles.box1}>
                                                 <Text style={styles.typoBoddy}>Are you sure to remove this user ?</Text>
                                             </View>
-                                            <View style={styles.box1}>
-                                                <NativeBaseProvider>
-                                                    <View style={{ flexDirection: "row", marginHorizontal: 20 }}>
-                                                        <Button style={{ marginHorizontal: 20 }} variant="outline" colorScheme="fuchsia" onPress={() => setModalVisible2(!modalVisible2)}>
-                                                            Cancle
-                                                        </Button>
-                                                        <Button colorScheme="fuchsia">    Sure    </Button>
-                                                    </View>
-                                                </NativeBaseProvider>
-                                            </View>
+                                        <View style={styles.buttonContainer}>
+                                        <Button
+                                            style={styles.cancelButton}
+                                            variant="outline"
+                                            colorScheme="fuchsia"
+                                            onPress={() => setModalVisible2(!modalVisible2)}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button colorScheme="fuchsia">
+                                            Sure
+                                        </Button>
                                         </View>
                                     </View>
+                                    </View>
                                 </View>
-                            </Modal>
-
+                                </Modal>
+                            </NativeBaseProvider>
                             <Pressable style={[styles.CheckboxSpace1, { backgroundColor: '#FF5959' }]} onPress={() => setModalVisible2(true)}>
                                 <Text style={styles.text}>Remove</Text>
                             </Pressable>
                         </View>
                         <Image source={require('../../assets/Line_19.png')} />
                     </View>
+
+                    {/* These are components that for demo display */}
                     <View style={styles.box1}>
                         <View style={styles.box4}>
                             <Text style={styles.typoBoddy1}>Sansika</Text>
