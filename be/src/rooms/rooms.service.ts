@@ -49,6 +49,7 @@ export class RoomsService {
       name,
       organization,
       tag,
+      adminIds: [createdBy],
     });
 
     await this.usersService.assignToRoom(createdBy, savedRoom.id);
@@ -82,5 +83,16 @@ export class RoomsService {
       _id: { $in: existingUser.roomIds },
     });
     return allRooms;
+  }
+
+  async assignRoomAdmin(userId: string, roomId: string) {
+    const existingRoom = await this.getRoom(roomId);
+    const isAlreadyAdmin = existingRoom.adminIds.some((id) => id === userId);
+    if (isAlreadyAdmin) {
+      throw new BadRequestException(
+        ErrorMessage.USER_ALREADY_ADMIN,
+        `User with id ${userId} is already an admin of room with id '${roomId}'`,
+      );
+    }
   }
 }

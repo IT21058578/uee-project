@@ -20,6 +20,9 @@ export class Room extends Audit {
 
   @Prop({ isRequired: true, type: String, enum: Object.values(RoomTag) })
   tag: RoomTag;
+
+  @Prop({ type: [String] })
+  adminIds: string[];
 }
 
 export const RoomSchema = SchemaFactory.createForClass(Room);

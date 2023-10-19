@@ -5,7 +5,7 @@ import {
   Logger,
   BadRequestException,
 } from '@nestjs/common';
-import { isDateString } from 'class-validator';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class TransformDatePipe implements PipeTransform {
@@ -13,10 +13,12 @@ export class TransformDatePipe implements PipeTransform {
 
   transform(value: any, metadata: ArgumentMetadata) {
     try {
-      if (!isDateString(value)) throw Error();
+      dayjs(value);
       return new Date(value);
     } catch (error) {
-      const message = `Validation Failed ('${value}' is not a valid date for ${metadata.type} '${metadata.data}')`;
+      const message = `Validation Failed (${JSON.stringify(
+        value,
+      )} is not a valid date for ${metadata.type} '${metadata.data}')`;
       this.logger.warn('Rejecting request due to: ' + message);
       throw new BadRequestException(message);
     }

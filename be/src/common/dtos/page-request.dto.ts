@@ -22,6 +22,7 @@ export class PageRequest {
   @IsNumber()
   pageSize: number;
 
+  @IsOptional()
   @IsObject()
   @IsNumber()
   sort?: {
