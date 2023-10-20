@@ -5,6 +5,8 @@ import Colors from "../constants/Colors";
 import FontSize from "../constants/FontSize";
 import { useNavigation } from "@react-navigation/native";
 import { NativeBaseProvider, Input ,TextArea } from "native-base";
+import {  Button , Stack} from "native-base";
+import { useState } from "react";
 
 const EditRoom = () => {
 
@@ -13,6 +15,13 @@ const EditRoom = () => {
     const handleBackNav = () => {
         navigate.goBack();
     }
+
+    const [selectedCategory, setSelectedCategory] = useState(null);
+
+    const handleButtonClick = (category:any) => {
+      setSelectedCategory(category);
+    };
+
 
     return(
         <View>
@@ -61,7 +70,7 @@ const EditRoom = () => {
                 <Text style={styles.typoBoddy}>Tag</Text>
             </View>
             <View style={styles.box2}>
-                <View style={[styles.tabButton,{backgroundColor:"#eceaff"}]}>
+                {/* <View style={[styles.tabButton,{backgroundColor:"#eceaff"}]}>
                     <Text style={[styles.tabtypoBoddy,{color:"#8F81FE"}]}>Office</Text>
                 </View>
                 <View style={[styles.tabButton,{backgroundColor:"#ffefeb"}]}>
@@ -72,8 +81,68 @@ const EditRoom = () => {
                 </View>
                 <View style={[styles.tabButton,{backgroundColor:"#d1feff"}]}>
                     <Text style={[styles.tabtypoBoddy,{color:"#1EC1C3"}]}>Bussiness</Text>
-                </View>
+                </View> */}
+                <NativeBaseProvider>
+                    <Stack mb="2.5" mt="1.5" direction={{ base: 'row', md: 'row' }} space={4} mx={{ base: 'auto', md: '0' }} style={{paddingHorizontal:5}}>
+                        <Button
+                        size="sm"
+                        variant="subtle"
+                        style={{
+                            borderRadius: 20,
+                            backgroundColor: selectedCategory === 'OFFICE' ? Colors.lightPrimary : 'transparent',
+                        }}
+                        onPress={() => handleButtonClick('OFFICE')}
+                        >
+                        OFFICE
+                        </Button>
+                        <Button
+                        size="sm"
+                        variant="subtle"
+                        colorScheme="secondary"
+                        style={{
+                            borderRadius: 20,
+                            backgroundColor: selectedCategory === 'HOME' ? Colors.home : 'transparent',
+                        }}
+                        onPress={() => handleButtonClick('HOME')}
+                        >
+                        HOME
+                        </Button>
+                        <Button
+                        size="sm"
+                        variant="subtle"
+                        style={{
+                            borderRadius: 20,
+                            backgroundColor: selectedCategory === 'EDUCATION' ? Colors.edu : 'transparent',
+                        }}
+                        onPress={() => handleButtonClick('EDUCATION')}
+                        >
+                        EDUCATION
+                        </Button>
+                        <Button
+                        size="sm"
+                        variant="subtle"
+                        colorScheme="secondary"
+                        style={{
+                            borderRadius: 20,
+                            backgroundColor: selectedCategory === 'BUSINESS' ? Colors.bussiness : 'transparent',
+                        }}
+                        onPress={() => handleButtonClick('BUSINESS')}
+                        >
+                        BUSINESS
+                        </Button>
+                    </Stack>
+                    {/* {selectedCategory && <Text>Selected Category: {selectedCategory}</Text>} */}
+                    {/* <Text>Selected Date: {selectedDate ? moment(selectedDate).format('MMMM D, YYYY') : 'No date selected'}</Text> */}
+                </NativeBaseProvider>
             </View>
+            <NativeBaseProvider>
+                <Button size="lg" 
+                    backgroundColor={Colors.ppButtons} 
+                    borderRadius={10} 
+                    marginTop={170}
+                    > Create Room 
+                </Button>
+            </NativeBaseProvider>
         </ScrollView>
         </View>
     )

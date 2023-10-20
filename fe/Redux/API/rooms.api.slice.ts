@@ -26,7 +26,7 @@ export const roomApiSlice = createApi({
     }),
 
     getroom: builder.query({
-      query: (id: string) => `/rooms/${id}`,
+      query: (roomId: string) => `/rooms/${roomId}`,
       providesTags: ["rooms"],
     }),
 

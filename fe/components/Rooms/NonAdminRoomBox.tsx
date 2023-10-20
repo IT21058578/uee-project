@@ -6,19 +6,21 @@ import FontSize from "../../constants/FontSize";
 import { IRoom } from "../../types";
 import { useNavigation } from "@react-navigation/native";
 import { useGetAlltasksQuery } from "../../Redux/API/tasks.api.slice";
-
+import { setRoomID } from "../../Redux/slices/userSlice";
+import { useDispatch } from "react-redux";
 
 const NonAdminRoomBox: React.FC<IRoom> = (props) => {
+
+  const dispatch = useDispatch();
 
   const navigation = useNavigation<any>();
 
   const roomId = props._id;
 
   const handleNavigate = () => {
+    dispatch(setRoomID(roomId));
     // Navigate to the desired screen when the Pressable is pressed
-    navigation.navigate("RoomDetails", {
-      roomId: roomId,
-    }); 
+    navigation.navigate("RoomDetails"); 
   };
 
   const {data:taskList , isLoading ,isError} = useGetAlltasksQuery('');

@@ -4,8 +4,15 @@ import Font from "../../constants/Font";
 import Colors from "../../constants/Colors";
 import FontSize from "../../constants/FontSize";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAppSelector } from "../../hooks/redux-hooks";
+import { useGetroomQuery } from "../../Redux/API/rooms.api.slice";
+import TaskDetail from "../TaskDetail";
 
 const RoomManagmentProfileSetti = () => {
+
+    const roomId = useAppSelector(state => state.user.roomId);
+
+    const {data:roomData , isError ,isLoading} = useGetroomQuery(roomId);
 
     return(
         <View>
@@ -20,7 +27,7 @@ const RoomManagmentProfileSetti = () => {
                     colors={["#fe9d9d", "#e77d7d"]}
                 >
                     <Text style={[styles.typoBoddy,{color:Colors.colorGray_100,fontFamily:Font['poppins-bold']}]}>Created Date</Text>
-                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>14 August 2023</Text>
+                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>{roomData?.createdAt.split('T')[0]}</Text>
                 </LinearGradient>
                 <LinearGradient
                     style={styles.box11}
@@ -28,7 +35,7 @@ const RoomManagmentProfileSetti = () => {
                     colors={["#fe9d9d", "#e77d7d"]}
                 >
                     <Text style={[styles.typoBoddy,{color:Colors.colorGray_100,fontFamily:Font['poppins-bold']}]}>Created Time</Text>
-                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>07:00 - 07:15 AM</Text>
+                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>{roomData?.createdAt.split('T')[1]}</Text>
                 </LinearGradient>
             </View>
             <View style={styles.box1}>
@@ -38,14 +45,14 @@ const RoomManagmentProfileSetti = () => {
                     colors={["#fe9d9d", "#e77d7d"]}
                 >
                     <Text style={[styles.typoBoddy,{color:Colors.colorGray_100,fontFamily:Font['poppins-bold']}]}>Description</Text>
-                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>This Room is created for manage group assignments though the entire semester.</Text>
+                    <Text style={[styles.typoBoddy,{color:"#FFFFFF"}]}>{roomData?.description}</Text>
                 </LinearGradient>
             </View>
             <View style={styles.box1}>
                 <Text style={styles.typoBoddy}>Organisation</Text>
             </View>
             <View style={styles.box1}>
-                <Text style={[styles.typoBoddy,{color:Colors.darkblue,fontFamily:Font['poppins-bold']}]}>SLIIT</Text>
+                <Text style={[styles.typoBoddy,{color:Colors.darkblue,fontFamily:Font['poppins-bold']}]}>{roomData?.organization}</Text>
             </View>
             <View style={styles.box1}>
                 <Image source={require('../../assets/Line_19.png')} />
@@ -55,9 +62,9 @@ const RoomManagmentProfileSetti = () => {
             </View>
             <View style={styles.box2}>
                 <View style={[styles.tabButton,{backgroundColor:"#eceaff"}]}>
-                    <Text style={[styles.tabtypoBoddy,{color:"#8F81FE"}]}>Office</Text>
+                    <Text style={[styles.tabtypoBoddy,{color:"#8F81FE"}]}>{roomData?.tag}</Text>
                 </View>
-                <View style={[styles.tabButton,{backgroundColor:"#ffefeb"}]}>
+                {/* <View style={[styles.tabButton,{backgroundColor:"#ffefeb"}]}>
                     <Text style={[styles.tabtypoBoddy,{color:"#F0A58E"}]}>Home</Text>
                 </View>
                 <View style={[styles.tabButton,{backgroundColor:"#ffe9ed"}]}>
@@ -65,7 +72,7 @@ const RoomManagmentProfileSetti = () => {
                 </View>
                 <View style={[styles.tabButton,{backgroundColor:"#d1feff"}]}>
                     <Text style={[styles.tabtypoBoddy,{color:"#1EC1C3"}]}>Bussiness</Text>
-                </View>
+                </View> */}
             </View>
         </ScrollView>
         </View>
@@ -102,21 +109,23 @@ const styles = StyleSheet.create ({
     },
     box11: {
         borderRadius:10,
-        paddingHorizontal:20,
-        marginRight:12,
+        paddingHorizontal:30,
+        marginRight:0,
         paddingVertical:20,
         marginBottom: 20,
     },
     box12: {
         borderRadius:10,
-        paddingHorizontal:20,
+        paddingHorizontal:10,
         paddingVertical:20,
         marginBottom: 20,
     },
     box2: {
         flexDirection:'row',
+        justifyContent: 'space-between',
         marginBottom: 0,
     },
+
     rectangle1:{
 
     },

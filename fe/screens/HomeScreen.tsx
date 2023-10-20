@@ -14,6 +14,7 @@ import { getItem } from '../utils/Genarals'
 import RoutePaths from '../utils/RoutePaths';
 import { useState } from 'react';
 import { useEffect } from 'react';
+import Colors from "../constants/Colors";
 
 const Home = () => {
 
@@ -110,12 +111,14 @@ const Home = () => {
         contentContainerStyle={styles.frameScrollViewContent}
       >
 
-        {isLoading || isError? (
-           <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>
-        ) : (
-          scheduleList?.schedules[0]?.taskList.map((schedule: TaskType) => (
-            <HomeScheduleBox {...schedule} tag={scheduleList?.schedules[0].tag} key={schedule.taskId}/>
+        {isLoading || isError ? (
+          <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large" />
+        ) : scheduleList?.schedules[0]?.taskList.length > 0 ? (
+          scheduleList.schedules[0].taskList.map((schedule: TaskType) => (
+            <HomeScheduleBox {...schedule} tag={scheduleList.schedules[0].tag} key={schedule.taskId} />
           ))
+        ) : (
+          <Text style={styles.noschedules}>No schedules for the day</Text>
         )}
 
       </ScrollView>
@@ -125,6 +128,13 @@ const Home = () => {
 };
 
 const styles = StyleSheet.create({
+  noschedules: {
+    paddingVertical:60,
+    paddingHorizontal:30,
+    color: Colors.colorTomato,
+    fontSize: 20,
+    fontFamily: Font["poppins-bold"],
+  },
   contentContainer: {
     paddingVertical: 100,
   },
