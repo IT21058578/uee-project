@@ -26,6 +26,7 @@ const ErrorMessage = {
   USER_NOT_IN_ROOM: 'User not in room',
   USER_ALREADY_ADMIN: 'User already admin',
   USER_NOT_ADMIN: 'User not admin',
+  INVALID_OPERATOR_OR_VALUE_FOR_FIELD: 'Invalid operator or value for field',
 } as const;
 
 export default ErrorMessage;

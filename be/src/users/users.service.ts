@@ -7,12 +7,13 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument, FlatUser } from './user.schema';
 import { Model } from 'mongoose';
-import { Page, PageBuilder } from 'src/common/util/page.util';
+import { Page, PageUtil } from 'src/common/util/page.util';
 import { CreateUserDto } from 'src/common/dtos/create-user.dto';
 import ErrorMessage from 'src/common/enums/error-message.enum';
 import { PageRequest } from 'src/common/dtos/page-request.dto';
 import { UserRole } from 'src/common/enums/user-roles.enum';
 import { hashSync } from 'bcrypt';
+import { MongooseUtil } from 'src/common/util/mongoose.util';
 
 @Injectable()
 export class UsersService {
@@ -93,37 +94,8 @@ export class UsersService {
     this.logger.log(`Deleted user with id '${id}'`);
   }
 
-  async getUserPage({
-    pageNum = 1,
-    pageSize = 10,
-    sort,
-  }: PageRequest): Promise<Page<FlatUser>> {
-    const skippedDocuments = (pageNum - 1) * pageSize;
-    const [totalDocuments, users] = await Promise.all([
-      this.userModel.count({}),
-      this.userModel
-        .find({})
-        .select({ password: 0 })
-        .limit(pageSize)
-        .skip(skippedDocuments)
-        .sort(
-          sort !== undefined
-            ? { [sort?.field ?? '_id']: sort?.direction ?? 'asc' }
-            : undefined,
-        ),
-    ]);
-
-    const userPage = PageBuilder.buildPage(
-      users.map((user) => user.toJSON() as FlatUser),
-      {
-        pageNum,
-        pageSize,
-        totalDocuments,
-        sort,
-      },
-    );
-
-    return userPage;
+  async getUserPage(pageRequest: PageRequest) {
+    return await MongooseUtil.getDocumentPage(this.userModel, pageRequest);
   }
 
   async assignToRoom(userId: string, roomId: string) {
@@ -154,7 +126,8 @@ export class UsersService {
       );
     }
 
-    existingUser.roomIds = existingUser?.roomIds?.filter((id) => id !== roomId) ?? [];
+    existingUser.roomIds =
+      existingUser?.roomIds?.filter((id) => id !== roomId) ?? [];
     await existingUser.save();
   }
 

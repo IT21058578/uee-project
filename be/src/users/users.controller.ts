@@ -24,7 +24,9 @@ export class UsersController {
 
   @Get(':id')
   async getUser(@Param('id', ValidateObjectIdPipe) id: string) {
-    const { password, ...user } = await this.usersService.getUser(id);
+    const { password, ...user } = (
+      await this.usersService.getUser(id)
+    ).toJSON();
     return user;
   }
 
@@ -33,7 +35,7 @@ export class UsersController {
     await this.usersService.deleteUser(id);
   }
 
-  @Put('invite')
+  @Put('assign')
   async inviteToRoom(
     @Query('email', ValidateEmailPipe) email: string,
     @Query('room-id', ValidateObjectIdPipe) roomId: string,

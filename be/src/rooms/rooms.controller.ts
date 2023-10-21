@@ -13,6 +13,7 @@ import { CreateRoomDto } from './create-room.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserRole } from 'src/common/enums/user-roles.enum';
 import { ValidateObjectIdPipe } from 'src/common/pipes/validate-object-id.pipe';
+import { PageRequest } from 'src/common/dtos/page-request.dto';
 
 @Controller('rooms')
 export class RoomsController {
@@ -26,6 +27,11 @@ export class RoomsController {
   @Get(':id')
   async getRoom(@Param('id', ValidateObjectIdPipe) roomId: string) {
     return await this.roomsService.getRoom(roomId);
+  }
+  
+  @Post('search')
+  async getRoomPage(@Body() pageRequest: PageRequest) {
+    await this.roomsService.getRoomPage(pageRequest);
   }
 
   @Post()
@@ -43,7 +49,7 @@ export class RoomsController {
     await this.roomsService.assignRoomAdmin(userId, roomId);
   }
 
-  @Put('/assign')
+  @Put('/unassign')
   async unassignRoomAdmin(
     @Query('user-id', ValidateObjectIdPipe) userId: string,
     @Query('room-id', ValidateObjectIdPipe) roomId: string,

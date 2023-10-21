@@ -18,7 +18,7 @@ export type Page<T> = {
   metadata: PageMetadata;
 };
 
-export class PageBuilder {
+export class PageUtil {
   static buildPage<T>(
     content: T[],
     metadata: {

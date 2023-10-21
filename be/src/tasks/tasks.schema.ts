@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { FlattenMaps, HydratedDocument, Model } from 'mongoose';
 import { Audit } from 'src/common/schema/audit.schema';
 import { TaskPriority } from './task-priority.enum';
-import { Duration } from 'dayjs/plugin/duration';
 
 export type FlatTask = FlattenMaps<Task & { _id: string }>;
 export type TaskModel = Model<Task>;
@@ -16,8 +15,9 @@ export class Task extends Audit {
   @Prop()
   description?: string;
 
-  @Prop({ type: Object, isRequired: Object })
-  duration: Duration;
+  /** Duration is stored in milliseconds */
+  @Prop({ type: Number, isRequired: Object })
+  duration: number;
 
   @Prop({ isRequired: true })
   date: Date;
