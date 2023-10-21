@@ -143,7 +143,6 @@ const TaskAssignedMemberItem: FC<{ id: string }> = (props) => {
   const { id } = props;
   const { data: user } = useGetUserQuery(id);
 
-  console.log("Task Detail Assigned User: ", user);
   const buildName = () => {
     return `${user?.firstName} ${user?.lastName}`;
   };

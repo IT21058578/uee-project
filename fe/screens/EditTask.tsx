@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -33,25 +33,11 @@ const EditTask = ({ route }: { route: any }) => {
 
   const { data: task } = useGettaskQuery(taskId);
   const [updateTask, updateResult] = useUpdatetaskMutation();
-  const {
-    data: userData,
-    isLoading,
-    isError,
-  } = useGetAllUsersQuery("api/users");
+  const { data: userData } = useGetAllUsersQuery("api/users");
 
   const navigation = useNavigation();
 
-  const handleBackNav = () => {
-    navigation.goBack();
-  };
-
-  const [selectedDate, setSelectedDate] = useState<Moment | null>();
-
-  const handleDateSelect = (date: Moment) => {
-    setSelectedDate(date);
-  };
-
-  // Track the selected user IDs
+  const [selectedDate, setSelectedDate] = useState<Moment | null>(moment());
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>(
     task?.assignedUserIds || []
   );
@@ -59,6 +45,14 @@ const EditTask = ({ route }: { route: any }) => {
   const [name, setTitle] = useState(task?.name || "");
   const [description, setDescription] = useState(task?.description || "");
   const [priority, setPriority] = useState(task?.priority || "");
+
+  const handleBackNav = () => {
+    navigation.goBack();
+  };
+
+  const handleDateSelect = (date: Moment) => {
+    setSelectedDate(date);
+  };
 
   // Function to handle checkbox change
   const handleCheckboxChange = (userId: string) => {
@@ -69,60 +63,56 @@ const EditTask = ({ route }: { route: any }) => {
     }
   };
 
-  const [showPicker, setShowPicker] = useState(false);
-  const [alarmString, setAlarmString] = useState<string | null>(
+  const [showPicker, setShowPicker] = useState<boolean>(false);
+  const [durationInMs, setDurationInMs] = useState<number>(
     task?.duration || ""
   );
 
   const handleDurationSelection = (pickedDuration: any) => {
     const { hours, minutes, seconds } = pickedDuration;
-
-    // Create a dayjs duration object
     const duration = dayjs.duration({
       hours,
       minutes,
       seconds,
     });
-
-    // Format the duration as a string (e.g., "HH:mm:ss")
-    const formattedDuration = duration.format("HH:mm:ss");
-
-    // Set the formatted duration as the alarmString state
-    setAlarmString(formattedDuration);
-
-    // Call the api to add task
-    handleCreateTask();
-
-    // Close the picker
+    const durationInMs = duration.asMilliseconds();
+    setDurationInMs(durationInMs);
     setShowPicker(false);
+    handleCreateTask();
   };
 
   const handleCreateTask = async () => {
-    const formData = {
-      name: name,
-      description: description,
-      duration: alarmString,
-      date: selectedDate,
-      priority: priority,
-      assignedUserIds: selectedUserIds,
-    };
+    try {
+      const formData = {
+        name: name,
+        description: description,
+        duration: durationInMs,
+        date: selectedDate,
+        priority: priority,
+        assignedUserIds: selectedUserIds,
+      };
 
-    const response = await updateTask({ taskId, formData }).unwrap();
-    if (response) {
+      console.log("Submitted task edit data : ", formData);
+      await updateTask({ taskId }).unwrap();
       Toast.show({
         type: "success",
         text1: "Task edited successful.",
       });
-
-      navigation.navigate("Home");
-    } else {
+    } catch (error) {
+      console.error(error);
       Toast.show({
         type: "error",
         text1: "Task edit is unsuccessful.",
       });
-      console.log("error");
     }
   };
+
+  // Transform and set selectedDate when task data comes through
+  useEffect(() => {
+    if (task) {
+      setSelectedDate(moment(task?.date));
+    }
+  }, [task]);
 
   return (
     <View>
@@ -197,7 +187,8 @@ const EditTask = ({ route }: { route: any }) => {
               <NativeBaseProvider>
                 <View style={styles.CheckboxSpace1}>
                   <Checkbox
-                    value={selectedUserIds?.includes(user._id).toString()}
+                    defaultIsChecked={task.assignedUserIds.includes(user._id)}
+                    value={user._id}
                     colorScheme="purple"
                     onChange={() => handleCheckboxChange(user._id)}
                     aria-label="Purple Checkbox"

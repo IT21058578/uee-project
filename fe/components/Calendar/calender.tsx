@@ -1,10 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
-import moment , {Moment} from 'moment';
-import DateComponent from './Date';
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from "react-native";
+import moment, { Moment } from "moment";
+import DateComponent from "./Date";
 
 interface CalendarProps {
-  onSelectDate: (date:Moment) => void;
+  onSelectDate: (date: Moment) => void;
   selected: Moment | null;
 }
 
@@ -14,10 +21,16 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selected }) => {
   const [currentMonth, setCurrentMonth] = useState<string | undefined>();
 
   // get the dates from today to 10 days from now, format them as strings and store them in state
+  // If the selected date is before the current date, display that specially.
   const getDates = () => {
     const _dates: moment.Moment[] = [];
+    const initialMoment = moment();
+    if (selected?.isBefore(initialMoment)) {
+      _dates.push(selected);
+    }
+
     for (let i = 0; i < 10; i++) {
-      const date = moment().add(i, 'days');
+      const date = moment().add(i, "days");
       _dates.push(date);
     }
     setDates(_dates);
@@ -34,7 +47,9 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selected }) => {
    * we format it as a string and set it as the currentMonth
    */
   const getCurrentMonth = () => {
-    const month = moment(dates[0]).add(scrollPosition / 60, 'days').format('MMMM');
+    const month = moment(dates[0])
+      .add(scrollPosition / 60, "days")
+      .format("MMMM");
     setCurrentMonth(month);
   };
 
@@ -77,18 +92,18 @@ export default Calendar;
 
 const styles = StyleSheet.create({
   centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   dateSection: {
-    width: '100%',
+    width: "100%",
     padding: 15,
   },
   scroll: {
-    height:100,
+    height: 100,
   },
 });
