@@ -1,33 +1,27 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export const userSlice = createSlice({
-    
-    name : 'user',
+  name: "user",
 
-    initialState : {} as any,
+  initialState: {} as any,
 
-    reducers : {
+  reducers: {
+    setUser: (state, action) => {
+      state = action.payload;
 
-        setUser : (state, action) => {
+      return state;
+    },
 
-            state = action.payload;
+    setRoomID: (state, action) => {
+      state.roomId = action.payload;
+      return state;
+    },
 
-            return state;
-        },
+    logoutCurrentUser: (state, action) => {
+      state = {};
+      return state;
+    },
+  },
+});
 
-        setRoomID : (state , action) => {
-            state.roomId = action.payload;
-            return state;
-        },
-
-        logoutCurrentUser : (state, action) => {
-
-            state = {};
-            console.log('hello')
-            return state;
-        },
-    }
-
-})
-
-export const { setUser, setRoomID ,logoutCurrentUser } = userSlice.actions;
+export const { setUser, setRoomID, logoutCurrentUser } = userSlice.actions;

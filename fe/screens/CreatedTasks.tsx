@@ -1,5 +1,5 @@
 import * as React from "react";
-import { View ,Text , Image , ScrollView } from "react-native";
+import { View ,Text , Image , ScrollView, Pressable } from "react-native";
 import { StyleSheet } from "react-native";
 import Font from "../constants/Font";
 import EditableScheduleBox from "../components/schedule/EditableScheduleBox";
@@ -80,7 +80,7 @@ const CreatedTasks = () => {
                     <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>
                     ) : (
                     filteredTasks?.map((schedule: Tasks) => (
-                        <EditableScheduleBox {...schedule} key={schedule._id}/>
+                         <EditableScheduleBox {...schedule} key={schedule._id}/> 
                     ))
                     )}
 

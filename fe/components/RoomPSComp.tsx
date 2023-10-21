@@ -58,8 +58,9 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ selectedDate, selectedC
   // Group the schedules by start time
   const groupedSchedules: { [key: string]: any[] } = {};
   
+  
   if (data) {
-    data?.content.forEach((schedule: any) => {
+    data?.schedules?.forEach((schedule: any) => {
       const key = schedule.startTime;
       if (!groupedSchedules[key]) {
         groupedSchedules[key] = [];

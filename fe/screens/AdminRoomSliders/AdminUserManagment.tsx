@@ -21,7 +21,7 @@ const AdminUserManage = () => {
 
     const sendEmail = () => {
 
-        console.log("Hi the button");
+        
 
         const emailSentSuccessfully = true; 
       

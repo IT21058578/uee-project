@@ -12,7 +12,7 @@ const useFetch = ( url : string ) => {
                 .then((data) => { setLoading(false); setData(data) })
             })
             .then(data => {
-                console.log(data);
+                
                 setLoading(false);
             }).catch((error) => {
                 console.error(error);

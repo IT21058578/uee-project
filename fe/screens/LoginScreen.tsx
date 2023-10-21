@@ -23,18 +23,19 @@ import Toast from "react-native-toast-message";
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
 const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
-
   const [sendUserInfo, result] = useLoginMutation();
-  const [data, setData] = useState({ email: "", password: "" });
+  const [data, setData] = useState({
+    email: "Disirathihan@gmail.com",
+    password: "12345678",
+  });
 
-  const handleChange = (name:any, text:any) => {
+  const handleChange = (name: any, text: any) => {
     setData({ ...data, [name]: text });
   };
 
   const handleLogin = async () => {
     sendUserInfo(data);
   };
-  
 
   return (
     <SafeAreaView>
@@ -74,15 +75,17 @@ const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             marginVertical: Spacing * 3,
           }}
         >
-          <AppTextInput 
+          <AppTextInput
             placeholder="Email"
             value={data.email}
-            onChangeText={(text) => handleChange("email", text)} />
-            
-          <AppTextInput 
+            onChangeText={(text) => handleChange("email", text)}
+          />
+
+          <AppTextInput
             placeholder="Password"
             value={data.password}
-            onChangeText={(text) => handleChange("password", text)} />
+            onChangeText={(text) => handleChange("password", text)}
+          />
         </View>
 
         <View>
@@ -210,7 +213,7 @@ const LoginScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
             </TouchableOpacity>
           </View>
         </View>
-        <Toast/>
+        <Toast />
       </View>
     </SafeAreaView>
   );

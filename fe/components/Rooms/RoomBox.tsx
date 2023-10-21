@@ -6,17 +6,16 @@ import FontSize from "../../constants/FontSize";
 import { IRoom, RoomType } from "../../types";
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import Popover from 'react-native-popover-view';
+import Popover from "react-native-popover-view";
 import { Entypo } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { Feather } from '@expo/vector-icons'; 
-import { AntDesign } from '@expo/vector-icons'; 
+import { Feather } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { useGetAlltasksQuery } from "../../Redux/API/tasks.api.slice";
 import { setRoomID } from "../../Redux/slices/userSlice";
 import { useDispatch } from "react-redux";
 
 const RoomBox: React.FC<IRoom> = (props) => {
-
   const dispatch = useDispatch();
   const [isPopoverVisible, setPopoverVisible] = useState(false);
 
@@ -26,7 +25,7 @@ const RoomBox: React.FC<IRoom> = (props) => {
 
   const handleEdit = () => {
     navigation.navigate("EditRoom", {
-      roomId : roomId,
+      roomId: roomId,
     });
     setPopoverVisible(false); // Close the popover
   };
@@ -36,15 +35,13 @@ const RoomBox: React.FC<IRoom> = (props) => {
   };
 
   const handleNavigate = () => {
-
     dispatch(setRoomID(roomId));
     // Navigate to the desired screen when the Pressable is pressed
     navigation.navigate("AdminRoom");
   };
 
-  const {data:taskList , isLoading ,isError} = useGetAlltasksQuery('');
-  console.log(taskList)
-  const taskCount = taskList?.content?.length
+  const { data: taskList, isLoading, isError } = useGetAlltasksQuery("");
+  const taskCount = taskList?.content?.length;
 
   return (
     <View style={styles.roomManagmentProfileSetti}>
@@ -55,7 +52,10 @@ const RoomBox: React.FC<IRoom> = (props) => {
           <Text style={[styles.seProjectGroup, styles.taskTypo]}>
             {props.name}
           </Text>
-          <Pressable style={[styles.groupItem, styles.groupLayout]} onPress={handleNavigate} />
+          <Pressable
+            style={[styles.groupItem, styles.groupLayout]}
+            onPress={handleNavigate}
+          />
           <Image
             style={[styles.iconlycurvedprofile, styles.groupIconLayout]}
             contentFit="cover"
@@ -63,25 +63,31 @@ const RoomBox: React.FC<IRoom> = (props) => {
           />
         </View>
         <Popover
-        isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
-        onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
-            from={(
-                <TouchableOpacity onPress={() => setPopoverVisible(!isPopoverVisible)}>
-                <View style={styles.newDot}>
-                    <Entypo name="dots-three-vertical" size={15} color="black" />
-                </View>
-                </TouchableOpacity>
-            )}>
-                <View style={styles.menuContainer}>
-                    <TouchableOpacity onPress={handleEdit} style={styles.textRow}>
-                        <Text><Feather name="edit" size={14} color="black" />  Edit</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleDelete} style={styles.textRow}>
-                        <Text><AntDesign name="delete" size={14} color="black" />  Delete</Text>
-                    </TouchableOpacity>
-            </View>
-          </Popover>
-        
+          isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
+          onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
+          from={
+            <TouchableOpacity
+              onPress={() => setPopoverVisible(!isPopoverVisible)}
+            >
+              <View style={styles.newDot}>
+                <Entypo name="dots-three-vertical" size={15} color="black" />
+              </View>
+            </TouchableOpacity>
+          }
+        >
+          <View style={styles.menuContainer}>
+            <TouchableOpacity onPress={handleEdit} style={styles.textRow}>
+              <Text>
+                <Feather name="edit" size={14} color="black" /> Edit
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDelete} style={styles.textRow}>
+              <Text>
+                <AntDesign name="delete" size={14} color="black" /> Delete
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Popover>
       </View>
     </View>
   );
@@ -89,11 +95,11 @@ const RoomBox: React.FC<IRoom> = (props) => {
 
 const styles = StyleSheet.create({
   textRow: {
-    marginVertical:10,
+    marginVertical: 10,
   },
-  newDot:{
-    top:15,
-    left:115
+  newDot: {
+    top: 15,
+    left: 115,
   },
   menuContainer: {
     padding: 20,
@@ -179,7 +185,7 @@ const styles = StyleSheet.create({
   },
   roomManagmentProfileSetti: {
     backgroundColor: "#feffff",
-    margin:5,
+    margin: 5,
     width: "40%",
     height: 150,
     overflow: "hidden",

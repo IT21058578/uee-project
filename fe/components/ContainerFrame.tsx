@@ -3,13 +3,12 @@ import { Text, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import Font from "../constants/Font";
 import { FontSize, Color, Border } from "../Styles/GlobalStyles";
-import { getItem } from '../utils/Genarals'
-import RoutePaths from '../utils/RoutePaths';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { getItem } from "../utils/Genarals";
+import RoutePaths from "../utils/RoutePaths";
+import { useState } from "react";
+import { useEffect } from "react";
 
 const ContainerFrame = () => {
-
   const [user, setUser] = useState<{ firstName: string } | null>(null);
 
   useEffect(() => {
@@ -28,9 +27,6 @@ const ContainerFrame = () => {
   }, []);
 
   const userName = user?.firstName;
-
-  console.log(userName)
-
 
   return (
     <View style={[styles.frame, styles.frameLayout]}>

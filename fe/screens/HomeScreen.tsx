@@ -10,14 +10,13 @@ import { schedulesApi } from "../data/virtualData";
 import { useGetDetailedScheduledForUserQuery } from "../Redux/API/schedules.api.slice";
 import { ActivityIndicator } from "react-native";
 import { Schedule } from "../types";
-import { getItem } from '../utils/Genarals'
-import RoutePaths from '../utils/RoutePaths';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { getItem } from "../utils/Genarals";
+import RoutePaths from "../utils/RoutePaths";
+import { useState } from "react";
+import { useEffect } from "react";
 import Colors from "../constants/Colors";
 
 const Home = () => {
-
   const [user, setUser] = useState<{ _id: string } | null>(null);
 
   useEffect(() => {
@@ -25,7 +24,7 @@ const Home = () => {
       const token = await getItem(RoutePaths.token);
       if (token) {
         const userData = await getItem("user");
-        console.log('user DATA',userData);
+
         if (userData) {
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
@@ -38,25 +37,19 @@ const Home = () => {
 
   const userID = user?._id;
 
-  console.log('user ID',userID);
-
   const currentDate = new Date();
-  const date = currentDate.toISOString().split('T')[0];
+  const date = currentDate.toISOString().split("T")[0];
 
   const {
     isLoading,
     data: scheduleList,
     isSuccess,
     isError,
-  } = useGetDetailedScheduledForUserQuery({userID , date});
-
-  console.log('schedule list', scheduleList)
+  } = useGetDetailedScheduledForUserQuery({ userID, date });
 
   return (
     <View style={styles.home}>
-
       <View style={styles.frameParent}>
-
         <ContainerFrame />
 
         <Text style={[styles.myTask, styles.taskTypo]}>My Task</Text>
@@ -95,11 +88,11 @@ const Home = () => {
           <Button
             style={styles.viewAll}
             mode="text"
-            labelStyle={styles.viewAllBtn}>
+            labelStyle={styles.viewAllBtn}
+          >
             View all
           </Button>
         </View>
-
       </View>
 
       <ScrollView
@@ -110,27 +103,32 @@ const Home = () => {
         pagingEnabled={true}
         contentContainerStyle={styles.frameScrollViewContent}
       >
-
         {isLoading || isError ? (
-          <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large" />
+          <ActivityIndicator
+            style={styles.contentContainer}
+            color="#0000ff"
+            size="large"
+          />
         ) : scheduleList?.schedules[0]?.taskList.length > 0 ? (
           scheduleList.schedules[0].taskList.map((schedule: TaskType) => (
-            <HomeScheduleBox {...schedule} tag={scheduleList.schedules[0].tag} key={schedule.taskId} />
+            <HomeScheduleBox
+              {...schedule}
+              tag={scheduleList.schedules[0].tag}
+              key={schedule.taskId}
+            />
           ))
         ) : (
           <Text style={styles.noschedules}>No schedules for the day</Text>
         )}
-
       </ScrollView>
-
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   noschedules: {
-    paddingVertical:60,
-    paddingHorizontal:30,
+    paddingVertical: 60,
+    paddingHorizontal: 30,
     color: Colors.colorTomato,
     fontSize: 20,
     fontFamily: Font["poppins-bold"],
@@ -338,9 +336,9 @@ const styles = StyleSheet.create({
   },
   home: {
     backgroundColor: Color.white,
-    top:20,
+    top: 20,
     width: "100%",
-    maxHeight:"90%",
+    maxHeight: "90%",
     paddingHorizontal: 0,
     paddingVertical: 37,
     alignItems: "center",

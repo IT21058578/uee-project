@@ -10,7 +10,6 @@ import { setRoomID } from "../../Redux/slices/userSlice";
 import { useDispatch } from "react-redux";
 
 const NonAdminRoomBox: React.FC<IRoom> = (props) => {
-
   const dispatch = useDispatch();
 
   const navigation = useNavigation<any>();
@@ -20,12 +19,11 @@ const NonAdminRoomBox: React.FC<IRoom> = (props) => {
   const handleNavigate = () => {
     dispatch(setRoomID(roomId));
     // Navigate to the desired screen when the Pressable is pressed
-    navigation.navigate("RoomDetails"); 
+    navigation.navigate("RoomDetails");
   };
 
-  const {data:taskList , isLoading ,isError} = useGetAlltasksQuery('');
-  console.log(taskList)
-  const taskCount = taskList?.content?.length
+  const { data: taskList, isLoading, isError } = useGetAlltasksQuery("");
+  const taskCount = taskList?.content?.length;
 
   const propCount = Object.keys(props).length;
 
@@ -38,7 +36,10 @@ const NonAdminRoomBox: React.FC<IRoom> = (props) => {
           <Text style={[styles.seProjectGroup, styles.taskTypo]}>
             {props.name}
           </Text>
-          <Pressable style={[styles.groupItem, styles.groupLayout]} onPress={handleNavigate} />
+          <Pressable
+            style={[styles.groupItem, styles.groupLayout]}
+            onPress={handleNavigate}
+          />
           <Image
             style={[styles.iconlycurvedprofile, styles.groupIconLayout]}
             contentFit="cover"
@@ -51,7 +52,6 @@ const NonAdminRoomBox: React.FC<IRoom> = (props) => {
 };
 
 const styles = StyleSheet.create({
- 
   groupChildPosition: {
     left: 0,
     top: 0,
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   roomManagmentProfileSetti: {
     backgroundColor: "#feffff",
-    margin:5,
+    margin: 5,
     width: "40%",
     height: 150,
     overflow: "hidden",
