@@ -12,10 +12,15 @@ import DateComponent from "./Date";
 
 interface CalendarProps {
   onSelectDate: (date: Moment) => void;
+  initialDate: Moment | null;
   selected: Moment | null;
 }
 
-const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selected }) => {
+const Calendar: React.FC<CalendarProps> = ({
+  onSelectDate,
+  selected,
+  initialDate,
+}) => {
   const [dates, setDates] = useState<moment.Moment[]>([]);
   const [scrollPosition, setScrollPosition] = useState<number>(0);
   const [currentMonth, setCurrentMonth] = useState<string | undefined>();
@@ -24,9 +29,10 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selected }) => {
   // If the selected date is before the current date, display that specially.
   const getDates = () => {
     const _dates: moment.Moment[] = [];
-    const initialMoment = moment();
-    if (selected?.isBefore(initialMoment)) {
-      _dates.push(selected);
+    const today = moment();
+
+    if (initialDate?.isBefore(today, "date")) {
+      _dates.push(initialDate);
     }
 
     for (let i = 0; i < 10; i++) {
@@ -38,7 +44,7 @@ const Calendar: React.FC<CalendarProps> = ({ onSelectDate, selected }) => {
 
   useEffect(() => {
     getDates();
-  }, []);
+  }, [selected, initialDate]);
 
   /**
    * scrollPosition is the number of pixels the user has scrolled

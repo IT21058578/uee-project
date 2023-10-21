@@ -31,12 +31,14 @@ dayjs.extend(duration);
 const EditTask = ({ route }: { route: any }) => {
   const taskId = route?.params?.taskId;
 
-  const { data: task } = useGettaskQuery(taskId);
+  const { data: task, isFetching: isTaskFetching } = useGettaskQuery(taskId);
   const [updateTask, updateResult] = useUpdatetaskMutation();
   const { data: userData } = useGetAllUsersQuery("api/users");
 
   const navigation = useNavigation();
 
+  /** In case initial date is before today. */
+  const [initialDate, setInitialDate] = useState<Moment>(moment());
   const [selectedDate, setSelectedDate] = useState<Moment | null>(moment());
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>(
     task?.assignedUserIds || []
@@ -109,10 +111,9 @@ const EditTask = ({ route }: { route: any }) => {
 
   // Transform and set selectedDate when task data comes through
   useEffect(() => {
-    if (task) {
-      setSelectedDate(moment(task?.date));
-    }
-  }, [task]);
+    setSelectedDate(moment(new Date(task?.date)));
+    setInitialDate(moment(new Date(task?.date)));
+  }, [task, isTaskFetching]);
 
   return (
     <View>
@@ -145,7 +146,11 @@ const EditTask = ({ route }: { route: any }) => {
           <Text style={styles.typoBoddy}>Date</Text>
         </View>
         <View style={styles.box2}>
-          <Calendar onSelectDate={handleDateSelect} selected={selectedDate} />
+          <Calendar
+            onSelectDate={handleDateSelect}
+            selected={selectedDate}
+            initialDate={initialDate}
+          />
         </View>
         <View style={styles.box1}>
           <Text style={styles.typoBoddy}>Description</Text>
