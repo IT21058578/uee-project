@@ -26,6 +26,7 @@ import duration from "dayjs/plugin/duration";
 import Calendar from "../components/Calendar/calender";
 import moment, { Moment } from "moment";
 import Toast from "react-native-toast-message";
+import PrioritySelector from "../components/PrioritySelector";
 dayjs.extend(duration);
 
 const EditTask = ({ route }: { route: any }) => {
@@ -56,6 +57,11 @@ const EditTask = ({ route }: { route: any }) => {
     setSelectedDate(date);
   };
 
+  const [showPicker, setShowPicker] = useState<boolean>(false);
+  const [durationInMs, setDurationInMs] = useState<number>(
+    task?.duration || ""
+  );
+
   // Function to handle checkbox change
   const handleCheckboxChange = (userId: string) => {
     if (selectedUserIds?.includes(userId)) {
@@ -64,11 +70,6 @@ const EditTask = ({ route }: { route: any }) => {
       setSelectedUserIds([...selectedUserIds, userId]);
     }
   };
-
-  const [showPicker, setShowPicker] = useState<boolean>(false);
-  const [durationInMs, setDurationInMs] = useState<number>(
-    task?.duration || ""
-  );
 
   const handleDurationSelection = (pickedDuration: any) => {
     const { hours, minutes, seconds } = pickedDuration;
@@ -113,6 +114,7 @@ const EditTask = ({ route }: { route: any }) => {
   useEffect(() => {
     setSelectedDate(moment(new Date(task?.date)));
     setInitialDate(moment(new Date(task?.date)));
+    setDurationInMs(task?.duration);
   }, [task, isTaskFetching]);
 
   return (
@@ -173,14 +175,10 @@ const EditTask = ({ route }: { route: any }) => {
           <Text style={styles.typoBoddy}>Priority</Text>
         </View>
         <View style={styles.box2}>
-          <NativeBaseProvider>
-            <Input
-              variant="underlined"
-              placeholder="Enter Priority"
-              onChangeText={setPriority}
-              value={priority}
-            />
-          </NativeBaseProvider>
+          <PrioritySelector
+            value={priority}
+            onChange={(val) => setPriority(val)}
+          />
         </View>
         <View style={styles.box1}>
           <Text style={styles.typoBoddy}>Assign Members</Text>
@@ -192,7 +190,7 @@ const EditTask = ({ route }: { route: any }) => {
               <NativeBaseProvider>
                 <View style={styles.CheckboxSpace1}>
                   <Checkbox
-                    defaultIsChecked={task.assignedUserIds.includes(user._id)}
+                    defaultIsChecked={task?.assignedUserIds.includes(user._id)}
                     value={user._id}
                     colorScheme="purple"
                     onChange={() => handleCheckboxChange(user._id)}
@@ -227,6 +225,9 @@ const EditTask = ({ route }: { route: any }) => {
           styles={{
             theme: "light",
           }}
+          initialHours={moment.duration(durationInMs).hours()}
+          initialMinutes={moment.duration(durationInMs).minutes()}
+          initialSeconds={moment.duration(durationInMs).seconds()}
         />
         <Toast />
       </ScrollView>
