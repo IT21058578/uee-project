@@ -13,6 +13,8 @@ import { TasksService } from 'src/tasks/tasks.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
+import { PageRequest } from 'src/common/dtos/page-request.dto';
+import { MongooseUtil } from 'src/common/util/mongoose.util';
 
 @Injectable({ scope: Scope.REQUEST })
 export class RoomsService {
@@ -94,5 +96,26 @@ export class RoomsService {
         `User with id ${userId} is already an admin of room with id '${roomId}'`,
       );
     }
+
+    existingRoom.adminIds.push(userId);
+    await existingRoom.save();
+  }
+
+  async unassignRoomAdmin(userId: string, roomId: string) {
+    const existingRoom = await this.getRoom(roomId);
+    const isAlreadyAdmin = existingRoom.adminIds.some((id) => id === userId);
+    if (isAlreadyAdmin) {
+      throw new BadRequestException(
+        ErrorMessage.USER_NOT_ADMIN,
+        `User with id ${userId} is not an admin of room with id '${roomId}'`,
+      );
+    }
+
+    existingRoom.adminIds = existingRoom.adminIds.filter((id) => userId !== id);
+    await existingRoom.save();
+  }
+
+  async getRoomPage(pageRequest: PageRequest) {
+    return await MongooseUtil.getDocumentPage(this.roomModel, pageRequest);
   }
 }

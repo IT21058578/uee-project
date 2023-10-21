@@ -17,6 +17,8 @@ import { TaskDocument } from 'src/tasks/tasks.schema';
 import { TaskPriority } from 'src/tasks/task-priority.enum';
 import { RoomsService } from 'src/rooms/rooms.service';
 import { Request } from 'express';
+import { MongooseUtil } from 'src/common/util/mongoose.util';
+import { PageRequest } from 'src/common/dtos/page-request.dto';
 dayjs?.extend(duration);
 
 @Injectable({ scope: Scope.REQUEST })
@@ -192,5 +194,9 @@ export class SchedulesService {
     });
 
     return taskList;
+  }
+
+  async getSchedulePage(pageRequest: PageRequest) {
+    return await MongooseUtil.getDocumentPage(this.scheduleModel, pageRequest);
   }
 }

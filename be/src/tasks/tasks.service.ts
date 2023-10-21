@@ -8,15 +8,13 @@ import { REQUEST } from '@nestjs/core';
 import { InjectModel } from '@nestjs/mongoose';
 import { Request } from 'express';
 import { PageRequest } from 'src/common/dtos/page-request.dto';
-import { FlatTask, Task, TaskModel } from './tasks.schema';
+import { Task, TaskModel } from './tasks.schema';
 import ErrorMessage from 'src/common/enums/error-message.enum';
 import { CreateTaskDto } from './create-task.dto';
 import { SchedulesService } from 'src/schedules/schedules.service';
-import { SortOrder } from 'mongoose';
-import { PageBuilder } from 'src/common/util/page.util';
 import dayjs, { duration } from 'dayjs';
-import plugin from 'dayjs/plugin/duration';
 import { UsersService } from 'src/users/users.service';
+import { MongooseUtil } from 'src/common/util/mongoose.util';
 
 @Injectable()
 export class TasksService {
@@ -46,7 +44,6 @@ export class TasksService {
       editTaskDto;
     name = name.trim();
     description = description.trim();
-    const newDuration = dayjs.duration(duration) as plugin.Duration;
 
     const existingTask = await this.getTask(id);
     const tasksWithSimilarNames = await this.taskModel.find({
@@ -63,7 +60,7 @@ export class TasksService {
 
     existingTask.date = date ?? existingTask.date;
     existingTask.description = description;
-    existingTask.duration = newDuration ?? existingTask.duration;
+    existingTask.duration = duration ?? existingTask.duration;
     existingTask.name = name ?? existingTask.name;
     existingTask.priority = priority ?? existingTask.priority;
     existingTask.assignedUserIds =
@@ -131,39 +128,8 @@ export class TasksService {
     );
   }
 
-  async searchTasks({ pageNum = 1, pageSize = 10, filter, sort }: PageRequest) {
-    const query = this.taskModel.find({
-      ...(filter?.roomId?.value
-        ? {
-            roomId: filter.roomId.value,
-          }
-        : {}),
-      ...(filter?.assignedUserIds?.value
-        ? {
-            assignedUserIds: { $in: [...filter.assignedUserIds.value] },
-          }
-        : {}),
-    });
-    const sortArr: [string, SortOrder][] = Object.entries(sort ?? {}).map(
-      ([key, value]) => [key, value as SortOrder],
-    );
-    const [content, totalDocuments] = await Promise.all([
-      query
-        .clone()
-        .sort(sortArr)
-        .skip((pageNum - 1) * pageSize)
-        .limit(pageSize)
-        .exec(),
-      query.clone().count().exec(),
-    ]);
-    const jsonContent = content.map((doc) => doc.toJSON()) satisfies FlatTask[];
-    const page = PageBuilder.buildPage(jsonContent, {
-      pageNum,
-      pageSize,
-      totalDocuments,
-      sort,
-    });
-    return page;
+  async searchTasks(pageRequest: PageRequest) {
+    return await MongooseUtil.getDocumentPage(this.taskModel, pageRequest);
   }
 
   async getAllTasksByCreatedBy(userId: string) {
