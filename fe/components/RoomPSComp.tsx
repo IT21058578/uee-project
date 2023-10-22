@@ -1,105 +1,140 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList ,ScrollView } from 'react-native';
-import RoomScheduleBox from './schedule/roomScheduleBox';
-import Colors from '../constants/Colors';
-import Font from '../constants/Font';
-import { useGetDetailedScheduledForUserQuery } from '../Redux/API/schedules.api.slice';
-import { ActivityIndicator } from 'react-native';
-import { getItem } from '../utils/Genarals'
-import RoutePaths from '../utils/RoutePaths';
-import { useState } from 'react';
-import { useEffect } from 'react';
-
-// Function to convert time to a sortable value
-function convertTimeToSortableValue(time: string): number {
-  const [hourMinute, ampm] = time.split(' ');
-  const [hours, minutes] = hourMinute.split(':').map((str) => parseInt(str));
-  return ampm === 'PM' ? (hours % 12 + 12) * 60 + minutes : hours * 60 + minutes;
-}
+import React from "react";
+import { View, Text, StyleSheet, FlatList } from "react-native";
+import RoomScheduleBox from "./schedule/roomScheduleBox";
+import Colors from "../constants/Colors";
+import Font from "../constants/Font";
+import { useGetDetailedScheduledForUserQuery } from "../Redux/API/schedules.api.slice";
+import { ActivityIndicator } from "react-native";
+import { useState } from "react";
+import { useEffect } from "react";
+import { useAppSelector } from "../hooks/redux-hooks";
+import moment from "moment";
+import { Color } from "../Styles/GlobalStyles";
 
 interface ScheduleScreenProps {
-  selectedDate: Date | null;
-  selectedCategory: string | null;
+  selectedDate?: Date;
+  selectedCategory?: string;
 }
 
-const ScheduleScreen: React.FC<ScheduleScreenProps> = ({ selectedDate, selectedCategory }) => {
-
-  const date = selectedDate?.toISOString().split('T')[0];
-
-  const [user, setUser] = useState<{ _id: string } | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = await getItem(RoutePaths.token);
-      if (token) {
-        const userData = await getItem("user");
-        if (userData) {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
-        }
-      }
-    };
-
-    fetchData();
-  }, []);
-
+const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
+  selectedDate,
+  selectedCategory,
+}) => {
+  const user = useAppSelector((state) => state.user);
+  const date = selectedDate?.toISOString().split("T")[0];
   const userID = user?._id;
+  const {
+    data,
+    isFetching: isDetailedScheduleFetching,
+    isError,
+    refetch: refetchDetailedSchedules,
+  } = useGetDetailedScheduledForUserQuery({
+    userID,
+    date,
+  });
 
-  const { data, isLoading, isError } = useGetDetailedScheduledForUserQuery({userID,date});
-
-  if (isLoading) {
-    return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;
-  }
-
-  if (isError) {
-    return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;
-  }
-
-  // Group the schedules by start time
-  const groupedSchedules: { [key: string]: any[] } = {};
-  
-  
-  if (data) {
-    data?.schedules?.forEach((schedule: any) => {
-      const key = schedule.startTime;
-      if (!groupedSchedules[key]) {
-        groupedSchedules[key] = [];
-      }
-      groupedSchedules[key].push(schedule);
-    });
-  }
-
-  // Sort the keys (start times) in ascending order considering AM and PM
-  const sortedKeys = Object.keys(groupedSchedules).sort(
-    (a, b) =>
-      convertTimeToSortableValue(a) - convertTimeToSortableValue(b)
+  const [groupedTaskList, setGroupedTaskList] = useState<Record<string, any[]>>(
+    {}
   );
+
+  // Cause a refetch everytime date is switched in calender.
+  useEffect(() => {
+    refetchDetailedSchedules();
+  }, [selectedDate?.toDateString()]);
+
+  // Once data comes through or category is changed, build grouped task list
+  useEffect(() => {
+    if (data) {
+      const groupedTaskList: Record<string, any[]> = {};
+      const schedules = data?.schedules ?? [];
+      schedules.forEach((schedule: any) => {
+        if (selectedCategory && selectedCategory !== schedule.tag) return;
+        schedule.taskList.forEach((task: any) => {
+          if (groupedTaskList[task.startTime] === undefined) {
+            groupedTaskList[task.startTime] = [];
+          }
+          groupedTaskList[task.startTime].push(task);
+        });
+      });
+      setGroupedTaskList(groupedTaskList);
+    }
+  }, [data, isDetailedScheduleFetching, selectedCategory]);
+
+  const getSortedGroupedTaskList = (): [string, any[]][] => {
+    const sortedKeys = Object.keys(groupedTaskList).sort((a, b) =>
+      moment(a).isBefore(moment(b)) ? 1 : -1
+    );
+    return sortedKeys.map((key) => [key, groupedTaskList[key]]);
+  };
+
+  const getSelectedTaskTotalDuration = () => {
+    const durationInMs = Object.values(groupedTaskList).reduce((a, b) => {
+      const singleScheduleTotalDuration = b.reduce((c, d) => {
+        const diffInMs = moment(d.endTime).diff(d.startTime);
+        return diffInMs;
+      }, 0);
+      return a + singleScheduleTotalDuration;
+    }, 0);
+    const durationMoment = moment.duration(durationInMs);
+    const hours = durationMoment.hours();
+    const minutes = durationMoment.minutes();
+    return `${hours} H ${minutes} M`;
+  };
+
+  if (isDetailedScheduleFetching || isError) {
+    return (
+      <ActivityIndicator
+        style={styles.contentContainer}
+        color="#0000ff"
+        size="large"
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
-
       <View style={styles.Box}>
-        <Text style={[styles.today, styles.todayPosition]}>Day Plan</Text>
-        <Text style={[styles.h45Min, styles.h45MinTypo]}>09 h 45 min</Text>
+        <Text style={styles.today}>Day Plan</Text>
+        <Text>{getSelectedTaskTotalDuration()}</Text>
       </View>
-
       <FlatList
-        data={sortedKeys.map((key) => [key, groupedSchedules[key]]) as (string | any[])[]}
-        keyExtractor={(item) => item[0]}
-        renderItem={({ item }) => (
-          <View style={styles.timeSlotContainer}>
-            <Text style={styles.timeSlot}>{item[0]}</Text>
-            {item[1].map((schedule: any) => (
-                <RoomScheduleBox {...schedule} key={schedule._id}/>
-            ))}
+        data={getSortedGroupedTaskList()}
+        keyExtractor={([startTime]) => startTime}
+        renderItem={({ item: [startTime, tasks] }) => {
+          const formattedStartDate = moment(startTime).format("LT");
+          return (
+            <View style={styles.timeSlotContainer}>
+              <Text style={styles.timeSlot}>{formattedStartDate}</Text>
+              {tasks.map((schedule: any) => (
+                <RoomScheduleBox {...schedule} key={schedule._id} />
+              ))}
+            </View>
+          );
+        }}
+        ListEmptyComponent={
+          <View style={styles.emptyTaskListView}>
+            <Text style={styles.emptyTaskListText}>
+              {selectedCategory
+                ? `No ${selectedCategory.toLocaleLowerCase()} tasks scheduled`
+                : "No tasks scheduled"}
+            </Text>
           </View>
-        )}
+        }
       />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  emptyTaskListView: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyTaskListText: {
+    fontSize: 16,
+    color: Color.dimgray,
+  },
   contentContainer: {
     paddingVertical: 100,
   },
@@ -107,30 +142,27 @@ const styles = StyleSheet.create({
     padding: 25,
   },
   Box: {
-    width: 100,
     height: 30,
     marginBottom: 30,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   timeSlotContainer: {
     marginBottom: 16,
   },
   timeSlot: {
     fontSize: 15,
-    fontWeight: 'bold',
-    marginLeft:5,
+    fontWeight: "bold",
+    marginLeft: 5,
     marginBottom: 8,
-    color:Colors.primary,
+    color: Colors.primary,
   },
   scheduleItem: {
     padding: 10,
-    backgroundColor: '#e5e5e5',
+    backgroundColor: "#e5e5e5",
     marginBottom: 8,
-  },
-  todayPosition: {
-    textAlign: "left",
-    color: Colors.darkText,
-    left: "auto",
-    position: "absolute",
   },
   h45MinTypo: {
     fontFamily: Font["poppins-regular"],

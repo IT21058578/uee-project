@@ -1,24 +1,17 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList ,ScrollView } from 'react-native';
-import AdminRoomScheduleBox from './schedule/AdminRoomScheduleBox';
-import Colors from '../constants/Colors';
-import Font from '../constants/Font';
-import { Schedule } from '../types';
-import { useGetPopulatedRoomScheduleQuery } from '../Redux/API/schedules.api.slice';
+import React from "react";
+import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
+import AdminRoomScheduleBox from "./schedule/AdminRoomScheduleBox";
+import Colors from "../constants/Colors";
+import Font from "../constants/Font";
+import { Schedule } from "../types";
+import { useGetPopulatedRoomScheduleQuery } from "../Redux/API/schedules.api.slice";
 
-// // Sample schedule data (replace with your own data)
-// const scheduleData = [
-//   { id: '1', startTime: '09:00 AM', endTime: '10:00 AM', title: 'Meeting 1' },
-//   { id: '6', startTime: '09:30 AM', endTime: '10:30 AM', title: 'Meeting 2' },
-//   { id: '2', startTime: '10:30 AM', endTime: '11:30 AM', title: 'Meeting 3' },
-//   { id: '3', startTime: '09:30 AM', endTime: '10:30 AM', title: 'Lunch' },
-//   { id: '4', startTime: '02:00 PM', endTime: '03:00 PM', title: 'Meeting 4' },
-//   { id: '5', startTime: '02:01 PM', endTime: '05:00 PM', title: 'Meeting 5' },
-// ];
-
-const AdminScheduleScreen = (selectedDate:any,roomId:any) => {
-
-  const { data:scheduleList , isError , isLoading} = useGetPopulatedRoomScheduleQuery({});
+const AdminScheduleScreen = (selectedDate: any, roomId: any) => {
+  const {
+    data: scheduleList,
+    isError,
+    isLoading,
+  } = useGetPopulatedRoomScheduleQuery({});
 
   const groupedSchedules: { [key: string]: any[] } = {};
 
@@ -38,24 +31,28 @@ const AdminScheduleScreen = (selectedDate:any,roomId:any) => {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.Box}>
         <Text style={[styles.today, styles.todayPosition]}>Day Plan</Text>
         <Text style={[styles.h45Min, styles.h45MinTypo]}>09 h 45 min</Text>
       </View>
 
       <FlatList
-        data={sortedKeys.map((key) => [key, groupedSchedules[key]]) as (string | any[])[]}
+        data={
+          sortedKeys.map((key) => [key, groupedSchedules[key]]) as (
+            | string
+            | any[]
+          )[]
+        }
         keyExtractor={(item) => item[0]}
         renderItem={({ item }) => (
           <View style={styles.timeSlotContainer}>
             <Text style={styles.timeSlot}>{item[0]}</Text>
             {item[1].map((schedule: Schedule) => (
-            //   <View key={schedule.id} style={styles.scheduleItem}>
-            //     <Text>{schedule.title}</Text>
-            //     <Text>{schedule.startTime} - {schedule.endTime}</Text>
-            //   </View>
-                <AdminRoomScheduleBox {...schedule} key={schedule._id}/>
+              //   <View key={schedule.id} style={styles.scheduleItem}>
+              //     <Text>{schedule.title}</Text>
+              //     <Text>{schedule.startTime} - {schedule.endTime}</Text>
+              //   </View>
+              <AdminRoomScheduleBox {...schedule} key={schedule._id} />
             ))}
           </View>
         )}
@@ -78,14 +75,14 @@ const styles = StyleSheet.create({
   },
   timeSlot: {
     fontSize: 15,
-    fontWeight: 'bold',
-    marginLeft:5,
+    fontWeight: "bold",
+    marginLeft: 5,
     marginBottom: 8,
-    color:Colors.primary,
+    color: Colors.primary,
   },
   scheduleItem: {
     padding: 10,
-    backgroundColor: '#e5e5e5',
+    backgroundColor: "#e5e5e5",
     marginBottom: 8,
   },
   todayPosition: {

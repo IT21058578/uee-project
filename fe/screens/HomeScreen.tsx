@@ -15,86 +15,80 @@ import RoutePaths from "../utils/RoutePaths";
 import { useState } from "react";
 import { useEffect } from "react";
 import Colors from "../constants/Colors";
+import { useAppSelector } from "../hooks/redux-hooks";
+import { DateUtils } from "../utils/DateUtils";
 
 const Home = () => {
-  const [user, setUser] = useState<{ _id: string } | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = await getItem(RoutePaths.token);
-      if (token) {
-        const userData = await getItem("user");
-
-        if (userData) {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
-        }
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  const user = useAppSelector((state) => state.user);
   const userID = user?._id;
-
-  const currentDate = new Date();
-  const date = currentDate.toISOString().split("T")[0];
+  const date = new Date().toISOString().split("T")[0];
 
   const {
+    data: detailedScheduleList,
     isLoading,
-    data: scheduleList,
-    isSuccess,
     isError,
   } = useGetDetailedScheduledForUserQuery({ userID, date });
+
+  if (isLoading || isError) {
+    return (
+      <View style={styles.home}>
+        <View style={styles.frameParent}>
+          <ContainerFrame />
+          <ActivityIndicator
+            style={styles.contentContainer}
+            color="#0000ff"
+            size="large"
+          />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.home}>
       <View style={styles.frameParent}>
         <ContainerFrame />
-
-        <Text style={[styles.myTask, styles.taskTypo]}>My Task</Text>
-
+        <Text style={[styles.myTask, styles.taskTypo]}>Task Details</Text>
         <View style={[styles.frame2, styles.frameLayout1]}>
           <View style={[styles.tasksForDayParent, styles.parentLayout]}>
             <Text style={styles.personal}>Tasks For Day</Text>
-            <Text style={[styles.text3, styles.textTypo]}>12</Text>
+            <Text style={[styles.text3, styles.textTypo]}>
+              {detailedScheduleList.counts.total}
+            </Text>
           </View>
-
           <View style={[styles.totalSheduledTimeParent, styles.parentLayout]}>
-            <Text style={styles.personal}>Total Sheduled Time</Text>
-            <Text style={[styles.text3, styles.textTypo]}>8h 15min</Text>
+            <Text style={styles.personal}>Total Scheduled</Text>
+            <Text style={[styles.text3, styles.textTypo]}>
+              {DateUtils.getDurationAsString(
+                detailedScheduleList.totalScheduled
+              )}
+            </Text>
           </View>
         </View>
-
         <View style={[styles.frame1, styles.frameLayout1]}>
           <View style={[styles.personalParent, styles.parentLayout1]}>
             <Text style={styles.personal}>Personal</Text>
-            <Text style={[styles.text, styles.textTypo]}>3</Text>
+            <Text style={[styles.text, styles.textTypo]}>
+              {detailedScheduleList.counts.HOME}
+            </Text>
           </View>
-
           <View style={[styles.workParent, styles.parentLayout1]}>
             <Text style={styles.personal}>Work</Text>
-            <Text style={[styles.text, styles.textTypo]}>7</Text>
+            <Text style={[styles.text, styles.textTypo]}>
+              {detailedScheduleList.counts.OFFICE}
+            </Text>
           </View>
-
           <View style={[styles.educationParent, styles.parentLayout1]}>
             <Text style={styles.personal}>Education</Text>
-            <Text style={[styles.text, styles.textTypo]}>2</Text>
+            <Text style={[styles.text, styles.textTypo]}>
+              {detailedScheduleList.counts.EDUCATION}
+            </Text>
           </View>
         </View>
-
         <View style={[styles.frame, styles.frameFlexBox]}>
-          <Text style={[styles.todayTask, styles.taskTypo]}>Today Task</Text>
-          <Button
-            style={styles.viewAll}
-            mode="text"
-            labelStyle={styles.viewAllBtn}
-          >
-            View all
-          </Button>
+          <Text style={[styles.todayTask, styles.taskTypo]}>Today's Task</Text>
         </View>
       </View>
-
       <ScrollView
         style={styles.frame3}
         horizontal={false}
@@ -103,20 +97,16 @@ const Home = () => {
         pagingEnabled={true}
         contentContainerStyle={styles.frameScrollViewContent}
       >
-        {isLoading || isError ? (
-          <ActivityIndicator
-            style={styles.contentContainer}
-            color="#0000ff"
-            size="large"
-          />
-        ) : scheduleList?.schedules[0]?.taskList.length > 0 ? (
-          scheduleList.schedules[0].taskList.map((schedule: TaskType) => (
-            <HomeScheduleBox
-              {...schedule}
-              tag={scheduleList.schedules[0].tag}
-              key={schedule.taskId}
-            />
-          ))
+        {detailedScheduleList?.schedules[0]?.taskList.length > 0 ? (
+          detailedScheduleList.schedules[0].taskList.map(
+            (schedule: TaskType) => (
+              <HomeScheduleBox
+                {...schedule}
+                tag={detailedScheduleList.schedules[0].tag}
+                key={schedule.taskId}
+              />
+            )
+          )
         ) : (
           <Text style={styles.noschedules}>No schedules for the day</Text>
         )}
@@ -174,7 +164,6 @@ const styles = StyleSheet.create({
     width: 98,
     borderRadius: Border.br_5xs,
     paddingHorizontal: Padding.p_xs,
-    height: 100,
   },
   textTypo: {
     fontFamily: Font["poppins-bold"],
@@ -187,7 +176,6 @@ const styles = StyleSheet.create({
     paddingVertical: Padding.p_base,
     paddingHorizontal: Padding.p_xs,
     borderRadius: Border.br_5xs,
-    height: 100,
   },
   wrapperLayout: {
     paddingVertical: Padding.p_11xs,
@@ -210,9 +198,7 @@ const styles = StyleSheet.create({
     backgroundColor: Color.ghostwhite,
     borderRadius: Border.br_mini,
   },
-  todayTask: {
-    width: 140,
-  },
+  todayTask: {},
   viewAll: {
     marginLeft: 119,
   },
@@ -265,7 +251,6 @@ const styles = StyleSheet.create({
   },
   myTask: {
     top: 95,
-    width: 100,
     left: 0,
     position: "absolute",
     color: Color.midnightblue,

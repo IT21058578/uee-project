@@ -3,34 +3,15 @@ import { Text, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import Font from "../constants/Font";
 import { FontSize, Color, Border } from "../Styles/GlobalStyles";
-import { getItem } from "../utils/Genarals";
-import RoutePaths from "../utils/RoutePaths";
-import { useState } from "react";
-import { useEffect } from "react";
+import { useAppSelector } from "../hooks/redux-hooks";
 
 const ContainerFrame = () => {
-  const [user, setUser] = useState<{ firstName: string } | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = await getItem(RoutePaths.token);
-      if (token) {
-        const userData = await getItem("user");
-        if (userData) {
-          const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
-        }
-      }
-    };
-
-    fetchData();
-  }, []);
-
+  const user = useAppSelector((state) => state.user);
   const userName = user?.firstName;
 
   return (
-    <View style={[styles.frame, styles.frameLayout]}>
-      <View style={[styles.frame1, styles.frameLayout]}>
+    <View style={styles.topRow}>
+      <View>
         <Text style={styles.hiTharindu}>Hi, {userName}</Text>
         <Text style={styles.letsMakeThis}>Let’s make this day productive</Text>
       </View>
@@ -46,6 +27,13 @@ const ContainerFrame = () => {
 };
 
 const styles = StyleSheet.create({
+  topRow: {
+    marginTop: 20,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
   frameLayout: {
     height: 56,
     overflow: "hidden",
@@ -67,7 +55,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   frame1: {
-    width: 182,
     overflow: "hidden",
   },
   personedSkinTonewhitePo: {
@@ -85,10 +72,7 @@ const styles = StyleSheet.create({
     shadowRadius: 13,
     elevation: 13,
     shadowOpacity: 1,
-    width: 39,
-    height: 39,
     alignItems: "center",
-    marginLeft: 106,
     overflow: "hidden",
   },
   frame: {

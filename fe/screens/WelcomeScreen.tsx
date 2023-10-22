@@ -55,7 +55,8 @@ const WelcomeScreen: React.FC<Props> = ({ navigation: { navigate } }) => {
               marginTop: Spacing * 2,
             }}
           >
-            "Collaborate seamlessly, boost productivity, stay synced - the perfect shared schedule management tool"
+            "Collaborate seamlessly, boost productivity, stay synced - the
+            perfect shared schedule management tool"
           </Text>
         </View>
         <View

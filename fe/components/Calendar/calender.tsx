@@ -12,7 +12,7 @@ import DateComponent from "./Date";
 
 interface CalendarProps {
   onSelectDate: (date: Moment) => void;
-  initialDate: Moment | null;
+  initialDate?: Moment | null;
   selected: Moment | null;
 }
 
