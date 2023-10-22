@@ -6,6 +6,7 @@ import {
   Text,
   ScrollView,
   Pressable,
+  ActivityIndicator,
 } from "react-native";
 import { NativeBaseProvider, Input, TextArea } from "native-base";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -18,7 +19,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { Tasks } from "../types";
 import { useUpdatetaskMutation } from "../Redux/API/tasks.api.slice";
-import { useGetAllUsersQuery } from "../Redux/API/users.api.slice";
+import {
+  useGetAllUsersInRoomQuery,
+  useGetAllUsersQuery,
+} from "../Redux/API/users.api.slice";
 import { useRoute } from "@react-navigation/native";
 import { useGettaskQuery } from "../Redux/API/tasks.api.slice";
 import dayjs from "dayjs";
@@ -31,12 +35,16 @@ dayjs.extend(duration);
 
 const EditTask = ({ route }: { route: any }) => {
   const taskId = route?.params?.taskId;
-
-  const { data: task, isFetching: isTaskFetching } = useGettaskQuery(taskId);
-  const [updateTask, updateResult] = useUpdatetaskMutation();
-  const { data: userData } = useGetAllUsersQuery("api/users");
-
   const navigation = useNavigation();
+  const { data: task, isFetching: isTaskFetching } = useGettaskQuery(taskId, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+  });
+  const { data: userData } = useGetAllUsersInRoomQuery(task?.roomId ?? "", {
+    refetchOnMountOrArgChange: true,
+  });
+  const [updateTask, { isLoading: isUpdateTaskLoading }] =
+    useUpdatetaskMutation();
 
   /** In case initial date is before today. */
   const [initialDate, setInitialDate] = useState<Moment>(moment());
@@ -44,10 +52,24 @@ const EditTask = ({ route }: { route: any }) => {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>(
     task?.assignedUserIds || []
   );
-
   const [name, setTitle] = useState(task?.name || "");
   const [description, setDescription] = useState(task?.description || "");
   const [priority, setPriority] = useState(task?.priority || "");
+  const [showPicker, setShowPicker] = useState<boolean>(false);
+  const [durationInMs, setDurationInMs] = useState<number>(
+    task?.duration || ""
+  );
+
+  useEffect(() => {
+    if (task) {
+      setTitle(task?.name);
+      setDescription(task?.description);
+      setPriority(task?.priority);
+      setSelectedDate(moment(new Date(task?.date)));
+      setInitialDate(moment(new Date(task?.date)));
+      setDurationInMs(task?.duration);
+    }
+  }, [task, isTaskFetching]);
 
   const handleBackNav = () => {
     navigation.goBack();
@@ -56,11 +78,6 @@ const EditTask = ({ route }: { route: any }) => {
   const handleDateSelect = (date: Moment) => {
     setSelectedDate(date);
   };
-
-  const [showPicker, setShowPicker] = useState<boolean>(false);
-  const [durationInMs, setDurationInMs] = useState<number>(
-    task?.duration || ""
-  );
 
   // Function to handle checkbox change
   const handleCheckboxChange = (userId: string) => {
@@ -78,13 +95,11 @@ const EditTask = ({ route }: { route: any }) => {
       minutes,
       seconds,
     });
-    const durationInMs = duration.asMilliseconds();
-    setDurationInMs(durationInMs);
     setShowPicker(false);
-    handleCreateTask();
+    handleCreateTask(duration.asMilliseconds());
   };
 
-  const handleCreateTask = async () => {
+  const handleCreateTask = async (durationInMs: number) => {
     try {
       const formData = {
         name: name,
@@ -93,14 +108,17 @@ const EditTask = ({ route }: { route: any }) => {
         date: selectedDate,
         priority: priority,
         assignedUserIds: selectedUserIds,
+        roomId: task.roomId,
       };
 
       console.log("Submitted task edit data : ", formData);
-      await updateTask({ taskId }).unwrap();
+      await updateTask({ taskId, formData }).unwrap();
       Toast.show({
         type: "success",
         text1: "Task edited successful.",
       });
+      console.log("Task edited successfully");
+      navigation.navigate("Tasks" as any);
     } catch (error) {
       console.error(error);
       Toast.show({
@@ -110,12 +128,26 @@ const EditTask = ({ route }: { route: any }) => {
     }
   };
 
-  // Transform and set selectedDate when task data comes through
-  useEffect(() => {
-    setSelectedDate(moment(new Date(task?.date)));
-    setInitialDate(moment(new Date(task?.date)));
-    setDurationInMs(task?.duration);
-  }, [task, isTaskFetching]);
+  if (isTaskFetching) {
+    return (
+      <View>
+        <View style={styles.container0}>
+          <View style={styles.box0}>
+            <Pressable style={styles.rectangle} onPress={handleBackNav}>
+              <Image
+                style={styles.backImg}
+                source={require("../assets/Arrow.png")}
+              />
+            </Pressable>
+            <Text style={styles.typo1}>Edit Task</Text>
+          </View>
+          <View>
+            <ActivityIndicator color="#0000ff" size="large" />
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View>
@@ -144,16 +176,14 @@ const EditTask = ({ route }: { route: any }) => {
             />
           </NativeBaseProvider>
         </View>
-        <View style={styles.box1}>
+        <View>
           <Text style={styles.typoBoddy}>Date</Text>
         </View>
-        <View style={styles.box2}>
-          <Calendar
-            onSelectDate={handleDateSelect}
-            selected={selectedDate}
-            initialDate={initialDate}
-          />
-        </View>
+        <Calendar
+          onSelectDate={handleDateSelect}
+          selected={selectedDate}
+          initialDate={initialDate}
+        />
         <View style={styles.box1}>
           <Text style={styles.typoBoddy}>Description</Text>
         </View>
@@ -161,6 +191,7 @@ const EditTask = ({ route }: { route: any }) => {
           <NativeBaseProvider>
             <TextArea
               h={20}
+              style={styles.descriptionInput}
               placeholder="Enter Description"
               w="100%"
               backgroundColor={Colors.colorGhostwhite}
@@ -204,12 +235,12 @@ const EditTask = ({ route }: { route: any }) => {
         <View style={styles.box1}>
           <NativeBaseProvider>
             <Button
+              isLoading={isUpdateTaskLoading}
               size="lg"
               backgroundColor={Colors.ppButtons}
               borderRadius={10}
               onPress={() => setShowPicker(true)}
             >
-              {" "}
               Schedule
             </Button>
           </NativeBaseProvider>
@@ -311,6 +342,9 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     padding: 10,
+  },
+  descriptionInput: {
+    fontSize: 14,
   },
 });
 

@@ -26,7 +26,7 @@ export class TasksController {
 
   @Get(':id')
   async getTask(@Param('id', ValidateObjectIdPipe) id: string) {
-    return this.tasksService.getTask(id);
+    return this.tasksService.getDetailedTask(id);
   }
 
   @Put('unassign')

@@ -15,7 +15,7 @@ export class LogGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    this.logger.log(`Request received to '${request.path}'`);
+    this.logger.log(`Request received to ${request.method} '${request.path}'`);
     return true;
   }
 }

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   forwardRef,
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
@@ -15,14 +16,19 @@ import { SchedulesService } from 'src/schedules/schedules.service';
 import dayjs, { duration } from 'dayjs';
 import { UsersService } from 'src/users/users.service';
 import { MongooseUtil } from 'src/common/util/mongoose.util';
+import { RoomsService } from 'src/rooms/rooms.service';
+import { DetailedTaskDto } from './detailed-task.dto';
 
 @Injectable()
 export class TasksService {
+  private readonly logger = new Logger(TasksService.name);
+
   constructor(
     @Inject(REQUEST) private readonly req: Request,
     @Inject(forwardRef(() => SchedulesService))
     private readonly schedulesService: SchedulesService,
     private readonly usersService: UsersService,
+    private readonly roomsService: RoomsService,
     @InjectModel(Task.name) private readonly taskModel: TaskModel,
   ) {
     dayjs.extend(duration);
@@ -39,11 +45,30 @@ export class TasksService {
     return existingTask;
   }
 
+  async getDetailedTask(id: string) {
+    const existingTask = await this.getTask(id);
+    const existingRoom = await this.roomsService.getRoom(existingTask.roomId);
+    const detailedTask: DetailedTaskDto = {
+      _id: existingTask.id,
+      roomName: existingRoom.name,
+      roomTag: existingRoom.tag,
+      name: existingTask.name,
+      duration: existingTask.duration,
+      date: existingTask.date,
+      priority: existingTask.priority,
+      roomId: existingRoom.id,
+      assignedUserIds: existingTask.assignedUserIds,
+      createdBy: existingTask.createdBy,
+      createdAt: existingTask.createdAt,
+    };
+    return detailedTask;
+  }
+
   async editTask(id: string, editTaskDto: CreateTaskDto) {
     let { date, description, duration, name, priority, assignedUserIds } =
       editTaskDto;
-    name = name.trim();
-    description = description.trim();
+    name = name?.trim();
+    description = description?.trim();
 
     const existingTask = await this.getTask(id);
     const tasksWithSimilarNames = await this.taskModel.find({
@@ -55,8 +80,12 @@ export class TasksService {
     }
 
     const allAffectedUserIds = new Set<string>();
-    assignedUserIds.forEach(allAffectedUserIds.add);
-    existingTask.assignedUserIds.forEach(allAffectedUserIds.add);
+    assignedUserIds.forEach((userId) => {
+      allAffectedUserIds.add(userId);
+    });
+    existingTask.assignedUserIds.forEach((userId) => {
+      allAffectedUserIds.add(userId);
+    });
 
     existingTask.date = date ?? existingTask.date;
     existingTask.description = description;

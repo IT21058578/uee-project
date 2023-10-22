@@ -19,8 +19,8 @@ export const taskApiSlice = createApi({
 
   endpoints: (builder) => ({
     getAlltasks: builder.query({
-      query: () =>  ({
-        url:"/tasks/search",
+      query: () => ({
+        url: "/tasks/search",
         method: "POST",
         invalidatesTags: ["tasks"],
       }),
@@ -56,7 +56,6 @@ export const taskApiSlice = createApi({
       }),
       invalidatesTags: ["tasks"],
     }),
-      
   }),
 });
 

@@ -9,8 +9,8 @@ export const roomApiSlice = createApi({
   reducerPath: "api/rooms",
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
-  async prepareHeaders(headers) {
-    const token = await getItem(RoutePaths.token);
+    async prepareHeaders(headers) {
+      const token = await getItem(RoutePaths.token);
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -24,12 +24,10 @@ export const roomApiSlice = createApi({
       query: (userID) => `/rooms/users/${userID}`,
       providesTags: ["rooms"],
     }),
-
     getroom: builder.query({
       query: (roomId: string) => `/rooms/${roomId}`,
       providesTags: ["rooms"],
     }),
-
     createroom: builder.mutation({
       query: ({ formData }) => ({
         url: "/rooms",
@@ -38,7 +36,6 @@ export const roomApiSlice = createApi({
       }),
       invalidatesTags: ["rooms"],
     }),
-
     updateroom: builder.mutation({
       query: ({ roomId, formData }) => ({
         url: `/rooms/${roomId}`,
@@ -47,7 +44,6 @@ export const roomApiSlice = createApi({
       }),
       invalidatesTags: ["rooms"],
     }),
-
     deleteroom: builder.mutation({
       query: (id: String) => ({
         url: `/rooms/${id}`,
@@ -55,7 +51,6 @@ export const roomApiSlice = createApi({
       }),
       invalidatesTags: ["rooms"],
     }),
-      
   }),
 });
 

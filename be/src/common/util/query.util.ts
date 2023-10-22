@@ -55,7 +55,7 @@ export class QueryUtil {
   };
 
   private static buildInQuery = (field: string, value: any) => {
-    if (!isUndefined(value)) {
+    if (isUndefined(value)) {
       return null;
     }
 
@@ -67,7 +67,7 @@ export class QueryUtil {
   };
 
   private static buildNotInQuery = (field: string, value: any) => {
-    if (!isUndefined(value)) {
+    if (isUndefined(value)) {
       return null;
     }
 
@@ -79,7 +79,7 @@ export class QueryUtil {
   };
 
   private static buildEqualsQuery = (field: string, value: any) => {
-    if (!isUndefined(value)) {
+    if (isUndefined(value)) {
       return null;
     }
 
@@ -87,7 +87,7 @@ export class QueryUtil {
   };
 
   private static buildNotEqualsQuery = (field: string, value: any) => {
-    if (!isUndefined(value)) {
+    if (isUndefined(value)) {
       return null;
     }
 
@@ -95,7 +95,7 @@ export class QueryUtil {
   };
 
   private static buildGreaterThanQuery = (field: string, value: any) => {
-    if (!isUndefined(value)) {
+    if (isUndefined(value)) {
       return null;
     }
 
@@ -103,7 +103,7 @@ export class QueryUtil {
   };
 
   private static buildLessThanQuery = (field: string, value: any) => {
-    if (!isUndefined(value)) {
+    if (isUndefined(value)) {
       return null;
     }
 
@@ -111,7 +111,7 @@ export class QueryUtil {
   };
 
   private static buildLikeQuery = (field: string, value: any) => {
-    if (!isUndefined(value)) {
+    if (isUndefined(value)) {
       return null;
     }
 

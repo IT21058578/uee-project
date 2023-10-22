@@ -23,14 +23,13 @@ import Colors from "../../constants/Colors";
 import { Tasks } from "../../types";
 import { useDeletetaskMutation } from "../../Redux/API/tasks.api.slice";
 import { useGettaskQuery } from "../../Redux/API/tasks.api.slice";
+import moment, { duration } from "moment";
+import { DateUtils } from "../../utils/DateUtils";
 
-const EditableScheduleBox = (props: Tasks) => {
+const EditableScheduleBox = (props: any) => {
   const [isPopoverVisible, setPopoverVisible] = useState(false);
-
   const navigation = useNavigation<any>();
-
   const [modalVisible2, setModalVisible2] = useState(false);
-
   const [deleteTask, deletedResult] = useDeletetaskMutation();
 
   const taskId = props?._id;
@@ -67,7 +66,9 @@ const EditableScheduleBox = (props: Tasks) => {
           <View style={styles.frameChild} />
           <View style={styles.projectProgressMeetingParent}>
             <Text style={styles.projectProgressMeeting}>{props.name}</Text>
-            <Text style={styles.text4}>{"Durationg goes here"}</Text>
+            <Text style={styles.text4}>
+              {DateUtils.getDurationAsString(props?.duration)}
+            </Text>
           </View>
         </View>
       </Pressable>
@@ -101,7 +102,7 @@ const EditableScheduleBox = (props: Tasks) => {
                 <Text style={styles.typoTitle1}>Delete Task</Text>
                 <View style={styles.box1}>
                   <Text style={styles.typoBoddy}>
-                    Are you sure to delete this Task ?
+                    Are you sure you want to delete this Task ?
                   </Text>
                 </View>
                 <View style={styles.box1}>
@@ -115,14 +116,13 @@ const EditableScheduleBox = (props: Tasks) => {
                         colorScheme="fuchsia"
                         onPress={handleCancle}
                       >
-                        Cancle
+                        Canel
                       </Button>
                       <Button
                         colorScheme="fuchsia"
                         onPress={() => handleDeletePermission(props._id)}
                       >
-                        {" "}
-                        Sure{" "}
+                        Sure
                       </Button>
                     </View>
                   </NativeBaseProvider>
@@ -147,7 +147,7 @@ const EditableScheduleBox = (props: Tasks) => {
 
       <View style={[styles.altriumRoom01Wrapper, styles.wrapperLayout]}>
         <Text style={[styles.altriumRoom01, styles.altriumRoom01Typo]}>
-          {props.roomId}
+          {props.roomName}
         </Text>
       </View>
     </View>

@@ -3,7 +3,7 @@ import dayjs, { Dayjs } from 'dayjs';
 
 declare global {
   namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList {}
+    interface RootParamList extends RootStackParamList { }
   }
 }
 
@@ -16,9 +16,9 @@ export type RootStackParamList = {
   BottomTab: undefined;
   CTasks: undefined;
   PersonalRoomSchedule: undefined;
-  AdminRoomDetail:undefined;
-  RoomManagmentProfileSetti:undefined;
-  Settings:undefined;
+  AdminRoomDetail: undefined;
+  RoomManagmentProfileSetti: undefined;
+  Settings: undefined;
   EditTask: undefined;
   AdminRoom: undefined;
   EditRoom: undefined;
@@ -47,41 +47,41 @@ export type RootStackScreenProps<Screen extends keyof RootStackParamList> =
 
 
 
-  //Bottom nav types 
+//Bottom nav types 
 
-  export enum TabElementDisplayOptions {
-    ICON_ONLY = "icon-only",
-    LABEL_ONLY = 'label-only',
-    BOTH = 'both'
+export enum TabElementDisplayOptions {
+  ICON_ONLY = "icon-only",
+  LABEL_ONLY = 'label-only',
+  BOTH = 'both'
 }
 
 export enum DotSize {
-    SMALL = 'small',
-    MEDIUM = 'medium',
-    LARGE = 'large',
-    DEFAULT = 'default' // not in docs
+  SMALL = 'small',
+  MEDIUM = 'medium',
+  LARGE = 'large',
+  DEFAULT = 'default' // not in docs
 }
 
 export enum TabButtonLayout {
-    VERTICAL = 'vertical',
-    HORIZONTAL = 'horizontal'
+  VERTICAL = 'vertical',
+  HORIZONTAL = 'horizontal'
 }
 
 
 export interface IAppearanceOptions {
-    topPadding: number;
-    bottomPadding: number;
-    horizontalPadding: number;
-    tabBarBackground: string;
-    activeTabBackgrounds?: string | string[];
-    activeColors?: string | string[];
-    floating: boolean;
-    dotCornerRadius: number;
-    whenActiveShow: TabElementDisplayOptions;
-    whenInactiveShow: TabElementDisplayOptions;
-    dotSize: DotSize;
-    shadow: boolean;
-    tabButtonLayout: TabButtonLayout
+  topPadding: number;
+  bottomPadding: number;
+  horizontalPadding: number;
+  tabBarBackground: string;
+  activeTabBackgrounds?: string | string[];
+  activeColors?: string | string[];
+  floating: boolean;
+  dotCornerRadius: number;
+  whenActiveShow: TabElementDisplayOptions;
+  whenInactiveShow: TabElementDisplayOptions;
+  dotSize: DotSize;
+  shadow: boolean;
+  tabButtonLayout: TabButtonLayout
 }
 
 //Soft Tab Two
@@ -152,7 +152,7 @@ export interface TaskType {
 }
 
 export interface Schedule {
-  _id:string;
+  _id: string;
   userId: string;
   date: Date;
   schedules: PopulatedScheduleDto[];
@@ -174,20 +174,22 @@ enum TaskPriority {
 }
 
 export interface Tasks {
-  _id:string;
+  _id: string;
   name: string;
   description: string;
-  duration: Dayjs;
+  duration: number;
   date: Date;
   priority: TaskPriority;
   roomId: string;
   assignedUserIds: string[];
+  roomName: string;
+  roomTag: string;
 }
 
 //rooms 
 
 export interface IRoom {
-  _id:string;
+  _id: string;
   name: string;
   description: string;
   organization: string;
