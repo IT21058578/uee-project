@@ -1,383 +1,351 @@
 import * as React from "react";
-import { View, Pressable, Image, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import Font from "../../constants/Font";
 import Colors from "../../constants/Colors";
 import FontSize from "../../constants/FontSize";
-import { LinearGradient } from "expo-linear-gradient";
-import { NativeBaseProvider, Button } from "native-base"
-import { Ionicons } from '@expo/vector-icons';
+import { NativeBaseProvider, Button, Row, Column, Modal } from "native-base";
 import { useState } from "react";
-import { Modal } from 'react-native';
-import { Input } from "native-base";
-import { useToast } from "native-base";
-import { useNavigation } from "@react-navigation/native";
+import ConfirmationModal from "../../components/ConfirmationModal";
+import {
+  useGetAllUsersInRoomQuery,
+  useUnassignUserFromRoomMutation,
+} from "../../Redux/API/users.api.slice";
+import { useAppSelector } from "../../hooks/redux-hooks";
+import InviteMemberModal from "../../components/InviteMemberModal";
+import LoadingIndictator from "../../components/LoadingIndictator";
+import { useAssignRoomAdminMutation } from "../../Redux/API/rooms.api.slice";
 
 const AdminUserManage = () => {
+  const roomId = useAppSelector((state) => state.user.roomId);
+  const adminIds = useAppSelector((state) => state.room?.adminIds);
+  const userId = useAppSelector((state) => state.user._id);
+  const [isUnassignUserModalOpen, setIsUnassignUserModalOpen] = useState(false);
+  const [isMakeAdminModalOpen, setIsMakeAdminModalOpen] = useState(false);
+  const [isInviteUserModalOpen, setIsInviteUserModalOpen] = useState(false);
+  const [isUnassignAdminModalOpen, setIsUnassignAdminModalOpen] =
+    useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string>();
+  const {
+    data: { content: usersList } = {},
+    refetch: refetchUsersList,
+    isFetching: isUsersListFetching,
+  } = useGetAllUsersInRoomQuery(roomId);
+  const [unassignUser] = useUnassignUserFromRoomMutation();
+  const [unassignAdmin] = useAssignRoomAdminMutation();
+  const [assignAdmin] = useAssignRoomAdminMutation();
 
-    const [modalVisible1, setModalVisible1] = useState(false);
-    const [modalVisible2, setModalVisible2] = useState(false);
+  const handleUnassignUserModalConfirm = async () => {
+    try {
+      console.log(selectedUserId);
+      await unassignUser(selectedUserId).unwrap();
+      setIsUnassignUserModalOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    const toast = useToast();
+  const handleMakeAdminModalConfirm = async () => {
+    try {
+      console.log(selectedUserId);
+      await assignAdmin({ userId: selectedUserId, roomId }).unwrap();
+      setIsMakeAdminModalOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    const sendEmail = () => {
+  const handleUnassignAdminModalConfirm = async () => {
+    try {
+      console.log(selectedUserId);
+      await unassignAdmin({ userId: selectedUserId, roomId }).unwrap();
+      setIsUnassignAdminModalOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-        
-
-        const emailSentSuccessfully = true; 
-      
-        if (emailSentSuccessfully) {
-          // Show a toast notification for successful email sending.
-          toast.show({
-            title: 'Email sent successfully!',
-            placement: 'bottom',
-            variant: 'success', // Use 'success' variant for success
-          });
-        } else {
-          // Handle the error case here, if needed.
-          // You can show an error toast or perform any other error handling.
-          toast.show({
-            title: 'Email sending failed!',
-            placement: 'bottom',
-            variant: 'danger', // Use 'danger' variant for errors
-          });
-        }
-      };
-
-    return (
-        <View>
-            <View style={styles.box0}>
-                <Text style={styles.typo1}>Room Member Managment</Text>
-            </View>
-            <ScrollView contentContainerStyle={styles.container}>
-                <View style={styles.box2}>
-                    <LinearGradient
-                        style={styles.box11}
-                        locations={[0, 1]}
-                        colors={["#fe9d9d", "#e77d7d"]}
-                    >
-                        <Text style={[styles.typoBoddy, { color: Colors.colorGray_100, fontFamily: Font['poppins-bold'] }]}>Created Date</Text>
-                        <Text style={[styles.typoBoddy, { color: "#FFFFFF" }]}>14 August 2023</Text>
-                    </LinearGradient>
-                    <LinearGradient
-                        style={styles.box11}
-                        locations={[0, 1]}
-                        colors={["#fe9d9d", "#e77d7d"]}
-                    >
-                        <Text style={[styles.typoBoddy, { color: Colors.colorGray_100, fontFamily: Font['poppins-bold'] }]}>Created Time</Text>
-                        <Text style={[styles.typoBoddy, { color: "#FFFFFF" }]}>07:00 - 07:15 AM</Text>
-                    </LinearGradient>
-                </View>
-                <View style={[styles.box2, { paddingBottom: 20 }]}>
-                    <Text style={[styles.typoBoddy, { color: Colors.darkText, fontFamily: Font['poppins-bold'], fontSize: FontSize.large, paddingVertical: 10 }]}>Room</Text>
-                    <View style={[styles.button, { justifyContent: 'flex-end', alignItems: 'flex-end' }]}>
-                    <NativeBaseProvider>
-                        {/* Model To add a new member */}
-                            <Modal
-                            animationType="slide"
-                            transparent={true}
-                            visible={modalVisible1}
-                            onRequestClose={() => {
-                                setModalVisible1(!modalVisible1);
+  return (
+    <>
+      <View>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Button onPress={() => setIsInviteUserModalOpen(true)}>
+            Add Member +
+          </Button>
+          <View style={styles.box3}>
+            {isUsersListFetching ? (
+              <LoadingIndictator />
+            ) : (
+              usersList?.map((user: any) => (
+                <Row
+                  justifyContent={"space-between"}
+                  alignItems={"center"}
+                  marginX={2}
+                  height={10}
+                >
+                  <Column>
+                    <Text>{`${user.firstName}`}</Text>
+                  </Column>
+                  {userId !== user._id && (
+                    <Column>
+                      <Row space={2}>
+                        {adminIds?.includes(user._id) ? (
+                          <Button
+                            onPress={() => {
+                              setSelectedUserId(user._id);
+                              setIsUnassignAdminModalOpen(true);
                             }}
-                            >
-                            <View style={styles.modalBackground}>
-                                <View style={styles.centeredView}>
-                                <View style={styles.simpleModalView}>
-                                    <Text style={styles.typoTitle1}>Add Member</Text>
-                                    <Input placeholder="Enter Email Address" />
+                          >
+                            Remove Admin
+                          </Button>
+                        ) : (
+                          <Button
+                            onPress={() => {
+                              setSelectedUserId(user._id);
+                              setIsMakeAdminModalOpen(true);
+                            }}
+                          >
+                            Make Admin
+                          </Button>
+                        )}
 
-                                    <View style={styles.buttonContainer}>
-                                    <Button
-                                        style={styles.cancelButton}
-                                        variant="outline"
-                                        colorScheme="fuchsia"
-                                        onPress={() => setModalVisible1(!modalVisible1)}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button colorScheme="fuchsia" onPress={sendEmail}>
-                                        Add
-                                    </Button>
-                                    </View>
-                                </View>
-                                </View>
-                            </View>
-                            </Modal>
-                            <Button leftIcon={<Ionicons name="add-outline" size={24} color="white" />} size={'sm'} width={125} backgroundColor={'#858FE9'} onPress={() => setModalVisible1(true)} >
-                                New Member
-                            </Button>
-                        </NativeBaseProvider>
-                    </View>
-                </View>
-                <View style={styles.box1}>
-                    <Text style={styles.typoBoddy}>Assign Members</Text>
-                </View>
-                <View style={styles.box3}>
-                    <View style={styles.box1}>
-                        <View style={styles.box4}>
-                            <Text style={styles.typoBoddy1}>Disira</Text>
-                            <View style={styles.CheckboxSpace1}>
-                                <Text style={styles.text}>Make Admin</Text>
-                            </View>
-                            <NativeBaseProvider>
-                                <Modal
-                                animationType="slide"
-                                transparent={true}
-                                visible={modalVisible2}
-                                onRequestClose={() => {
-                                    setModalVisible2(!modalVisible2);
-                                }}
-                                >
-                                <View style={styles.modalBackground}>
-                                    <View style={styles.centeredView}>
-                                    <View style={styles.simpleModalView}>
-                                        <Text style={styles.typoTitle1}>Delete Member</Text>
-                                            <View style={styles.box1}>
-                                                <Text style={styles.typoBoddy}>Are you sure to remove this user ?</Text>
-                                            </View>
-                                        <View style={styles.buttonContainer}>
-                                        <Button
-                                            style={styles.cancelButton}
-                                            variant="outline"
-                                            colorScheme="fuchsia"
-                                            onPress={() => setModalVisible2(!modalVisible2)}
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button colorScheme="fuchsia">
-                                            Sure
-                                        </Button>
-                                        </View>
-                                    </View>
-                                    </View>
-                                </View>
-                                </Modal>
-                            </NativeBaseProvider>
-                            <Pressable style={[styles.CheckboxSpace1, { backgroundColor: '#FF5959' }]} onPress={() => setModalVisible2(true)}>
-                                <Text style={styles.text}>Remove</Text>
-                            </Pressable>
-                        </View>
-                        <Image source={require('../../assets/Line_19.png')} />
-                    </View>
-
-                    {/* These are components that for demo display */}
-                    <View style={styles.box1}>
-                        <View style={styles.box4}>
-                            <Text style={styles.typoBoddy1}>Sansika</Text>
-                            <View style={styles.CheckboxSpace1}>
-                                <Text style={styles.text}>Make Admin</Text>
-                            </View>
-                            <View style={[styles.CheckboxSpace1, { backgroundColor: '#FF5959' }]}>
-                                <Text style={styles.text}>Remove</Text>
-                            </View>
-                        </View>
-                        <Image source={require('../../assets/Line_19.png')} />
-                    </View>
-                    <View style={styles.box1}>
-                        <View style={styles.box4}>
-                            <Text style={styles.typoBoddy1}>Tharindu</Text>
-                            <View style={[styles.CheckboxSpace1, { backgroundColor: '#E88B8C' }]}>
-                                <Text style={styles.text}>Undo Admin</Text>
-                            </View>
-                            <View style={[styles.CheckboxSpace1, { backgroundColor: '#FF5959' }]}>
-                                <Text style={styles.text}>Remove</Text>
-                            </View>
-                        </View>
-                        <Image source={require('../../assets/Line_19.png')} />
-                    </View>
-                </View>
-            </ScrollView>
-        </View>
-    )
-}
+                        <Button
+                          onPress={() => {
+                            setSelectedUserId(user._id);
+                            setIsUnassignUserModalOpen(true);
+                          }}
+                        >
+                          Remove
+                        </Button>
+                      </Row>
+                    </Column>
+                  )}
+                </Row>
+              ))
+            )}
+          </View>
+        </ScrollView>
+      </View>
+      <ConfirmationModal
+        isOpen={isUnassignUserModalOpen}
+        title={"Are you sure?"}
+        onCancel={() => setIsUnassignUserModalOpen(false)}
+        onConfirm={handleUnassignUserModalConfirm}
+      >
+        Are you sure you want to remove this user? They will no longer be able
+        to access this room or its tasks.
+      </ConfirmationModal>
+      <ConfirmationModal
+        isOpen={isMakeAdminModalOpen}
+        title={"Are you sure?"}
+        onCancel={() => setIsMakeAdminModalOpen(false)}
+        onConfirm={handleMakeAdminModalConfirm}
+      >
+        Are you sure you want to make this user an admin? They will gain the
+        ability to add or edit tasks and users.
+      </ConfirmationModal>
+      <ConfirmationModal
+        isOpen={isUnassignAdminModalOpen}
+        title={"Are you sure?"}
+        onCancel={() => setIsUnassignAdminModalOpen}
+        onConfirm={handleUnassignAdminModalConfirm}
+      >
+        Are you sure you want remove this user as an admin? The changes already
+        made by them will persist, but they will no loner be able to add or
+        modify users and tasks
+      </ConfirmationModal>
+      <InviteMemberModal
+        roomId={roomId}
+        isOpen={isInviteUserModalOpen}
+        onCancel={() => setIsInviteUserModalOpen(false)}
+        onConfirm={refetchUsersList}
+      />
+    </>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flexGrow: 1,
-        paddingVertical: 20,
-        paddingHorizontal: 20,
-        paddingBottom: 150,
+  container: {
+    flexGrow: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 150,
+    gap: 15,
+  },
+  container0: {
+    flexGrow: 1,
+    paddingTop: 60,
+    paddingHorizontal: 20,
+  },
+  tabButton: {
+    backgroundColor: Colors.colorLavender,
+    borderRadius: 20,
+    padding: 8,
+    marginRight: 5,
+  },
+  button: {
+    marginLeft: 150,
+  },
+  box0: {
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  box1: {
+    marginBottom: 20,
+  },
+  box11: {
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    marginRight: 12,
+    paddingVertical: 20,
+    marginBottom: 20,
+  },
+  box12: {
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    marginBottom: 20,
+  },
+  box2: {
+    flexDirection: "row",
+    marginBottom: 0,
+  },
+  rectangle1: {},
+  box3: {
+    backgroundColor: Colors.colorGhostwhite,
+    borderRadius: 10,
+    shadowColor: Colors.darkText,
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    container0: {
-        flexGrow: 1,
-        paddingTop: 60,
-        paddingHorizontal: 20,
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+    elevation: 2,
+    padding: 10,
+    marginBottom: 50,
+  },
+  typo1: {
+    color: Colors.darkblue,
+    fontFamily: Font["poppins-semiBold"],
+    fontSize: FontSize.large,
+  },
+  typoBoddy: {
+    color: Colors.darkblue,
+    fontFamily: Font["poppins-regular"],
+    fontSize: FontSize.medium,
+  },
+  tabtypoBoddy: {
+    fontFamily: Font["poppins-regular"],
+    fontSize: FontSize.medium,
+  },
+  typoTitle: {
+    color: Colors.darkblue,
+    fontFamily: Font["poppins-bold"],
+    fontSize: FontSize.medium,
+  },
+  typoTitle1: {
+    color: Colors.darkblue,
+    fontFamily: Font["poppins-semiBold"],
+    fontSize: FontSize.large,
+  },
+  rectangle: {
+    width: 40,
+    height: 40,
+    backgroundColor: Colors.colorWhite,
+    borderRadius: 10,
+    shadowColor: Colors.darkText,
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    tabButton: {
-        backgroundColor: Colors.colorLavender,
-        borderRadius: 20,
-        padding: 8,
-        marginRight: 5,
-    },
-    button: {
-        marginLeft: 150,
-    },
-    box0: {
-        paddingTop: 20,
-        paddingHorizontal: 20,
-        marginBottom: 10,
-    },
-    box1: {
-        marginBottom: 20,
-    },
-    box11: {
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        marginRight: 12,
-        paddingVertical: 20,
-        marginBottom: 20,
-    },
-    box12: {
-        borderRadius: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 20,
-        marginBottom: 20,
-    },
-    box2: {
-        flexDirection: 'row',
-        marginBottom: 0,
-    },
-    rectangle1: {
+    shadowOpacity: 0.5,
+    shadowRadius: 2,
+    elevation: 2,
+    alignItems: "center",
+    verticalAlign: "middle",
+  },
+  backImg: {
+    marginTop: 8,
+  },
+  box4: {
+    flex: 1,
+    flexDirection: "row",
+    padding: 10,
+    alignItems: "center",
+  },
+  CheckboxSpace1: {
+    flex: 1,
+    alignItems: "center", // Align text to the center both vertically and horizontally
+    backgroundColor: "#4CD97B",
+    borderRadius: 10,
+    marginLeft: 5,
+    paddingVertical: 10,
+  },
+  text: {
+    color: Colors.colorWhite,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
+  // Model Styles
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
     },
-    box3: {
-        backgroundColor: Colors.colorGhostwhite,
-        borderRadius: 10,
-        shadowColor: Colors.darkText,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.5,
-        shadowRadius: 2,
-        elevation: 2,
-        padding: 10,
-        marginBottom: 50,
-    },
-    typo1: {
-        color: Colors.darkblue,
-        fontFamily: Font['poppins-semiBold'],
-        fontSize: FontSize.large,
-    },
-    typoBoddy: {
-        color: Colors.darkblue,
-        fontFamily: Font['poppins-regular'],
-        fontSize: FontSize.medium,
-    },
-    tabtypoBoddy: {
-        fontFamily: Font['poppins-regular'],
-        fontSize: FontSize.medium,
-    },
-    typoTitle: {
-        color: Colors.darkblue,
-        fontFamily: Font['poppins-bold'],
-        fontSize: FontSize.medium,
-    },
-    typoTitle1: {
-        color: Colors.darkblue,
-        fontFamily: Font['poppins-semiBold'],
-        fontSize: FontSize.large,
-    },
-    rectangle: {
-        width: 40,
-        height: 40,
-        backgroundColor: Colors.colorWhite,
-        borderRadius: 10,
-        shadowColor: Colors.darkText,
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.5,
-        shadowRadius: 2,
-        elevation: 2,
-        alignItems: "center",
-        verticalAlign: "middle"
-    },
-    backImg: {
-        marginTop: 8,
-    },
-    box4: {
-        flex: 1,
-        flexDirection: 'row',
-        padding: 10,
-        alignItems: 'center',
-    },
-    typoBoddy1: {
-        flex: 1, // Make this text flex to push the other text to the right
-    },
-    CheckboxSpace1: {
-        flex: 1,
-        alignItems: 'center', // Align text to the center both vertically and horizontally
-        backgroundColor: '#4CD97B',
-        borderRadius: 10,
-        marginLeft: 5,
-        paddingVertical: 10,
-    },
-    text: {
-        color: Colors.colorWhite,
-    },
-    modalBackground: {
-        flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)', // Semi-transparent background
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+  },
 
-    // Model Styles
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 22,
-    },
-    modalView: {
-        margin: 20,
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: 'center',
-    },
+  buttonContainer: {
+    flexDirection: "row",
+    marginHorizontal: 20,
+    marginTop: 10,
+    justifyContent: "space-between",
+  },
 
-    buttonContainer: {
-        flexDirection: 'row',
-        marginHorizontal: 20,
-        marginTop: 10,
-        justifyContent: 'space-between',
-      },
+  simpleModalView: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
 
-      simpleModalView: {
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 20,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-      },
-    
-      // Styles for the cancel button
-      cancelButton: {
-        marginHorizontal: 10,
-        flex: 1, // Adjust flex value as needed
-      },
-})
+  // Styles for the cancel button
+  cancelButton: {
+    marginHorizontal: 10,
+    flex: 1, // Adjust flex value as needed
+  },
+});
 
 export default AdminUserManage;

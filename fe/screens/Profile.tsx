@@ -1,5 +1,12 @@
 import * as React from "react";
-import { Text, StyleSheet, View, Pressable , ScrollView ,TouchableWithoutFeedback} from "react-native";
+import {
+  Text,
+  StyleSheet,
+  View,
+  Pressable,
+  ScrollView,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { Image } from "expo-image";
 import Colors from "../constants/Colors";
 import Font from "../constants/Font";
@@ -10,124 +17,70 @@ import { RoomType } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
-import Popover from 'react-native-popover-view';
-import { Ionicons } from '@expo/vector-icons';
-import { AntDesign } from '@expo/vector-icons'; 
+import Popover from "react-native-popover-view";
+import { Ionicons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import NonAdminRoomBox from "../components/Rooms/NonAdminRoomBox";
 import { useGetAllroomsQuery } from "../Redux/API/rooms.api.slice";
 import { ActivityIndicator } from "react-native";
-import { getItem } from '../utils/Genarals'
-import RoutePaths from '../utils/RoutePaths';
-import { useEffect } from 'react';
+import { getItem } from "../utils/Genarals";
+import RoutePaths from "../utils/RoutePaths";
+import { useEffect } from "react";
 import { removeItem } from "../utils/Genarals";
 import { logoutCurrentUser } from "../Redux/slices/userSlice";
-import { useAppDispatch } from "../hooks/redux-hooks";
+import { useAppDispatch, useAppSelector } from "../hooks/redux-hooks";
+import { Button } from "native-base";
+import LoadingIndictator from "../components/LoadingIndictator";
 
 const AdminRoomComponent = () => {
-
-  const [user, setUser] = useState<{ _id: string } | null>(null);
+  const navigation = useNavigation();
+  const user = useAppSelector((state) => state.user);
+  const {
+    data: roomList,
+    isFetching: isRoomListFetching,
+    refetch: refetchRoomList,
+  } = useGetAllroomsQuery(user._id, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
 
   useEffect(() => {
-  const fetchData = async () => {
-    const token = await getItem(RoutePaths.token);
-    if (token) {
-      const userData = await getItem("user");
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-      }
-    }
+    const unsubscribe = navigation.addListener("focus", () => {
+      refetchRoomList();
+    });
+    return unsubscribe;
+  }, []);
+
+  const isRoomAdmin = (room: any) => {
+    return room.adminIds.includes(user._id);
   };
 
-  fetchData();
-}, []);
-
-const userID = user?._id;
-
-  const {
-    isLoading,
-    data: roomList,
-    isSuccess,
-    isError,
-  } = useGetAllroomsQuery(userID);
-
-    const roomPairs = [];
-    for (let i = 0; i < roomList?.length; i += 2) {
-      const room1 = roomList?.[i];
-      const room2 = i + 1 < roomList?.length ? roomList?.[i + 1] : null;
-      
-      roomPairs.push( 
-        <View key={i} style={{ flexDirection: 'row' }}>
-          <RoomBox {...room1} />
-          {room2 && <RoomBox {...room2} />}
-        </View>
-      );
-    }
-
-    if (isLoading || isError) {
-      return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;
-    }
-
-    return <View>{roomPairs}</View>;
-}
-
-const RoomComponent = () => {
-
-
-  const [user, setUser] = useState<{ _id: string } | null>(null);
-
-useEffect(() => {
-  const fetchData = async () => {
-    const token = await getItem(RoutePaths.token);
-    if (token) {
-      const userData = await getItem("user");
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-      }
-    }
-  };
-
-  fetchData();
-}, []);
-
-const userID = user?._id;
-
-  const {
-    isLoading,
-    data: roomList,
-    isSuccess,
-    isError,
-  } = useGetAllroomsQuery(userID);
-
-  const roomPairs = [];
-  for (let i = 0; i < roomList?.length; i += 2) {
-    const room1 = roomList?.[i];
-    const room2 = i + 1 < roomList?.length ? roomList?.[i + 1] : null;
-
-    roomPairs.push(
-      <View key={i} style={{ flexDirection: 'row' }}>
-        <NonAdminRoomBox {...room1} />
-        {room2 && <NonAdminRoomBox {...room2} />}
-      </View>
-    );
-  }
-
-  if (isLoading || isError) {
-    return <ActivityIndicator style={styles.contentContainer} color="#0000ff" size="large"/>;
-  }
-
-  return <View>{roomPairs}</View>;
-}
+  if (isRoomListFetching) return <LoadingIndictator />;
+  return (
+    <View
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        paddingLeft: 45,
+        columnGap: 10,
+      }}
+    >
+      {roomList?.map((room: any) => (
+        <RoomBox
+          {...room}
+          isActionsVisible={isRoomAdmin(room)}
+          onDelete={() => refetchRoomList()}
+        />
+      ))}
+    </View>
+  );
+};
 
 const RoomManagmentProfileSetti = () => {
-
-  const dispatch = useAppDispatch()
-
-  const [isPopoverVisible, setPopoverVisible] = useState(false);
-
+  const dispatch = useAppDispatch();
   const navigation = useNavigation();
-
+  const [isPopoverVisible, setPopoverVisible] = useState(false);
 
   const handleSettings = () => {
     navigation.navigate("Settings");
@@ -136,7 +89,7 @@ const RoomManagmentProfileSetti = () => {
 
   const handleLogout = () => {
     removeItem(RoutePaths.token);
-    removeItem('user');
+    removeItem("user");
     dispatch(logoutCurrentUser);
     navigation.navigate("Login");
     setPopoverVisible(false); // Close the popover
@@ -144,92 +97,93 @@ const RoomManagmentProfileSetti = () => {
 
   const handleNavigate = () => {
     // Navigate to the desired screen when the Pressable is pressed
-    navigation.navigate("CreateRoom"); 
+    navigation.navigate("CreateRoom");
   };
-
 
   return (
     <View style={styles.roomManagmentProfileSetti}>
       <ScrollView>
-      <View style={styles.Box}>
-      <Text style={[styles.tharinduGunasekara, styles.roomsManageByFlexBox]}>
-        Tharindu Gunasekara
-      </Text>
-      <Text style={[styles.tharindugmailcom, styles.roomsManageByFlexBox]}>
-        tharindu@gmail.com
-      </Text>
-      <View style={styles.groupParent}>
-        <View style={[styles.ellipseParent, styles.ellipseParentPosition]}>
-          <Image
-            style={styles.groupChild}
-            contentFit="cover"
-            source={require("../assets/Ellipse-236.png")}
-          />
-          <Image
-            style={[styles.icon, styles.iconLayout]}
-            contentFit="cover"
-            source={require("../assets/58-13.png")}
-          />
-        </View>
+        <View style={styles.Box}>
+          <Text
+            style={[styles.tharinduGunasekara, styles.roomsManageByFlexBox]}
+          >
+            Tharindu Gunasekara
+          </Text>
+          <Text style={[styles.tharindugmailcom, styles.roomsManageByFlexBox]}>
+            tharindu@gmail.com
+          </Text>
+          <View style={styles.groupParent}>
+            <View style={[styles.ellipseParent, styles.ellipseParentPosition]}>
+              <Image
+                style={styles.groupChild}
+                contentFit="cover"
+                source={require("../assets/Ellipse-236.png")}
+              />
+              <Image
+                style={[styles.icon, styles.iconLayout]}
+                contentFit="cover"
+                source={require("../assets/58-13.png")}
+              />
+            </View>
 
-        <Popover
-        isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
-        onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
-            from={(
-                  <View style={styles.groupWrapper}>
+            <Popover
+              isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
+              onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
+              from={
+                <View style={styles.groupWrapper}>
                   <View style={styles.groupPosition}>
-                  <TouchableWithoutFeedback  onPress={() => setPopoverVisible(!isPopoverVisible)}>
-                    <View style={[styles.groupItem, styles.groupPosition]}>
-                      <Image
-                        style={[styles.iconlycurvedmoreSquare, styles.iconLayout]}
-                        resizeMode="cover"
-                        source={require("../assets/More-Square.png")}
-                      />
-                    </View>
-                  </TouchableWithoutFeedback>
+                    <TouchableWithoutFeedback
+                      onPress={() => setPopoverVisible(!isPopoverVisible)}
+                    >
+                      <View style={[styles.groupItem, styles.groupPosition]}>
+                        <Image
+                          style={[
+                            styles.iconlycurvedmoreSquare,
+                            styles.iconLayout,
+                          ]}
+                          resizeMode="cover"
+                          source={require("../assets/More-Square.png")}
+                        />
+                      </View>
+                    </TouchableWithoutFeedback>
                   </View>
                 </View>
-            )}>
-                <View style={styles.menuContainer}>
-                    <TouchableOpacity onPress={handleSettings} style={styles.textRow}>
-                        <Text><AntDesign name="setting" size={14} color="black" />  Settings</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleLogout} style={styles.textRow}>
-                        <Text><Ionicons name="log-out-outline" size={14} color="black" onPress={handleLogout}/>  Log Out</Text>
-                    </TouchableOpacity>
-            </View>
-        </Popover>
-
-      </View>
-      <View style={styles.roomsManageByYouParent}>
-        <Text style={[styles.roomsManageBy, styles.ellipseParentPosition]}>
-          Rooms Manage By You
-        </Text>
-        <TouchableWithoutFeedback  onPress={handleNavigate}>
-          <View style={styles.groupContainer}>
-            <View style={styles.groupPosition}>
-              <View style={[styles.groupInner, styles.groupPosition]} />
-            </View>
-            <Text style={styles.createRoom}>Create Room</Text>
-            <Image
-              style={[styles.iconlycurvedhome, styles.iconLayout]}
-              contentFit="cover"
-              source={require("../assets/Home.png")}
-            />
+              }
+            >
+              <View style={styles.menuContainer}>
+                <TouchableOpacity
+                  onPress={handleSettings}
+                  style={styles.textRow}
+                >
+                  <Text>
+                    <AntDesign name="setting" size={14} color="black" />{" "}
+                    Settings
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleLogout} style={styles.textRow}>
+                  <Text>
+                    <Ionicons
+                      name="log-out-outline"
+                      size={14}
+                      color="black"
+                      onPress={handleLogout}
+                    />{" "}
+                    Log Out
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Popover>
           </View>
-        </TouchableWithoutFeedback>
-      </View>
-      </View>
-      <View style={styles.Box1}>
-        <AdminRoomComponent/>
-      </View>
-      <View style={styles.roomManagmentMember}>
-        <Text style={styles.roomsYouMember}>Rooms You Member Of</Text>
-      </View>
-      <View style={styles.Box1}>
-        <RoomComponent/>
-      </View>
-    </ScrollView>
+          <View style={styles.roomsManageByYouParent}>
+            <Button onPress={handleNavigate}>
+              <Text>Create Room +</Text>
+            </Button>
+          </View>
+        </View>
+        <View style={styles.Box1}>
+          <AdminRoomComponent />
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -240,7 +194,7 @@ const styles = StyleSheet.create({
     paddingRight: 70,
   },
   textRow: {
-    marginVertical:10,
+    marginVertical: 10,
   },
   menuContainer: {
     padding: 20,
@@ -250,10 +204,10 @@ const styles = StyleSheet.create({
   roomsYouMember: {
     position: "absolute",
     left: 30,
-    top:10,
+    top: 10,
     fontSize: 16,
     fontWeight: "600",
-    fontFamily: Font['poppins-semiBold'],
+    fontFamily: Font["poppins-semiBold"],
     color: "#10275a",
     textAlign: "left",
   },
@@ -265,13 +219,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   Box: {
-    width:"100%",
-    height:300
+    width: "100%",
+    height: 300,
   },
   Box1: {
     width: "100%",
     alignSelf: "stretch", // Ensures the container takes the full width
-    marginHorizontal:35
   },
   roomsManageByFlexBox: {
     textAlign: "left",
@@ -416,12 +369,12 @@ const styles = StyleSheet.create({
     top: 228,
     left: 35,
     width: 305,
-    height: 31,
+    height: 40,
     position: "absolute",
   },
   roomManagmentProfileSetti: {
     top: 10,
-    maxHeight:"85%",
+    maxHeight: "85%",
     backgroundColor: "#feffff",
     flex: 1,
     height: 812,

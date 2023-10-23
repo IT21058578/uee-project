@@ -31,6 +31,7 @@ const TopBarWithTabs: React.FC = () => {
   return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator style={styles.container}
+        
         tabBar={(props) => (
           <View style={styles.tabBar}>
             <CustomTabBarButton

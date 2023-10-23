@@ -10,6 +10,7 @@ import { useEffect } from "react";
 import { useAppSelector } from "../hooks/redux-hooks";
 import moment from "moment";
 import { Color } from "../Styles/GlobalStyles";
+import { DateUtils } from "../utils/DateUtils";
 
 interface ScheduleScreenProps {
   selectedDate?: Date;
@@ -76,9 +77,7 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
       return a + singleScheduleTotalDuration;
     }, 0);
     const durationMoment = moment.duration(durationInMs);
-    const hours = durationMoment.hours();
-    const minutes = durationMoment.minutes();
-    return `${hours} H ${minutes} M`;
+    return DateUtils.getDurationAsString(durationMoment.asMilliseconds());
   };
 
   if (isDetailedScheduleFetching || isError) {

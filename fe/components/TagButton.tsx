@@ -4,8 +4,8 @@ import Colors from "../constants/Colors";
 
 type Props = {
   isSelected?: boolean;
-  onClick: () => void;
-  children?: React.ReactNode;
+  onClick: (children: string) => void;
+  children?: string;
 };
 
 const TagButton = ({ isSelected, onClick, children }: Props) => {
@@ -17,7 +17,7 @@ const TagButton = ({ isSelected, onClick, children }: Props) => {
         borderRadius: 20,
         backgroundColor: isSelected ? Colors.lightPrimary : "transparent",
       }}
-      onPress={onClick}
+      onPress={() => onClick(children ?? "")}
     >
       {children}
     </Button>

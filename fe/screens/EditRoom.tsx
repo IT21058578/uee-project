@@ -13,17 +13,70 @@ import FontSize from "../constants/FontSize";
 import { useNavigation } from "@react-navigation/native";
 import { NativeBaseProvider, Input, TextArea } from "native-base";
 import { Button, Stack } from "native-base";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import TagButton from "../components/TagButton";
+import {
+  useGetroomQuery,
+  useUpdateroomMutation,
+} from "../Redux/API/rooms.api.slice";
+import LoadingIndictator from "../components/LoadingIndictator";
 
-const EditRoom = () => {
-  const navigate = useNavigation();
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const handleButtonClick = (category: any) => {
-    setSelectedCategory(category);
-  };
+const EditRoom = (props: any) => {
+  const navigation = props.navigation;
+  const roomId: string = props.route?.params?.roomId;
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [updateRoom, { isLoading: isUpdateRoomLoading }] =
+    useUpdateroomMutation();
+  const { data: roomData, isFetching: isRoomDataFetching } =
+    useGetroomQuery(roomId);
+
+  useEffect(() => {
+    if (roomData) {
+      setFormData({
+        name: roomData.name,
+        description: roomData.description,
+        organization: roomData.organization,
+        tag: roomData.tag,
+      });
+    }
+  }, [roomData, isRoomDataFetching]);
+
   const handleBackNav = () => {
-    navigate.goBack();
+    navigation.goBack();
   };
+
+  const handleEditRoomClick = async () => {
+    try {
+      console.log("Submitted Edited Room Data : ", roomId, formData);
+      await updateRoom({ roomId, formData }).unwrap();
+      console.log("Succesfully Edited room data");
+      handleBackNav();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const getFieldValueChangeHandler = (fieldName: string) => (value: string) =>
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+
+  if (isRoomDataFetching) {
+    return (
+      <View>
+        <View style={styles.container0}>
+          <View style={styles.box0}>
+            <Pressable style={styles.rectangle} onPress={handleBackNav}>
+              <Image
+                style={styles.backImg}
+                source={require("../assets/Arrow.png")}
+              />
+            </Pressable>
+            <Text style={styles.typo1}>Edit Room</Text>
+          </View>
+        </View>
+        <LoadingIndictator />
+      </View>
+    );
+  }
 
   return (
     <View>
@@ -43,139 +96,72 @@ const EditRoom = () => {
           <Text style={styles.typoBoddy}>Name</Text>
         </View>
         <View style={styles.box1}>
-          <NativeBaseProvider>
-            <Input
-              variant="underlined"
-              placeholder="Enter Room Name"
-              value="SE Project Goup"
-            />
-          </NativeBaseProvider>
+          <Input
+            variant="underlined"
+            placeholder="Enter Room Name"
+            value={formData.name}
+            onChangeText={getFieldValueChangeHandler("name")}
+          />
         </View>
         <View style={styles.box1}>
           <Text style={styles.typoBoddy}>Description</Text>
         </View>
         <View style={styles.box1}>
-          <NativeBaseProvider>
-            <TextArea
-              h={20}
-              placeholder="Enter Description"
-              value="This Room is created for manage group assignments though the entire semester."
-              w="100%"
-              backgroundColor={Colors.colorGhostwhite}
-              maxW={400}
-              autoCompleteType="off"
-            />
-          </NativeBaseProvider>
+          <TextArea
+            h={20}
+            placeholder="Enter Description"
+            w="100%"
+            backgroundColor={Colors.colorGhostwhite}
+            maxW={400}
+            autoCompleteType="off"
+            value={formData.description}
+            onChangeText={getFieldValueChangeHandler("description")}
+          />
         </View>
         <View style={styles.box1}>
           <Text style={styles.typoBoddy}>Organisation</Text>
         </View>
         <View style={styles.box1}>
-          <NativeBaseProvider>
-            <Input
-              variant="underlined"
-              placeholder="Enter Organisation Name"
-              value="SLIIT"
-            />
-          </NativeBaseProvider>
+          <Input
+            variant="underlined"
+            placeholder="Enter Organisation Name"
+            value={formData.organization}
+            onChangeText={getFieldValueChangeHandler("organization")}
+          />
         </View>
         <View style={styles.box1}>
           <Text style={styles.typoBoddy}>Tag</Text>
         </View>
         <View style={styles.box2}>
-          {/* <View style={[styles.tabButton,{backgroundColor:"#eceaff"}]}>
-                    <Text style={[styles.tabtypoBoddy,{color:"#8F81FE"}]}>Office</Text>
-                </View>
-                <View style={[styles.tabButton,{backgroundColor:"#ffefeb"}]}>
-                    <Text style={[styles.tabtypoBoddy,{color:"#F0A58E"}]}>Home</Text>
-                </View>
-                <View style={[styles.tabButton,{backgroundColor:"#ffe9ed"}]}>
-                    <Text style={[styles.tabtypoBoddy,{color:"#F57C96"}]}>Education</Text>
-                </View>
-                <View style={[styles.tabButton,{backgroundColor:"#d1feff"}]}>
-                    <Text style={[styles.tabtypoBoddy,{color:"#1EC1C3"}]}>Bussiness</Text>
-                </View> */}
-          <NativeBaseProvider>
-            <Stack
-              mb="2.5"
-              mt="1.5"
-              direction={{ base: "row", md: "row" }}
-              space={4}
-              mx={{ base: "auto", md: "0" }}
-              style={{ paddingHorizontal: 5 }}
-            >
-              <Button
-                size="sm"
-                variant="subtle"
-                style={{
-                  borderRadius: 20,
-                  backgroundColor:
-                    selectedCategory === "OFFICE"
-                      ? Colors.lightPrimary
-                      : "transparent",
-                }}
-                onPress={() => handleButtonClick("OFFICE")}
-              >
-                OFFICE
-              </Button>
-              <Button
-                size="sm"
-                variant="subtle"
-                colorScheme="secondary"
-                style={{
-                  borderRadius: 20,
-                  backgroundColor:
-                    selectedCategory === "HOME" ? Colors.home : "transparent",
-                }}
-                onPress={() => handleButtonClick("HOME")}
-              >
-                HOME
-              </Button>
-              <Button
-                size="sm"
-                variant="subtle"
-                style={{
-                  borderRadius: 20,
-                  backgroundColor:
-                    selectedCategory === "EDUCATION"
-                      ? Colors.edu
-                      : "transparent",
-                }}
-                onPress={() => handleButtonClick("EDUCATION")}
-              >
-                EDUCATION
-              </Button>
-              <Button
-                size="sm"
-                variant="subtle"
-                colorScheme="secondary"
-                style={{
-                  borderRadius: 20,
-                  backgroundColor:
-                    selectedCategory === "BUSINESS"
-                      ? Colors.bussiness
-                      : "transparent",
-                }}
-                onPress={() => handleButtonClick("BUSINESS")}
-              >
-                BUSINESS
-              </Button>
-            </Stack>
-            {/* {selectedCategory && <Text>Selected Category: {selectedCategory}</Text>} */}
-            {/* <Text>Selected Date: {selectedDate ? moment(selectedDate).format('MMMM D, YYYY') : 'No date selected'}</Text> */}
-          </NativeBaseProvider>
-        </View>
-        <NativeBaseProvider>
-          <Button
-            size="lg"
-            backgroundColor={Colors.ppButtons}
-            borderRadius={10}
-            marginTop={170}
+          <Stack
+            mb="2.5"
+            mt="1.5"
+            direction={{ base: "row", md: "row" }}
+            space={4}
+            mx={{ base: "auto", md: "0" }}
+            style={{ paddingHorizontal: 5 }}
           >
-            {" "}
-            Create Room
-          </Button>
-        </NativeBaseProvider>
+            {["OFFICE", "HOME", "EDUCATION", "BUSINESS"].map((key) => (
+              <TagButton
+                key={key}
+                isSelected={formData.tag === key}
+                onClick={getFieldValueChangeHandler("tag")}
+              >
+                {key}
+              </TagButton>
+            ))}
+          </Stack>
+        </View>
+        <Button
+          size="lg"
+          backgroundColor={Colors.ppButtons}
+          borderRadius={10}
+          marginTop={170}
+          onPress={handleEditRoomClick}
+          isLoading={isUpdateRoomLoading}
+        >
+          Edit Room
+        </Button>
       </ScrollView>
     </View>
   );

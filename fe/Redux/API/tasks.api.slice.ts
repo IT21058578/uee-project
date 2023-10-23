@@ -26,6 +26,21 @@ export const taskApiSlice = createApi({
       }),
     }),
 
+    getAllTasksInRoom: builder.query({
+      query: ({ roomId }) => ({
+        url: "/tasks/search",
+        method: "POST",
+        body: {
+          pageSize: 100,
+          pageNum: 1,
+          filter: {
+            roomId: { operator: "EQUALS", value: roomId },
+          },
+        },
+        invalidatesTags: ["tasks"],
+      }),
+    }),
+
     gettask: builder.query({
       query: (taskId: string) => `/tasks/${taskId}`,
       providesTags: ["tasks"],
@@ -62,6 +77,7 @@ export const taskApiSlice = createApi({
 export const {
   useGetAlltasksQuery,
   useGettaskQuery,
+  useGetAllTasksInRoomQuery,
   useUpdatetaskMutation,
   useCreatetaskMutation,
   useDeletetaskMutation,

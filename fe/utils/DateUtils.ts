@@ -3,7 +3,7 @@ import moment from "moment";
 export class DateUtils {
   static getDurationAsString(durationInMs: number = 0) {
     const dur = moment.duration(durationInMs ?? 0);
-    const durStr = `${dur.hours()}H ${dur.minutes()}M`;
+    const durStr = `${dur.hours()}h ${dur.minutes()}min`;
     return durStr;
   }
 

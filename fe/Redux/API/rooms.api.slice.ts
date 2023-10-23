@@ -51,6 +51,26 @@ export const roomApiSlice = createApi({
       }),
       invalidatesTags: ["rooms"],
     }),
+    assignRoomAdmin: builder.mutation({
+      query: ({ userId, roomId }) => ({
+        url: "/rooms/assign",
+        method: "PUT",
+        params: {
+          "user-id": userId,
+          "room-id": roomId,
+        },
+      }),
+    }),
+    unassignRoomAdmin: builder.mutation({
+      query: ({ userId, roomId }) => ({
+        url: "/rooms/unassign",
+        method: "PUT",
+        params: {
+          "user-id": userId,
+          "room-id": roomId,
+        },
+      }),
+    }),
   }),
 });
 
@@ -60,4 +80,6 @@ export const {
   useUpdateroomMutation,
   useCreateroomMutation,
   useDeleteroomMutation,
+  useAssignRoomAdminMutation,
+  useUnassignRoomAdminMutation,
 } = roomApiSlice;
