@@ -12,6 +12,7 @@ import {
   Input,
   TextArea,
   useNativeBase,
+  useToast,
 } from "native-base";
 import DropDownPicker from "react-native-dropdown-picker";
 import Colors from "../constants/Colors";
@@ -39,10 +40,12 @@ import Toast from "react-native-toast-message";
 import { useAppSelector } from "../hooks/redux-hooks";
 import LoadingIndictator from "../components/LoadingIndictator";
 import PrioritySelector from "../components/PrioritySelector";
+import ToastAlert from "../components/ToastAlert";
 
 const AddTask = ({ route }: any) => {
   const roomId = route?.params?.roomId;
   const navigation = useNavigation();
+  const toast = useToast();
   const { data: userData } = useGetAllUsersInRoomQuery(roomId ?? "", {
     refetchOnMountOrArgChange: true,
   });
@@ -98,9 +101,28 @@ const AddTask = ({ route }: any) => {
       console.log("Submitted task create data : ", formData);
       await createTask(formData).unwrap();
       console.log("Task created successfully");
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Created Task"
+            description="All schedules for affected users have been readjusted"
+          />
+        ),
+      });
       navigation.navigate("TASKS" as any);
     } catch (error) {
       console.error(error);
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
+      });
     }
   };
 

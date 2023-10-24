@@ -20,6 +20,7 @@ import { useDispatch } from "react-redux";
 import { useDeleteroomMutation } from "../../Redux/API/rooms.api.slice";
 import { Skeleton, useToast } from "native-base";
 import ConfirmationModal from "../ConfirmationModal";
+import ToastAlert from "../ToastAlert";
 
 const RoomBox = (props: any) => {
   const { isActionsVisible, _id: roomId, onDelete } = props;
@@ -51,17 +52,25 @@ const RoomBox = (props: any) => {
       await deleteRoom(roomId).unwrap();
       console.log("Successfully deleted room");
       toast.show({
-        placement: "top",
-        title: "Successfully Deleted Room",
-        description: "All schedules, members and tasks have been cleaned up",
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Deleted Room"
+            description="All schedules, members and tasks have been cleaned up"
+          />
+        ),
       });
       onDelete?.(roomId);
     } catch (error) {
-      console.error(error);
       toast.show({
-        placement: "top",
-        title: "An error occurred",
-        description: "Please try again later",
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
       });
     }
     setPopoverVisible(false); // Close the popover

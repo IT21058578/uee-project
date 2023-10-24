@@ -3,7 +3,14 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import Font from "../../constants/Font";
 import Colors from "../../constants/Colors";
 import FontSize from "../../constants/FontSize";
-import { NativeBaseProvider, Button, Row, Column, Modal } from "native-base";
+import {
+  NativeBaseProvider,
+  Button,
+  Row,
+  Column,
+  Modal,
+  useToast,
+} from "native-base";
 import { useEffect, useState } from "react";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import {
@@ -19,10 +26,12 @@ import {
   useUnassignRoomAdminMutation,
 } from "../../Redux/API/rooms.api.slice";
 import PrimaryButton from "../../components/PrimaryButton";
+import ToastAlert from "../../components/ToastAlert";
 
 const AdminUserManage = () => {
   const roomId = useAppSelector((state) => state.user.roomId);
   const userId = useAppSelector((state) => state.user._id);
+  const toast = useToast();
   const [isUnassignUserModalOpen, setIsUnassignUserModalOpen] = useState(false);
   const [isMakeAdminModalOpen, setIsMakeAdminModalOpen] = useState(false);
   const [isInviteUserModalOpen, setIsInviteUserModalOpen] = useState(false);
@@ -42,6 +51,7 @@ const AdminUserManage = () => {
   const [unassignUser] = useUnassignUserFromRoomMutation();
   const [unassignAdmin] = useUnassignRoomAdminMutation();
   const [assignAdmin] = useAssignRoomAdminMutation();
+  const isAdmin = roomData?.adminIds?.includes(userId);
 
   const refetchAllData = () => {
     refetchRoomData();
@@ -52,9 +62,28 @@ const AdminUserManage = () => {
     try {
       await unassignUser({ userId: selectedUserId, roomId }).unwrap();
       setIsUnassignUserModalOpen(false);
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Kicked User"
+            description="User no longer has access to this room"
+          />
+        ),
+      });
       refetchAllData();
     } catch (error) {
       console.error(error);
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
+      });
     }
   };
 
@@ -62,9 +91,28 @@ const AdminUserManage = () => {
     try {
       await assignAdmin({ userId: selectedUserId, roomId }).unwrap();
       setIsMakeAdminModalOpen(false);
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Elevated Admin"
+            description="Member has now gained admin privileges"
+          />
+        ),
+      });
       refetchUsersList();
     } catch (error) {
       console.error(error);
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
+      });
     }
   };
 
@@ -72,9 +120,28 @@ const AdminUserManage = () => {
     try {
       await unassignAdmin({ userId: selectedUserId, roomId }).unwrap();
       setIsUnassignAdminModalOpen(false);
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Demoted Admin"
+            description="Member no longer has admin privileges"
+          />
+        ),
+      });
       refetchUsersList();
     } catch (error) {
       console.error(error);
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
+      });
     }
   };
 
@@ -102,7 +169,7 @@ const AdminUserManage = () => {
                   <Column>
                     <Text>{`${user.firstName}`}</Text>
                   </Column>
-                  {userId !== user._id && (
+                  {userId !== user._id && isAdmin && (
                     <Column>
                       <Row space={2}>
                         {roomData?.adminIds?.includes(user._id) ? (

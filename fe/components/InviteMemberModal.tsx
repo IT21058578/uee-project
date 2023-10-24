@@ -1,7 +1,8 @@
-import { Button, Input, Modal, Stack, Text } from "native-base";
+import { Button, Input, Modal, Stack, Text, useToast } from "native-base";
 import React, { useState } from "react";
 import { useAssignUserToRoomMutation } from "../Redux/API/users.api.slice";
 import Colors from "../constants/Colors";
+import ToastAlert from "./ToastAlert";
 
 type Props = {
   isOpen: boolean;
@@ -12,6 +13,7 @@ type Props = {
 
 const InviteMemberModal = (props: Props) => {
   const { isOpen, onCancel, onConfirm, roomId } = props;
+  const toast = useToast();
   const [email, setEmail] = useState<string>("");
   const [assignUser, { isLoading: isAssingUserLoading }] =
     useAssignUserToRoomMutation();
@@ -25,7 +27,26 @@ const InviteMemberModal = (props: Props) => {
       console.log(
         `Successfully invited user with email ${email} to room with id ${roomId}`
       );
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Added User"
+            description="Member can now be assigned to tasks"
+          />
+        ),
+      });
     } catch (error) {
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
+      });
       console.error(error);
     }
     onConfirm?.();
@@ -75,7 +96,7 @@ const InviteMemberModal = (props: Props) => {
               backgroundColor: Colors.primary,
               flexGrow: 1,
             }}
-            onPress={onCancel}
+            onPress={handleInviteMemberConfirm}
           >
             <Text style={{ color: Colors.colorWhite, fontWeight: "600" }}>
               CONFIRM

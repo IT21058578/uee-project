@@ -8,7 +8,7 @@ import {
   Pressable,
   ActivityIndicator,
 } from "react-native";
-import { NativeBaseProvider, Input, TextArea } from "native-base";
+import { NativeBaseProvider, Input, TextArea, useToast } from "native-base";
 import DropDownPicker from "react-native-dropdown-picker";
 import Colors from "../constants/Colors";
 import Font from "../constants/Font";
@@ -32,11 +32,13 @@ import moment, { Moment } from "moment";
 import Toast from "react-native-toast-message";
 import PrioritySelector from "../components/PrioritySelector";
 import PrimaryButton from "../components/PrimaryButton";
+import ToastAlert from "../components/ToastAlert";
 dayjs.extend(duration);
 
 const EditTask = ({ route }: { route: any }) => {
   const taskId = route?.params?.taskId;
   const navigation = useNavigation();
+  const toast = useToast();
   const { data: task, isFetching: isTaskFetching } = useGettaskQuery(taskId, {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
@@ -114,17 +116,28 @@ const EditTask = ({ route }: { route: any }) => {
 
       console.log("Submitted task edit data : ", formData);
       await updateTask({ taskId, formData }).unwrap();
-      Toast.show({
-        type: "success",
-        text1: "Task edited successful.",
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Edited Task"
+            description="All schedules for affected users have been readjusted"
+          />
+        ),
       });
       console.log("Task edited successfully");
       navigation.navigate("Tasks" as any);
     } catch (error) {
       console.error(error);
-      Toast.show({
-        type: "error",
-        text1: "Task edit is unsuccessful.",
+      toast.show({
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
       });
     }
   };

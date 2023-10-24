@@ -15,6 +15,7 @@ import { Input, TextArea, Button, Stack, useToast } from "native-base";
 import { useState } from "react";
 import TagButton from "../components/TagButton";
 import { useCreateroomMutation } from "../Redux/API/rooms.api.slice";
+import ToastAlert from "../components/ToastAlert";
 
 const CreateRoom = () => {
   const navigate = useNavigation();
@@ -33,17 +34,26 @@ const CreateRoom = () => {
       await createRoom({ formData }).unwrap();
       console.log("Succesfully submitted room data");
       toast.show({
-        placement: "top",
-        title: "Successfully Created Room",
-        description: "You will now be able to access the room in your profile",
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Created Room"
+            description="You will now be able to access the room in your profile"
+          />
+        ),
       });
       handleBackNav();
     } catch (error) {
       console.error(error);
       toast.show({
-        placement: "top",
-        title: "An error occurred",
-        description: "Please try again later",
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
       });
     }
   };

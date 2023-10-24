@@ -26,6 +26,7 @@ import { useGettaskQuery } from "../../Redux/API/tasks.api.slice";
 import moment, { duration } from "moment";
 import { DateUtils } from "../../utils/DateUtils";
 import ConfirmationModal from "../ConfirmationModal";
+import ToastAlert from "../ToastAlert";
 
 const EditableScheduleBox = (props: any) => {
   const { isRoomNameVisible = true, isActionsVisible = true, onDelete } = props;
@@ -54,18 +55,27 @@ const EditableScheduleBox = (props: any) => {
       await deleteTask(taskId).unwrap();
       console.log("Successfully deleted task with id", taskId);
       toast.show({
-        placement: "top",
-        title: "Successfully Deleted Task",
-        description: "All schedules for affected users have been readjusted",
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Deleted Task"
+            description="All schedules for affected users have been readjusted"
+          />
+        ),
       });
       onDelete?.();
       setIsDeleteTaskModalOpen(false);
     } catch (error) {
       console.error(error);
       toast.show({
-        placement: "top",
-        title: "An error occurred",
-        description: "Please try again later",
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
       });
     }
   };

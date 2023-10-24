@@ -1,28 +1,14 @@
 import * as React from "react";
 import { View, Text, ScrollView, Pressable } from "react-native";
-import { Image } from "expo-image";
 import { StyleSheet } from "react-native";
 import Font from "../../constants/Font";
-import HomeScheduleBox from "../../components/schedule/homeScheduleBox";
-import { scheduleTypes } from "../../types";
-import { schedulesApi } from "../../data/virtualData";
 import AppTextInput from "../../components/AppTextInput";
-import { TouchableWithoutFeedback } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Tasks } from "../../types";
-import {
-  useGetAllTasksInRoomQuery,
-  useGetAlltasksQuery,
-} from "../../Redux/API/tasks.api.slice";
+import { useGetAllTasksInRoomQuery } from "../../Redux/API/tasks.api.slice";
 import EditableScheduleBox from "../../components/schedule/EditableScheduleBox";
-import { ActivityIndicator } from "react-native";
 import { useEffect, useState } from "react";
-import {
-  useGetAllroomsQuery,
-  useGetroomQuery,
-} from "../../Redux/API/rooms.api.slice";
-import { Button } from "native-base";
-import Colors from "../../constants/Colors";
+import { useGetroomQuery } from "../../Redux/API/rooms.api.slice";
 import LoadingIndictator from "../../components/LoadingIndictator";
 import EmptyListPlaceholder from "../../components/EmptyListPlaceholder";
 import { useAppSelector } from "../../hooks/redux-hooks";
@@ -39,7 +25,6 @@ const AdminCreatedTasks = () => {
   } = useGetAllTasksInRoomQuery({ roomId });
   const [searchText, setSearchText] = useState("");
   const { data: roomData, refetch: refetchRoomData } = useGetroomQuery(roomId);
-
   const isCurrentUserAdmin = roomData?.adminIds?.includes(userId);
 
   useEffect(() => {
@@ -69,12 +54,14 @@ const AdminCreatedTasks = () => {
           placeholder="🔍   Search tasks"
           onChangeText={(text) => setSearchText(text)}
         />
-        <PrimaryButton
-          label={"+"}
-          buttonStyle={{ width: 60 }}
-          textStyle={{ fontSize: 24 }}
-          onPress={handleAddTaskClick}
-        />
+        {isCurrentUserAdmin && (
+          <PrimaryButton
+            label={"+"}
+            buttonStyle={{ width: 60 }}
+            textStyle={{ fontSize: 24 }}
+            onPress={handleAddTaskClick}
+          />
+        )}
       </View>
       <View style={styles.Box1}>
         <ScrollView

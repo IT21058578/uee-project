@@ -65,7 +65,12 @@ export const usersApiSlice = createApi({
         },
       }),
     }),
-    
+    deleteUser: builder.mutation({
+      query: ({ userId }) => ({
+        url: `/users/${userId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -75,4 +80,5 @@ export const {
   useGetAllUsersInRoomQuery,
   useUnassignUserFromRoomMutation,
   useAssignUserToRoomMutation,
+  useDeleteUserMutation,
 } = usersApiSlice;

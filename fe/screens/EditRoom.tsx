@@ -20,6 +20,7 @@ import {
   useUpdateroomMutation,
 } from "../Redux/API/rooms.api.slice";
 import LoadingIndictator from "../components/LoadingIndictator";
+import ToastAlert from "../components/ToastAlert";
 
 const EditRoom = (props: any) => {
   const navigation = props.navigation;
@@ -52,7 +53,13 @@ const EditRoom = (props: any) => {
       await updateRoom({ roomId, formData }).unwrap();
       console.log("Succesfully Edited room data");
       toast.show({
-        placement: "top",
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Successfully Deleted Task"
+            description="All schedules for affected users have been readjusted"
+          />
+        ),
         title: "Successfully Edited Room",
         description: "All room details have been updated",
       });
@@ -60,9 +67,14 @@ const EditRoom = (props: any) => {
     } catch (error) {
       console.error(error);
       toast.show({
-        placement: "top",
-        title: "An error occurred",
-        description: "Please try again later",
+        placement: "bottom",
+        render: () => (
+          <ToastAlert
+            title="Something went wrong"
+            description="An error occurred, please try again later"
+            type="error"
+          />
+        ),
       });
     }
   };

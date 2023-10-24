@@ -17,7 +17,7 @@ export const userSlice = createSlice({
       return state;
     },
 
-    logoutCurrentUser: (state, action) => {
+    logoutCurrentUser: (state) => {
       state = {};
       return state;
     },
