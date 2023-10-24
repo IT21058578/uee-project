@@ -13,6 +13,7 @@ import {
   TextArea,
   useNativeBase,
   useToast,
+  FormControl,
 } from "native-base";
 import DropDownPicker from "react-native-dropdown-picker";
 import Colors from "../constants/Colors";
@@ -41,6 +42,9 @@ import { useAppSelector } from "../hooks/redux-hooks";
 import LoadingIndictator from "../components/LoadingIndictator";
 import PrioritySelector from "../components/PrioritySelector";
 import ToastAlert from "../components/ToastAlert";
+import FormInputField from "../components/FormInputField";
+import PrimaryButton from "../components/PrimaryButton";
+import { isEmptyString } from "../utils/ValidationUtils";
 
 const AddTask = ({ route }: any) => {
   const roomId = route?.params?.roomId;
@@ -52,11 +56,9 @@ const AddTask = ({ route }: any) => {
   const [createTask, { isLoading: isCreateTaskLoading }] =
     useCreatetaskMutation();
   const [selectedDate, setSelectedDate] = useState<Moment | null>(moment());
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
-  const [name, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState("");
   const [showPicker, setShowPicker] = useState<boolean>(false);
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   const handleBackNav = () => {
     navigation.goBack();
@@ -68,10 +70,18 @@ const AddTask = ({ route }: any) => {
 
   // Function to handle checkbox change
   const handleCheckboxChange = (userId: string) => {
+    const selectedUserIds = formData.assignedUserIds ?? [];
     if (selectedUserIds?.includes(userId)) {
-      setSelectedUserIds(selectedUserIds?.filter((id) => id !== userId));
+      setFormData((prev) => ({
+        ...prev,
+        assignedUserIds:
+          selectedUserIds?.filter((id: string) => id !== userId) ?? [],
+      }));
     } else {
-      setSelectedUserIds([...selectedUserIds, userId]);
+      setFormData((prev) => ({
+        ...prev,
+        assignedUserIds: [...selectedUserIds, userId],
+      }));
     }
   };
 
@@ -83,23 +93,46 @@ const AddTask = ({ route }: any) => {
       seconds,
     });
     setShowPicker(false);
+    setFormData((prev) => ({ ...prev, duration: duration.asMilliseconds() }));
     handleCreateTask(duration.asMilliseconds());
+  };
+
+  const validateFormFields = () => {
+    console.log("Validating form fields");
+    const { name, priority, assignedUserIds } = formData;
+    const formErrors: Record<string, string> = {};
+    let isValid = true;
+
+    if (isEmptyString(name)) {
+      formErrors.name = "Name cannot be empty";
+      isValid = false;
+    }
+
+    if (isEmptyString(priority)) {
+      formErrors.priority = "Priority must be selected";
+      isValid = false;
+    }
+
+    if (!assignedUserIds?.length) {
+      formErrors.assignedUserIds = "Atleast one user must be assigned";
+      isValid = false;
+    }
+
+    setFormErrors(formErrors);
+    return isValid;
   };
 
   const handleCreateTask = async (durationInMs: number) => {
     try {
-      const formData = {
-        name: name,
-        description: description,
-        duration: durationInMs,
+      if (!validateFormFields()) return;
+      const formattedFormData = {
+        ...formData,
         date: selectedDate,
-        priority: priority,
-        assignedUserIds: selectedUserIds,
-        roomId: roomId,
+        roomId,
+        duration: durationInMs,
       };
-
-      console.log("Submitted task create data : ", formData);
-      await createTask(formData).unwrap();
+      console.log("Submitted task create data : ", formattedFormData);
+      await createTask(formattedFormData).unwrap();
       console.log("Task created successfully");
       toast.show({
         placement: "bottom",
@@ -126,111 +159,101 @@ const AddTask = ({ route }: any) => {
     }
   };
 
+  const getFieldValueChangeHandler = (fieldName: string) => (value: string) => {
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    setFormErrors({});
+  };
+
   return (
-    <View>
-      <View style={styles.container0}>
-        <View style={styles.box0}>
-          <Pressable style={styles.rectangle} onPress={handleBackNav}>
-            <Image
-              style={styles.backImg}
-              source={require("../assets/Arrow.png")}
-            />
-          </Pressable>
-          <Text style={styles.typo1}>Add Task</Text>
+    <>
+      <View>
+        <View style={styles.container0}>
+          <View style={styles.box0}>
+            <Pressable style={styles.rectangle} onPress={handleBackNav}>
+              <Image
+                style={styles.backImg}
+                source={require("../assets/Arrow.png")}
+              />
+            </Pressable>
+            <Text style={styles.typo1}>Add Task</Text>
+          </View>
         </View>
-      </View>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Title</Text>
-        </View>
-        <View style={styles.box1}>
-          <NativeBaseProvider>
-            <Input
-              variant="underlined"
-              placeholder="Enter Title"
-              onChangeText={setTitle}
-              value={name}
-            />
-          </NativeBaseProvider>
-        </View>
-        <View>
-          <Text style={styles.typoBoddy}>Date</Text>
-        </View>
-        <Calendar onSelectDate={handleDateSelect} selected={selectedDate} />
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Description</Text>
-        </View>
-        <View style={styles.box1}>
-          <NativeBaseProvider>
-            <TextArea
-              h={20}
-              placeholder="Enter Description"
-              w="100%"
-              backgroundColor={Colors.colorGhostwhite}
-              maxW={400}
-              value={description}
-              onChangeText={setDescription}
-              autoCompleteType="off"
-            />
-          </NativeBaseProvider>
-        </View>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Priority</Text>
-        </View>
-        <View style={styles.box2}>
-          <PrioritySelector
-            value={priority}
-            onChange={(val) => setPriority(val ?? "")}
+        <ScrollView contentContainerStyle={styles.container}>
+          <FormInputField
+            label="Name"
+            onChange={getFieldValueChangeHandler("name")}
+            value={formData.name}
+            isError={!!formErrors.name}
+            errorMessage={formErrors.name}
           />
-        </View>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Assign Members</Text>
-        </View>
-        <View style={styles.box3}>
-          {userData?.content.map((user: any) => (
-            <View style={styles.box4} key={user._id}>
-              <Text style={styles.typoBoddy}>{user.firstName}</Text>
-              <NativeBaseProvider>
-                <View style={styles.CheckboxSpace1}>
-                  <Checkbox
-                    value={user._id}
-                    colorScheme="purple"
-                    onChange={() => handleCheckboxChange(user._id)}
-                    aria-label="Purple Checkbox"
-                  />
-                </View>
-              </NativeBaseProvider>
-            </View>
-          ))}
-        </View>
-        <View style={styles.box1}>
-          <NativeBaseProvider>
-            <Button
-              isLoading={isCreateTaskLoading}
-              size="lg"
-              backgroundColor={Colors.ppButtons}
-              borderRadius={10}
-              onPress={() => setShowPicker(true)}
+          <View>
+            <Text style={styles.typoBoddy}>Date</Text>
+            <Calendar onSelectDate={handleDateSelect} selected={selectedDate} />
+          </View>
+          <FormInputField
+            label="Description"
+            value={formData.description}
+            onChange={getFieldValueChangeHandler("description")}
+            type="textarea"
+          />
+          <FormInputField
+            label="Priority"
+            value={formData.priority}
+            onChange={getFieldValueChangeHandler("priority")}
+            isError={!!formErrors.priority}
+            errorMessage={formErrors.priority}
+            type="select"
+            options={[
+              { label: "High", value: "HIGH" },
+              { label: "Medium", value: "MEDIUM" },
+              { label: "Low", value: "LOW" },
+            ]}
+          />
+          <View>
+            <Text style={styles.typoBoddy}>Assign Members</Text>
+            <View
+              style={[
+                styles.box3,
+                !formErrors.assignedUserIds ? null : styles.errorBorder,
+              ]}
             >
-              Schedule
-            </Button>
-          </NativeBaseProvider>
-        </View>
-        <TimerPickerModal
-          visible={showPicker}
-          setIsVisible={setShowPicker}
-          onConfirm={handleDurationSelection}
-          modalTitle="Set Task Duration"
-          onCancel={() => setShowPicker(false)}
-          closeOnOverlayPress
-          LinearGradient={LinearGradient}
-          styles={{
-            theme: "light",
-          }}
-        />
-        <Toast />
-      </ScrollView>
-    </View>
+              {userData?.content.map((user: any) => (
+                <View style={[styles.box4]} key={user._id}>
+                  <Text style={styles.typoBoddy}>{user.firstName}</Text>
+                  <View style={styles.CheckboxSpace1}>
+                    <Checkbox
+                      value={user._id}
+                      colorScheme="blue"
+                      onChange={() => handleCheckboxChange(user._id)}
+                      aria-label="Purple Checkbox"
+                    />
+                  </View>
+                </View>
+              ))}
+            </View>
+            <Text style={styles.errorText}>{formErrors.assignedUserIds}</Text>
+          </View>
+
+          <PrimaryButton
+            isLoading={isCreateTaskLoading}
+            label="Schedule"
+            onPress={() => setShowPicker(true)}
+          />
+        </ScrollView>
+      </View>
+      <TimerPickerModal
+        visible={showPicker}
+        setIsVisible={setShowPicker}
+        onConfirm={handleDurationSelection}
+        modalTitle="Set Task Duration"
+        onCancel={() => setShowPicker(false)}
+        closeOnOverlayPress
+        LinearGradient={LinearGradient}
+        styles={{
+          theme: "light",
+        }}
+      />
+    </>
   );
 };
 
@@ -240,6 +263,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     paddingBottom: 150,
+    gap: 16,
   },
   container0: {
     flexGrow: 1,
@@ -251,14 +275,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  box1: {
-    marginBottom: 20,
-  },
   box2: {
     marginBottom: 20,
     paddingRight: 0,
   },
   box3: {
+    marginTop: 16,
     backgroundColor: Colors.colorGhostwhite,
     borderRadius: 10,
     shadowColor: Colors.darkText,
@@ -270,7 +292,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
     padding: 10,
-    marginBottom: 50,
+    marginBottom: 10,
   },
   typo1: {
     marginLeft: 80,
@@ -310,7 +332,17 @@ const styles = StyleSheet.create({
   box4: {
     flex: 1,
     flexDirection: "row",
+    justifyContent: "space-between",
     padding: 10,
+  },
+  errorText: {
+    color: "#dc2626",
+    fontFamily: Font["poppins-regular"],
+    fontSize: FontSize.small,
+  },
+  errorBorder: {
+    borderWidth: 1,
+    borderColor: "#dc2626",
   },
 });
 

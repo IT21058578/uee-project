@@ -167,7 +167,9 @@ const AdminUserManage = () => {
                   paddingBottom={2}
                 >
                   <Column>
-                    <Text>{`${user.firstName}`}</Text>
+                    <Text
+                      style={styles.memberNameText}
+                    >{`${user.firstName}`}</Text>
                   </Column>
                   {userId !== user._id && isAdmin && (
                     <Column>
@@ -435,6 +437,11 @@ const styles = StyleSheet.create({
   cancelButton: {
     marginHorizontal: 10,
     flex: 1, // Adjust flex value as needed
+  },
+  memberNameText: {
+    color: Colors.darkblue,
+    fontFamily: Font["poppins-regular"],
+    fontSize: FontSize.medium,
   },
 });
 

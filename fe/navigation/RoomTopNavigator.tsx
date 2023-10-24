@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     backgroundColor: "transparent", // Set the background color of the tab bar
-    paddingHorizontal: 12,
+    paddingHorizontal: 20,
   },
   tabBarButton: {
     flex: 1,

@@ -33,6 +33,8 @@ import Toast from "react-native-toast-message";
 import PrioritySelector from "../components/PrioritySelector";
 import PrimaryButton from "../components/PrimaryButton";
 import ToastAlert from "../components/ToastAlert";
+import { isEmptyString } from "../utils/ValidationUtils";
+import FormInputField from "../components/FormInputField";
 dayjs.extend(duration);
 
 const EditTask = ({ route }: { route: any }) => {
@@ -50,27 +52,21 @@ const EditTask = ({ route }: { route: any }) => {
     useUpdatetaskMutation();
 
   /** In case initial date is before today. */
-  const [initialDate, setInitialDate] = useState<Moment>(moment());
   const [selectedDate, setSelectedDate] = useState<Moment | null>(moment());
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>(
-    task?.assignedUserIds || []
-  );
-  const [name, setTitle] = useState(task?.name || "");
-  const [description, setDescription] = useState(task?.description || "");
-  const [priority, setPriority] = useState(task?.priority || "");
   const [showPicker, setShowPicker] = useState<boolean>(false);
   const [durationInMs, setDurationInMs] = useState<number>(
     task?.duration || ""
   );
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (task) {
-      setTitle(task?.name);
-      setDescription(task?.description);
-      setPriority(task?.priority);
+      setFormData({
+        ...task,
+      });
+      setDurationInMs(task.duration ?? 0);
       setSelectedDate(moment(new Date(task?.date)));
-      setInitialDate(moment(new Date(task?.date)));
-      setDurationInMs(task?.duration);
     }
   }, [task, isTaskFetching]);
 
@@ -84,10 +80,18 @@ const EditTask = ({ route }: { route: any }) => {
 
   // Function to handle checkbox change
   const handleCheckboxChange = (userId: string) => {
+    const selectedUserIds = formData.assignedUserIds ?? [];
     if (selectedUserIds?.includes(userId)) {
-      setSelectedUserIds(selectedUserIds?.filter((id) => id !== userId));
+      setFormData((prev) => ({
+        ...prev,
+        assignedUserIds:
+          selectedUserIds?.filter((id: string) => id !== userId) ?? [],
+      }));
     } else {
-      setSelectedUserIds([...selectedUserIds, userId]);
+      setFormData((prev) => ({
+        ...prev,
+        assignedUserIds: [...selectedUserIds, userId],
+      }));
     }
   };
 
@@ -99,23 +103,46 @@ const EditTask = ({ route }: { route: any }) => {
       seconds,
     });
     setShowPicker(false);
+    setFormData((prev) => ({ ...prev, duration: duration.asMilliseconds() }));
     handleCreateTask(duration.asMilliseconds());
+  };
+
+  const validateFormFields = () => {
+    console.log("Validating form fields");
+    const { name, priority, assignedUserIds } = formData;
+    const formErrors: Record<string, string> = {};
+    let isValid = true;
+
+    if (isEmptyString(name)) {
+      formErrors.name = "Name cannot be empty";
+      isValid = false;
+    }
+
+    if (isEmptyString(priority)) {
+      formErrors.priority = "Priority must be selected";
+      isValid = false;
+    }
+
+    if (!assignedUserIds?.length) {
+      formErrors.assignedUserIds = "Atleast one user must be assigned";
+      isValid = false;
+    }
+
+    setFormErrors(formErrors);
+    return isValid;
   };
 
   const handleCreateTask = async (durationInMs: number) => {
     try {
-      const formData = {
-        name: name,
-        description: description,
-        duration: durationInMs,
+      if (!validateFormFields()) return;
+      const formattedFormData = {
+        ...formData,
         date: selectedDate,
-        priority: priority,
-        assignedUserIds: selectedUserIds,
         roomId: task.roomId,
+        duration: durationInMs,
       };
-
-      console.log("Submitted task edit data : ", formData);
-      await updateTask({ taskId, formData }).unwrap();
+      console.log("Submitted task edit data : ", formattedFormData);
+      await updateTask({ taskId, formData: formattedFormData }).unwrap();
       toast.show({
         placement: "bottom",
         render: () => (
@@ -126,7 +153,7 @@ const EditTask = ({ route }: { route: any }) => {
         ),
       });
       console.log("Task edited successfully");
-      navigation.navigate("Tasks" as any);
+      navigation.goBack();
     } catch (error) {
       console.error(error);
       toast.show({
@@ -140,6 +167,11 @@ const EditTask = ({ route }: { route: any }) => {
         ),
       });
     }
+  };
+
+  const getFieldValueChangeHandler = (fieldName: string) => (value: string) => {
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    setFormErrors({});
   };
 
   if (isTaskFetching) {
@@ -164,105 +196,100 @@ const EditTask = ({ route }: { route: any }) => {
   }
 
   return (
-    <View>
-      <View style={styles.container0}>
-        <View style={styles.box0}>
-          <Pressable style={styles.rectangle} onPress={handleBackNav}>
-            <Image
-              style={styles.backImg}
-              source={require("../assets/Arrow.png")}
-            />
-          </Pressable>
-          <Text style={styles.typo1}>Edit Task</Text>
+    <>
+      <View>
+        <View style={styles.container0}>
+          <View style={styles.box0}>
+            <Pressable style={styles.rectangle} onPress={handleBackNav}>
+              <Image
+                style={styles.backImg}
+                source={require("../assets/Arrow.png")}
+              />
+            </Pressable>
+            <Text style={styles.typo1}>Edit Task</Text>
+          </View>
         </View>
-      </View>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Title</Text>
-        </View>
-        <View style={styles.box1}>
-          <NativeBaseProvider>
-            <Input
-              variant="underlined"
-              placeholder="Enter Title"
-              onChangeText={setTitle}
-              value={name}
-            />
-          </NativeBaseProvider>
-        </View>
-        <View>
-          <Text style={styles.typoBoddy}>Date</Text>
-        </View>
-        <Calendar
-          onSelectDate={handleDateSelect}
-          selected={selectedDate}
-          initialDate={initialDate}
-        />
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Description</Text>
-        </View>
-        <View style={styles.box1}>
-          <NativeBaseProvider>
-            <TextArea
-              h={20}
-              placeholder="Enter Description"
-              w="100%"
-              backgroundColor={Colors.colorGhostwhite}
-              maxW={400}
-              value={description}
-              onChangeText={setDescription}
-              autoCompleteType="off"
-            />
-          </NativeBaseProvider>
-        </View>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Priority</Text>
-        </View>
-        <View style={styles.box2}>
-          <PrioritySelector
-            value={priority}
-            onChange={(val) => setPriority(val)}
+        <ScrollView contentContainerStyle={styles.container}>
+          <FormInputField
+            label="Name"
+            onChange={getFieldValueChangeHandler("name")}
+            value={formData.name}
+            isError={!!formErrors.name}
+            errorMessage={formErrors.name}
           />
-        </View>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Assign Members</Text>
-        </View>
-        <View style={styles.box3}>
-          {userData?.content.map((user: any) => (
-            <View style={styles.box4} key={user._id}>
-              <Text style={styles.typoBoddy}>{user.firstName}</Text>
-              <View style={styles.CheckboxSpace1}>
-                <Checkbox
-                  defaultIsChecked={task?.assignedUserIds.includes(user._id)}
-                  value={user._id}
-                  colorScheme="darkBlue"
-                  onChange={() => handleCheckboxChange(user._id)}
-                />
-              </View>
+          <View>
+            <Text style={styles.typoBoddy}>Date</Text>
+            <Calendar onSelectDate={handleDateSelect} selected={selectedDate} />
+          </View>
+          <FormInputField
+            label="Description"
+            value={formData.description}
+            onChange={getFieldValueChangeHandler("description")}
+            type="textarea"
+          />
+          <FormInputField
+            label="Priority"
+            value={formData.priority}
+            onChange={getFieldValueChangeHandler("priority")}
+            isError={!!formErrors.priority}
+            errorMessage={formErrors.priority}
+            type="select"
+            options={[
+              { label: "High", value: "HIGH" },
+              { label: "Medium", value: "MEDIUM" },
+              { label: "Low", value: "LOW" },
+            ]}
+          />
+          <View>
+            <Text style={styles.typoBoddy}>Assign Members</Text>
+            <View
+              style={[
+                styles.box3,
+                !formErrors.assignedUserIds ? null : styles.errorBorder,
+              ]}
+            >
+              {userData?.content.map((user: any) => (
+                <View style={[styles.box4]} key={user._id}>
+                  <Text style={styles.typoBoddy}>{user.firstName}</Text>
+                  <View style={styles.CheckboxSpace1}>
+                    <Checkbox
+                      defaultIsChecked={task?.assignedUserIds.includes(
+                        user._id
+                      )}
+                      value={user._id}
+                      colorScheme="blue"
+                      onChange={() => handleCheckboxChange(user._id)}
+                      aria-label="Purple Checkbox"
+                    />
+                  </View>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
-        <View style={styles.box1}>
-          <PrimaryButton label="Schedule" onPress={() => setShowPicker(true)} />
-        </View>
-        <TimerPickerModal
-          visible={showPicker}
-          setIsVisible={setShowPicker}
-          onConfirm={handleDurationSelection}
-          modalTitle="Set Task Duration"
-          onCancel={() => setShowPicker(false)}
-          closeOnOverlayPress
-          LinearGradient={LinearGradient}
-          styles={{
-            theme: "light",
-          }}
-          initialHours={moment.duration(durationInMs).hours()}
-          initialMinutes={moment.duration(durationInMs).minutes()}
-          initialSeconds={moment.duration(durationInMs).seconds()}
-        />
-        <Toast />
-      </ScrollView>
-    </View>
+            <Text style={styles.errorText}>{formErrors.assignedUserIds}</Text>
+          </View>
+          <PrimaryButton
+            isLoading={isUpdateTaskLoading}
+            label="Schedule"
+            onPress={() => setShowPicker(true)}
+          />
+        </ScrollView>
+      </View>
+      <TimerPickerModal
+        visible={showPicker}
+        setIsVisible={setShowPicker}
+        onConfirm={handleDurationSelection}
+        modalTitle="Set Task Duration"
+        onCancel={() => setShowPicker(false)}
+        closeOnOverlayPress
+        LinearGradient={LinearGradient}
+        styles={{
+          theme: "light",
+        }}
+        initialHours={moment.duration(durationInMs).hours()}
+        initialMinutes={moment.duration(durationInMs).minutes()}
+        initialSeconds={moment.duration(durationInMs).seconds()}
+      />
+    </>
   );
 };
 
@@ -290,6 +317,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   box3: {
+    marginTop: 16,
     backgroundColor: Colors.colorGhostwhite,
     borderRadius: 10,
     shadowColor: Colors.darkText,
@@ -301,7 +329,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
     padding: 10,
-    marginBottom: 50,
+    marginBottom: 10,
   },
   typo1: {
     marginLeft: 80,
@@ -343,6 +371,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
+  },
+  errorText: {
+    color: "#dc2626",
+    fontFamily: Font["poppins-regular"],
+    fontSize: FontSize.small,
+  },
+  errorBorder: {
+    borderWidth: 1,
+    borderColor: "#dc2626",
   },
 });
 

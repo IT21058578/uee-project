@@ -3,14 +3,15 @@ import { StyleSheet, View, Pressable, Text } from "react-native";
 import { Image } from "expo-image";
 import Font from "../../constants/Font";
 import { useNavigation } from "@react-navigation/native";
+import { useAppSelector } from "../../hooks/redux-hooks";
 
 const TopBarRoom = () => {
-
+  const roomName = useAppSelector((state) => state.room.name);
   const navigation = useNavigation();
 
   const handleBack = () => {
-      navigation.navigate('BottomTab');
-  }
+    navigation.navigate("BottomTab");
+  };
   return (
     <View style={styles.TopBarRoom}>
       <View style={styles.TopBarRoomInner}>
@@ -23,7 +24,7 @@ const TopBarRoom = () => {
               source={require("fe/assets/Arrow.png")}
             />
           </Pressable>
-          <Text style={styles.seProjectGroup}>SE Project Group</Text>
+          <Text style={styles.seProjectGroup}>{roomName}</Text>
         </View>
       </View>
     </View>

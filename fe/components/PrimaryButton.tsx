@@ -9,11 +9,19 @@ type Props = {
   label?: string;
   buttonStyle?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  isLoading?: boolean;
 };
 
-const PrimaryButton = ({ onPress, label, buttonStyle, textStyle }: Props) => {
+const PrimaryButton = ({
+  onPress,
+  label,
+  buttonStyle,
+  textStyle,
+  isLoading,
+}: Props) => {
   return (
     <Button
+      isLoading={isLoading}
       onPress={onPress}
       style={[
         {

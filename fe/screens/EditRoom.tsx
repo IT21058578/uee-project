@@ -21,12 +21,16 @@ import {
 } from "../Redux/API/rooms.api.slice";
 import LoadingIndictator from "../components/LoadingIndictator";
 import ToastAlert from "../components/ToastAlert";
+import FormInputField from "../components/FormInputField";
+import PrimaryButton from "../components/PrimaryButton";
+import { isEmptyString } from "../utils/ValidationUtils";
 
 const EditRoom = (props: any) => {
   const navigation = props.navigation;
   const roomId: string = props.route?.params?.roomId;
   const toast = useToast();
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [updateRoom, { isLoading: isUpdateRoomLoading }] =
     useUpdateroomMutation();
   const { data: roomData, isFetching: isRoomDataFetching } =
@@ -47,8 +51,34 @@ const EditRoom = (props: any) => {
     navigation.goBack();
   };
 
+  const validateFormFields = () => {
+    console.log("Validating form fields");
+    const { name, tag, organization } = formData;
+    const formErrors: Record<string, string> = {};
+    let isValid = true;
+
+    if (isEmptyString(name)) {
+      formErrors.name = "Name cannot be empty";
+      isValid = false;
+    }
+
+    if (isEmptyString(organization)) {
+      formErrors.organization = "Organization cannot be empty";
+      isValid = false;
+    }
+
+    if (isEmptyString(tag)) {
+      formErrors.tag = "Tag must be selected";
+      isValid = false;
+    }
+
+    setFormErrors(formErrors);
+    return isValid;
+  };
+
   const handleEditRoomClick = async () => {
     try {
+      if (!validateFormFields()) return;
       console.log("Submitted Edited Room Data : ", roomId, formData);
       await updateRoom({ roomId, formData }).unwrap();
       console.log("Succesfully Edited room data");
@@ -56,7 +86,7 @@ const EditRoom = (props: any) => {
         placement: "bottom",
         render: () => (
           <ToastAlert
-            title="Successfully Deleted Task"
+            title="Successfully Edited Room"
             description="All schedules for affected users have been readjusted"
           />
         ),
@@ -79,8 +109,10 @@ const EditRoom = (props: any) => {
     }
   };
 
-  const getFieldValueChangeHandler = (fieldName: string) => (value: string) =>
+  const getFieldValueChangeHandler = (fieldName: string) => (value: string) => {
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    setFormErrors({});
+  };
 
   if (isRoomDataFetching) {
     return (
@@ -115,76 +147,45 @@ const EditRoom = (props: any) => {
         </View>
       </View>
       <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Name</Text>
-        </View>
-        <View style={styles.box1}>
-          <Input
-            variant="underlined"
-            placeholder="Enter Room Name"
-            value={formData.name}
-            onChangeText={getFieldValueChangeHandler("name")}
-          />
-        </View>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Description</Text>
-        </View>
-        <View style={styles.box1}>
-          <TextArea
-            h={20}
-            placeholder="Enter Description"
-            w="100%"
-            backgroundColor={Colors.colorGhostwhite}
-            maxW={400}
-            autoCompleteType="off"
-            value={formData.description}
-            onChangeText={getFieldValueChangeHandler("description")}
-          />
-        </View>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Organisation</Text>
-        </View>
-        <View style={styles.box1}>
-          <Input
-            variant="underlined"
-            placeholder="Enter Organisation Name"
-            value={formData.organization}
-            onChangeText={getFieldValueChangeHandler("organization")}
-          />
-        </View>
-        <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Tag</Text>
-        </View>
-        <View style={styles.box2}>
-          <Stack
-            mb="2.5"
-            mt="1.5"
-            direction={{ base: "row", md: "row" }}
-            space={4}
-            mx={{ base: "auto", md: "0" }}
-            style={{ paddingHorizontal: 5 }}
-          >
-            {["OFFICE", "HOME", "EDUCATION", "BUSINESS"].map((key) => (
-              <TagButton
-                key={key}
-                isSelected={formData.tag === key}
-                onClick={getFieldValueChangeHandler("tag")}
-              >
-                {key}
-              </TagButton>
-            ))}
-          </Stack>
-        </View>
-        <Button
-          size="lg"
-          backgroundColor={Colors.ppButtons}
-          borderRadius={10}
-          marginTop={170}
+        <FormInputField
+          label="Name"
+          onChange={getFieldValueChangeHandler("name")}
+          value={formData.name}
+          isError={!!formErrors.name}
+          errorMessage={formErrors.name}
+        />
+        <FormInputField
+          label="Description"
+          value={formData.description}
+          onChange={getFieldValueChangeHandler("description")}
+          type="textarea"
+        />
+        <FormInputField
+          label="Organization"
+          value={formData.organization}
+          onChange={getFieldValueChangeHandler("organization")}
+          isError={!!formErrors.organization}
+          errorMessage={formErrors.organization}
+        />
+        <FormInputField
+          label="Tag"
+          value={formData.tag}
+          onChange={getFieldValueChangeHandler("tag")}
+          isError={!!formErrors.tag}
+          errorMessage={formErrors.tag}
+          type="select"
+          options={[
+            { label: "Office", value: "OFFICE" },
+            { label: "Home", value: "HOME" },
+            { label: "Education", value: "EDUCATION" },
+            { label: "Business", value: "BUSINESS" },
+          ]}
+        />
+        <PrimaryButton
           onPress={handleEditRoomClick}
           isLoading={isUpdateRoomLoading}
-        >
-          Edit Room
-        </Button>
+          label="Edit Room"
+        />
       </ScrollView>
     </View>
   );
@@ -198,6 +199,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     paddingBottom: 150,
+    gap: 16,
   },
   container0: {
     flexGrow: 1,

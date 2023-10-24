@@ -13,6 +13,7 @@ const room = createSlice({
   reducers: {
     setRoom: (state, { payload }) => {
       state = payload;
+      return state;
     },
   },
 });
