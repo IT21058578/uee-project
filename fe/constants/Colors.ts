@@ -3,6 +3,7 @@ const black = "#000";
 const dark = "#626262";
 const green = "#1A5D1A";
 const blue = "#1F41BB";
+const midBlue = "#6579c2";
 const gray = "#ECECEC";
 const colorDarkslateblue = "#10275a";
 const lightBlue = "#f1f4ff";
@@ -18,12 +19,11 @@ const home = "#FFEFEB";
 const edu = "#FFE9ED";
 const bussiness = "#D1FEFF";
 
-const colorWhite= "#fff";
-const colorGhostwhite= "#f9fafd";
-const colorLavender= "#e8e9f3";
-const colorLightslategray= "#8a8bb3";
+const colorWhite = "#fff";
+const colorGhostwhite = "#f9fafd";
+const colorLavender = "#e8e9f3";
+const colorLightslategray = "#8a8bb3";
 const colorGray_100 = "rgba(255, 255, 255, 0.5)";
-
 
 export default {
   darkText: dark,
@@ -34,24 +34,23 @@ export default {
   active: blue,
   borderWithOpacity: "#1f41bb",
   lightPrimary: lightBlue,
+  midPrimary: midBlue,
   gray: gray,
   darkblue: colorDarkslateblue,
-  purpleLight:purpleLight,
-  purpletext:purpletext,
-  colorAliceblue:colorAliceblue,
-  colorLightgreen:colorLightgreen,
-  colorTomato:colorTomato,
-  ppButtons:ppButtons,
+  purpleLight: purpleLight,
+  purpletext: purpletext,
+  colorAliceblue: colorAliceblue,
+  colorLightgreen: colorLightgreen,
+  colorTomato: colorTomato,
+  ppButtons: ppButtons,
 
   colorWhite: colorWhite,
   colorGhostwhite: colorGhostwhite,
   colorLavender: colorLavender,
   colorLightslategray: colorLightslategray,
-  colorGray_100:colorGray_100,
-  office:office,
-  home:home,
-  edu:edu,
-  bussiness:bussiness,
-
-
+  colorGray_100: colorGray_100,
+  office: office,
+  home: home,
+  edu: edu,
+  bussiness: bussiness,
 };

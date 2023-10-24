@@ -1,33 +1,48 @@
 import * as React from "react";
 import { Text, StyleSheet, View, ScrollView } from "react-native";
-import { Button } from "react-native-paper";
 import ContainerFrame from "../components/ContainerFrame";
 import Font from "../constants/Font";
 import { Color, FontSize, Padding, Border } from "../Styles/GlobalStyles";
-import { TaskType, scheduleTypes } from "../types";
-import HomeScheduleBox from "../components/schedule/homeScheduleBox";
-import { schedulesApi } from "../data/virtualData";
 import { useGetDetailedScheduledForUserQuery } from "../Redux/API/schedules.api.slice";
 import { ActivityIndicator } from "react-native";
-import { Schedule } from "../types";
-import { getItem } from "../utils/Genarals";
-import RoutePaths from "../utils/RoutePaths";
-import { useState } from "react";
 import { useEffect } from "react";
 import Colors from "../constants/Colors";
 import { useAppSelector } from "../hooks/redux-hooks";
 import { DateUtils } from "../utils/DateUtils";
+import EmptyListPlaceholder from "../components/EmptyListPlaceholder";
+import RoomScheduleBox from "../components/schedule/roomScheduleBox";
+import { useNavigation } from "@react-navigation/native";
 
 const Home = () => {
+  const navigation = useNavigation();
   const user = useAppSelector((state) => state.user);
   const userID = user?._id;
   const date = new Date().toISOString().split("T")[0];
-
   const {
     data: detailedScheduleList,
     isLoading,
     isError,
+    refetch: refetchDetaiedScheduleList,
   } = useGetDetailedScheduledForUserQuery({ userID, date });
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      refetchDetaiedScheduleList();
+    });
+    return unsubscribe;
+  }, []);
+
+  const getJoinedTaskList = () => {
+    const allTaskLists: any[][] = detailedScheduleList.schedules.map(
+      (schedule: any) =>
+        schedule.taskList.map((task: any) => ({
+          ...task,
+          roomName: schedule.roomName,
+        }))
+    );
+    const joinedTaskList = allTaskLists.flat(1);
+    return joinedTaskList;
+  };
 
   if (isLoading || isError) {
     return (
@@ -86,29 +101,30 @@ const Home = () => {
           </View>
         </View>
         <View style={[styles.frame, styles.frameFlexBox]}>
-          <Text style={[styles.todayTask, styles.taskTypo]}>Today's Task</Text>
+          <Text style={[styles.todayTask, styles.taskTypo]}>Today's Tasks</Text>
         </View>
       </View>
       <ScrollView
-        style={styles.frame3}
+        style={{ width: "100%" }}
         horizontal={false}
         showsVerticalScrollIndicator={true}
         showsHorizontalScrollIndicator={false}
         pagingEnabled={true}
         contentContainerStyle={styles.frameScrollViewContent}
       >
-        {detailedScheduleList?.schedules[0]?.taskList.length > 0 ? (
-          detailedScheduleList.schedules[0].taskList.map(
-            (schedule: TaskType) => (
-              <HomeScheduleBox
-                {...schedule}
-                tag={detailedScheduleList.schedules[0].tag}
-                key={schedule.taskId}
-              />
-            )
-          )
+        {getJoinedTaskList().length > 0 ? (
+          getJoinedTaskList().map((schedule: any) => (
+            <RoomScheduleBox
+              isRoomNameVisible
+              {...schedule}
+              key={schedule._id}
+            />
+          ))
         ) : (
-          <Text style={styles.noschedules}>No schedules for the day</Text>
+          <EmptyListPlaceholder
+            title="Schedule is empty"
+            content="You have no tasks scheduled for today. Take a day off!"
+          />
         )}
       </ScrollView>
     </View>
@@ -132,6 +148,7 @@ const styles = StyleSheet.create({
     fontFamily: Font["poppins-regular"],
   },
   frameScrollViewContent: {
+    marginHorizontal: 25,
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "flex-start",
@@ -316,12 +333,9 @@ const styles = StyleSheet.create({
   frameContainer: {
     marginTop: 18,
   },
-  frame3: {
-    flex: 1,
-  },
   home: {
     backgroundColor: Color.white,
-    top: 20,
+    marginTop: 20,
     width: "100%",
     maxHeight: "90%",
     paddingHorizontal: 0,

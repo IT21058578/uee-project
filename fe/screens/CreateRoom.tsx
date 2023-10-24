@@ -11,13 +11,14 @@ import Font from "../constants/Font";
 import Colors from "../constants/Colors";
 import FontSize from "../constants/FontSize";
 import { useNavigation } from "@react-navigation/native";
-import { Input, TextArea, Button, Stack } from "native-base";
+import { Input, TextArea, Button, Stack, useToast } from "native-base";
 import { useState } from "react";
 import TagButton from "../components/TagButton";
 import { useCreateroomMutation } from "../Redux/API/rooms.api.slice";
 
 const CreateRoom = () => {
   const navigate = useNavigation();
+  const toast = useToast();
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [createRoom, { isLoading: isCreateRoomLoading }] =
     useCreateroomMutation();
@@ -31,9 +32,19 @@ const CreateRoom = () => {
       console.log("Submitted Room Data : ", formData);
       await createRoom({ formData }).unwrap();
       console.log("Succesfully submitted room data");
+      toast.show({
+        placement: "top",
+        title: "Successfully Created Room",
+        description: "You will now be able to access the room in your profile",
+      });
       handleBackNav();
     } catch (error) {
       console.error(error);
+      toast.show({
+        placement: "top",
+        title: "An error occurred",
+        description: "Please try again later",
+      });
     }
   };
 

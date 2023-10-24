@@ -8,12 +8,11 @@ const room = createSlice({
     organization: string;
     tag: string;
     adminIds: string[];
+    _id: string;
   }>,
   reducers: {
     setRoom: (state, { payload }) => {
-      console.log("BRUHHHH", payload);
       state = payload;
-      console.log("BRuh", state);
     },
   },
 });

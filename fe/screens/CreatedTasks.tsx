@@ -16,6 +16,7 @@ import { ActivityIndicator } from "react-native";
 import { Tasks } from "../types";
 import { useGetAllroomsQuery } from "../Redux/API/rooms.api.slice";
 import { useAppSelector } from "../hooks/redux-hooks";
+import EmptyListPlaceholder from "../components/EmptyListPlaceholder";
 
 const CreatedTasks = (props: any) => {
   const navigation = props.navigation;
@@ -27,7 +28,7 @@ const CreatedTasks = (props: any) => {
     data: taskList,
     isSuccess,
     isError,
-    refetch: refetchTaskList
+    refetch: refetchTaskList,
   } = useGetAlltasksQuery("api/tasks", {
     refetchOnMountOrArgChange: true,
     refetchOnFocus: true,
@@ -84,6 +85,13 @@ const CreatedTasks = (props: any) => {
               color="#0000ff"
               size="large"
             />
+          ) : filteredTasks?.length === 0 ? (
+            <>
+              <EmptyListPlaceholder
+                title="No Tasks Found"
+                content="Any tasks you create in your rooms will show up here"
+              />
+            </>
           ) : (
             filteredTasks?.map((schedule: Tasks) => (
               <EditableScheduleBox
@@ -92,6 +100,7 @@ const CreatedTasks = (props: any) => {
                   roomName: getRoomFromList(schedule.roomId)?.name,
                 }}
                 key={schedule._id}
+                onDelete={() => refetchTaskList()}
               />
             ))
           )}
@@ -119,12 +128,13 @@ const styles = StyleSheet.create({
   Box1: {
     width: "100%",
     height: "100%",
-    padding: 25,
+    paddingHorizontal: 25,
   },
   Box2: {
     width: "100%",
-    height: "auto",
-    padding: 25,
+    paddingHorizontal: 25,
+    paddingTop: 25,
+    paddingBottom: 10,
   },
   tasksCreatedBy: {
     top: 57,
@@ -156,5 +166,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "flex-start",
+    gap: 10,
   },
 });

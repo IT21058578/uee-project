@@ -18,18 +18,21 @@ import { Feather } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { NativeBaseProvider, Button } from "native-base";
+import { NativeBaseProvider, Button, Stack, Row, useToast } from "native-base";
 import Colors from "../../constants/Colors";
 import { Tasks } from "../../types";
 import { useDeletetaskMutation } from "../../Redux/API/tasks.api.slice";
 import { useGettaskQuery } from "../../Redux/API/tasks.api.slice";
 import moment, { duration } from "moment";
 import { DateUtils } from "../../utils/DateUtils";
+import ConfirmationModal from "../ConfirmationModal";
 
 const EditableScheduleBox = (props: any) => {
-  const [isPopoverVisible, setPopoverVisible] = useState(false);
+  const { isRoomNameVisible = true, isActionsVisible = true, onDelete } = props;
+  const toast = useToast();
   const navigation = useNavigation<any>();
-  const [modalVisible2, setModalVisible2] = useState(false);
+  const [isPopoverVisible, setPopoverVisible] = useState(false);
+  const [isDeleteTaskModalOpen, setIsDeleteTaskModalOpen] = useState(false);
   const [deleteTask, deletedResult] = useDeletetaskMutation();
 
   const taskId = props?._id;
@@ -41,116 +44,108 @@ const EditableScheduleBox = (props: any) => {
     setPopoverVisible(false); // Close the popover
   };
 
-  const handleDelete = () => {
-    setModalVisible2(true);
-  };
-
-  const handleDeletePermission = (taskId: string) => {
-    setModalVisible2(!modalVisible2);
-    deleteTask(taskId);
-  };
-
-  const handleCancle = () => {
-    setModalVisible2(!modalVisible2);
-    setPopoverVisible(false); // Close the popover
-  };
-
   const handleViewClick = () => {
     navigation.navigate("TaskDetail", { taskId });
   };
 
+  const handleDeleteTaskModalConfirm = async () => {
+    try {
+      console.log("Deleting task with id ", taskId);
+      await deleteTask(taskId).unwrap();
+      console.log("Successfully deleted task with id", taskId);
+      toast.show({
+        placement: "top",
+        title: "Successfully Deleted Task",
+        description: "All schedules for affected users have been readjusted",
+      });
+      onDelete?.();
+      setIsDeleteTaskModalOpen(false);
+    } catch (error) {
+      console.error(error);
+      toast.show({
+        placement: "top",
+        title: "An error occurred",
+        description: "Please try again later",
+      });
+    }
+  };
+
   return (
-    <View style={[styles.frameContainer, styles.frameLayout]}>
-      <Pressable onPress={handleViewClick}>
-        <View style={[styles.frame4, styles.frameFlexBox]}>
+    <>
+      <View
+        style={{
+          padding: 20,
+          width: "100%",
+          borderRadius: 4,
+          backgroundColor: Color.ghostwhite,
+        }}
+      >
+        <Pressable
+          onPress={handleViewClick}
+          style={{
+            width: "95%",
+            position: "absolute",
+            height: "170%",
+            zIndex: 1000,
+          }}
+        />
+        <Row space={4} alignItems={"center"}>
           <View style={styles.frameChild} />
-          <View style={styles.projectProgressMeetingParent}>
+          <Stack>
             <Text style={styles.projectProgressMeeting}>{props.name}</Text>
             <Text style={styles.text4}>
               {DateUtils.getDurationAsString(props?.duration)}
             </Text>
-          </View>
-        </View>
-      </Pressable>
+            {isRoomNameVisible && (
+              <Text style={[styles.altriumRoom01Typo]}>{props.roomName}</Text>
+            )}
+          </Stack>
+        </Row>
 
-      <Popover
-        isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
-        onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
-        from={
-          <TouchableWithoutFeedback
-            onPress={() => setPopoverVisible(!isPopoverVisible)}
+        {isActionsVisible && (
+          <Popover
+            isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
+            onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
+            from={
+              <TouchableWithoutFeedback
+                onPress={() => setPopoverVisible(!isPopoverVisible)}
+              >
+                <View style={styles.doted}>
+                  <Entypo name="dots-three-vertical" size={14} color="black" />
+                </View>
+              </TouchableWithoutFeedback>
+            }
           >
-            <View style={styles.doted}>
-              <Entypo name="dots-three-vertical" size={10} color="black" />
+            <View style={styles.menuContainer}>
+              <TouchableOpacity onPress={handleEdit} style={styles.textRow}>
+                <Text>
+                  <Feather name="edit" size={14} color="black" /> Edit
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsDeleteTaskModalOpen(true);
+                  setPopoverVisible(false);
+                }}
+                style={styles.textRow}
+              >
+                <Text>
+                  <AntDesign name="delete" size={14} color="black" /> Delete
+                </Text>
+              </TouchableOpacity>
             </View>
-          </TouchableWithoutFeedback>
-        }
-      >
-        {/* Model to change the Language */}
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={modalVisible2}
-          onRequestClose={() => {
-            Alert.alert("Modal has been closed.");
-            setModalVisible2(!modalVisible2);
-          }}
-        >
-          <View style={styles.modalBackground}>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                <Text style={styles.typoTitle1}>Delete Task</Text>
-                <View style={styles.box1}>
-                  <Text style={styles.typoBoddy}>
-                    Are you sure you want to delete this Task ?
-                  </Text>
-                </View>
-                <View style={styles.box1}>
-                  <NativeBaseProvider>
-                    <View
-                      style={{ flexDirection: "row", marginHorizontal: 20 }}
-                    >
-                      <Button
-                        style={{ marginHorizontal: 20 }}
-                        variant="outline"
-                        colorScheme="fuchsia"
-                        onPress={handleCancle}
-                      >
-                        Canel
-                      </Button>
-                      <Button
-                        colorScheme="fuchsia"
-                        onPress={() => handleDeletePermission(props._id)}
-                      >
-                        Sure
-                      </Button>
-                    </View>
-                  </NativeBaseProvider>
-                </View>
-              </View>
-            </View>
-          </View>
-        </Modal>
-        <View style={styles.menuContainer}>
-          <TouchableOpacity onPress={handleEdit} style={styles.textRow}>
-            <Text>
-              <Feather name="edit" size={14} color="black" /> Edit
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleDelete} style={styles.textRow}>
-            <Text>
-              <AntDesign name="delete" size={14} color="black" /> Delete
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </Popover>
-
-      <View style={[styles.altriumRoom01Wrapper, styles.wrapperLayout]}>
-        <Text style={[styles.altriumRoom01, styles.altriumRoom01Typo]}>
-          {props.roomName}
-        </Text>
+          </Popover>
+        )}
       </View>
-    </View>
+      <ConfirmationModal
+        isOpen={isDeleteTaskModalOpen}
+        onCancel={() => setIsDeleteTaskModalOpen(false)}
+        onConfirm={handleDeleteTaskModalConfirm}
+      >
+        Are you sure you want to delete this task? This will remove and adjust
+        all schedules of the assigned users.
+      </ConfirmationModal>
+    </>
   );
 };
 
@@ -170,8 +165,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   doted: {
-    top: 20,
-    left: 300,
+    position: "absolute",
+    left: "102%",
+    top: "40%",
   },
   altriumRoom01Wrapper: {
     top: 75,
@@ -208,12 +204,16 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   altriumRoom01Typo: {
-    height: 20,
+    paddingVertical: 2,
+    marginTop: 4,
     width: 83,
     fontSize: FontSize.size_3xs,
     fontFamily: Font["poppins-regular"],
     fontWeight: "500",
-    textAlign: "left",
+    textAlign: "center",
+    borderRadius: 4,
+    color: Color.lightcoral_100,
+    backgroundColor: Color.lightcoral_200,
   },
   frame4: {
     top: 15,

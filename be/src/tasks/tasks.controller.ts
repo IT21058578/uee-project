@@ -21,12 +21,14 @@ export class TasksController {
 
   @Post('search')
   async searchTasks(@Body() pageRequest: PageRequest) {
-    return this.tasksService.searchTasks(pageRequest);
+    const page = await this.tasksService.searchTasks(pageRequest);
+    console.log(page);
+    return page;
   }
 
   @Get(':id')
   async getTask(@Param('id', ValidateObjectIdPipe) id: string) {
-    return this.tasksService.getDetailedTask(id);
+    return await this.tasksService.getDetailedTask(id);
   }
 
   @Put('unassign')
@@ -53,7 +55,7 @@ export class TasksController {
     @Param('id', ValidateObjectIdPipe) id: string,
     @Body() editTaskDto: CreateTaskDto,
   ) {
-    return this.tasksService.editTask(id, editTaskDto);
+    return await this.tasksService.editTask(id, editTaskDto);
   }
 
   @Delete(':id')
@@ -65,6 +67,6 @@ export class TasksController {
   @Post()
   @Roles(...Object.values(UserRole))
   async createTask(@Body() createTaskDto: CreateTaskDto) {
-    return this.tasksService.createTask(createTaskDto);
+    return await this.tasksService.createTask(createTaskDto);
   }
 }

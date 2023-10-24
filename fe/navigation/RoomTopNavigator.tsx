@@ -19,7 +19,6 @@ const Tab = createMaterialTopTabNavigator();
 const screenListData = [
   { label: "DETAILS", component: AdminRoomDetail },
   { label: "MEMBERS", component: AdminUserManage },
-  { label: "SCHEDULE", component: AdminRoomSchedule },
   { label: "TASKS", component: AdminCreatedTasks },
 ];
 

@@ -11,7 +11,7 @@ import Font from "../constants/Font";
 import FontSize from "../constants/FontSize";
 import Spacing from "../constants/Spacing";
 
-const AppTextInput: React.FC<TextInputProps> = ({ ...otherProps }) => {
+const AppTextInput: React.FC<TextInputProps> = ({ style, ...otherProps }) => {
   const [focused, setFocused] = useState<boolean>(false);
   return (
     <TextInput
@@ -35,6 +35,7 @@ const AppTextInput: React.FC<TextInputProps> = ({ ...otherProps }) => {
           shadowOpacity: 0.2,
           shadowRadius: Spacing,
         },
+        { ...style },
       ]}
       {...otherProps}
     />

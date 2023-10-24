@@ -5,19 +5,32 @@ import Font from "../../constants/Font";
 import { Schedule } from "../../types";
 import { Color, FontSize, Padding, Border } from "../../Styles/GlobalStyles";
 import { DateUtils } from "../../utils/DateUtils";
+import { Row, Stack } from "native-base";
 
 const RoomScheduleBox = (props: any) => {
+  const { isRoomNameVisible = false } = props;
   return (
-    <View style={[styles.frameContainer, styles.frameLayout]}>
-      <View style={[styles.frame4, styles.frameFlexBox]}>
+    <View
+      style={{
+        flex: 1,
+        padding: 20,
+        width: "100%",
+        borderRadius: 4,
+        backgroundColor: Color.ghostwhite,
+      }}
+    >
+      <Row space={4} alignItems={"center"}>
         <View style={styles.frameChild} />
-        <View style={styles.projectProgressMeetingParent}>
+        <Stack>
           <Text style={styles.projectProgressMeeting}>{props.taskName}</Text>
           <Text style={styles.text4}>
             {DateUtils.getStartEndTimeString(props.startTime, props.endTime)}
           </Text>
-        </View>
-      </View>
+          {isRoomNameVisible && (
+            <Text style={[styles.altriumRoom01Typo]}>{props.roomName}</Text>
+          )}
+        </Stack>
+      </Row>
     </View>
   );
 };
@@ -58,12 +71,16 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   altriumRoom01Typo: {
-    height: 20,
+    paddingVertical: 2,
+    marginTop: 4,
     width: 83,
     fontSize: FontSize.size_3xs,
     fontFamily: Font["poppins-regular"],
     fontWeight: "500",
-    textAlign: "left",
+    textAlign: "center",
+    borderRadius: 4,
+    color: Color.lightcoral_100,
+    backgroundColor: Color.lightcoral_200,
   },
   frame4: {
     top: 15,

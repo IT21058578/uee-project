@@ -1,6 +1,7 @@
 import { Button, Input, Modal, Stack, Text } from "native-base";
 import React, { useState } from "react";
 import { useAssignUserToRoomMutation } from "../Redux/API/users.api.slice";
+import Colors from "../constants/Colors";
 
 type Props = {
   isOpen: boolean;
@@ -35,7 +36,7 @@ const InviteMemberModal = (props: Props) => {
     <Modal isOpen={isOpen} onClose={onCancel}>
       <Modal.Content>
         <Modal.CloseButton onPress={onCancel} />
-        <Modal.Header>Invite new member</Modal.Header>
+        <Modal.Header borderBottomWidth={0}>Invite new member</Modal.Header>
         <Modal.Body>
           <Stack space={3}>
             <Text>
@@ -49,13 +50,37 @@ const InviteMemberModal = (props: Props) => {
             />
           </Stack>
         </Modal.Body>
-        <Modal.Footer>
-          <Button.Group space={2}>
-            <Button variant="ghost" onPress={onCancel}>
-              Cancel
-            </Button>
-            <Button onPress={handleInviteMemberConfirm}>Confirm</Button>
-          </Button.Group>
+        <Modal.Footer
+          borderTopWidth={0}
+          justifyContent={"space-between"}
+          style={{ gap: 12 }}
+        >
+          <Button
+            variant={"subtle"}
+            style={{
+              borderRadius: 4,
+              backgroundColor: Colors.lightPrimary,
+              flexGrow: 1,
+            }}
+            onPress={onCancel}
+          >
+            <Text style={{ color: Colors.primary, fontWeight: "600" }}>
+              CANCEL
+            </Text>
+          </Button>
+          <Button
+            variant={"subtle"}
+            style={{
+              borderRadius: 4,
+              backgroundColor: Colors.primary,
+              flexGrow: 1,
+            }}
+            onPress={onCancel}
+          >
+            <Text style={{ color: Colors.colorWhite, fontWeight: "600" }}>
+              CONFIRM
+            </Text>
+          </Button>
         </Modal.Footer>
       </Modal.Content>
     </Modal>

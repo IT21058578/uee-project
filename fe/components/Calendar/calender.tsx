@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   dateSection: {
     width: "100%",
-    padding: 15,
+    paddingVertical: 15,
   },
   scroll: {
     height: 100,

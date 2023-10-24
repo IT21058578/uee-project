@@ -18,13 +18,16 @@ import {
 import { setRoomID } from "../../Redux/slices/userSlice";
 import { useDispatch } from "react-redux";
 import { useDeleteroomMutation } from "../../Redux/API/rooms.api.slice";
-import { Skeleton } from "native-base";
+import { Skeleton, useToast } from "native-base";
+import ConfirmationModal from "../ConfirmationModal";
 
 const RoomBox = (props: any) => {
   const { isActionsVisible, _id: roomId, onDelete } = props;
+  const toast = useToast();
   const navigation = useNavigation<any>();
   const dispatch = useDispatch();
   const [isPopoverVisible, setPopoverVisible] = useState(false);
+  const [isDeleteRoomModalOpen, setIsDeleteRoomModalOpen] = useState(false);
   const { data: taskList, isFetching: isTaskListFetching } =
     useGetAllTasksInRoomQuery({ roomId });
   const [deleteRoom] = useDeleteroomMutation();
@@ -37,14 +40,29 @@ const RoomBox = (props: any) => {
     setPopoverVisible(false); // Close the popover
   };
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
+    setPopoverVisible(false);
+    setIsDeleteRoomModalOpen((prev) => !prev);
+  };
+
+  const handleDeleteModalConfirm = async () => {
     try {
       console.log("Deleting room with id ", roomId);
       await deleteRoom(roomId).unwrap();
       console.log("Successfully deleted room");
+      toast.show({
+        placement: "top",
+        title: "Successfully Deleted Room",
+        description: "All schedules, members and tasks have been cleaned up",
+      });
       onDelete?.(roomId);
     } catch (error) {
       console.error(error);
+      toast.show({
+        placement: "top",
+        title: "An error occurred",
+        description: "Please try again later",
+      });
     }
     setPopoverVisible(false); // Close the popover
   };
@@ -55,67 +73,84 @@ const RoomBox = (props: any) => {
   };
 
   return (
-    <View style={styles.roomManagmentProfileSetti}>
-      <View>
-        <View style={[styles.rectangleParent, styles.groupChildPosition]}>
-          <View style={[styles.groupChild, styles.groupLayout]} />
-          {isTaskListFetching ? (
-            <Skeleton
-              style={[styles.task, styles.taskTypo]}
-              mb="3"
-              h="4"
-              maxW="10"
-              rounded="4"
-              startColor="violet.300"
-            />
-          ) : (
-            <Text style={[styles.task, styles.taskTypo]}>
-              {taskCount} Tasks
+    <>
+      <View style={styles.roomManagmentProfileSetti}>
+        <View>
+          <View style={[styles.rectangleParent, styles.groupChildPosition]}>
+            <View style={[styles.groupChild, styles.groupLayout]} />
+            {isTaskListFetching ? (
+              <Skeleton
+                style={[styles.task, styles.taskTypo]}
+                mb="3"
+                h="4"
+                maxW="10"
+                rounded="4"
+                startColor="violet.300"
+              />
+            ) : (
+              <Text style={[styles.task, styles.taskTypo]}>
+                {taskCount} Tasks
+              </Text>
+            )}
+            <Text style={[styles.seProjectGroup, styles.taskTypo]}>
+              {props.name}
             </Text>
+            <Pressable
+              style={[styles.groupItem, styles.groupLayout]}
+              onPress={handleNavigate}
+            />
+            <Image
+              style={[styles.iconlycurvedprofile, styles.groupIconLayout]}
+              contentFit="cover"
+              source={require("../../assets/Profile.png")}
+            />
+          </View>
+          {isActionsVisible && (
+            <Popover
+              isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
+              onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
+              from={
+                <TouchableOpacity
+                  onPress={() => setPopoverVisible(!isPopoverVisible)}
+                >
+                  <View style={styles.newDot}>
+                    <Entypo
+                      name="dots-three-vertical"
+                      size={15}
+                      color="black"
+                    />
+                  </View>
+                </TouchableOpacity>
+              }
+            >
+              <View style={styles.menuContainer}>
+                <TouchableOpacity onPress={handleEdit} style={styles.textRow}>
+                  <Text>
+                    <Feather name="edit" size={14} color="black" /> Edit
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleDeleteClick}
+                  style={styles.textRow}
+                >
+                  <Text>
+                    <AntDesign name="delete" size={14} color="black" /> Delete
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </Popover>
           )}
-          <Text style={[styles.seProjectGroup, styles.taskTypo]}>
-            {props.name}
-          </Text>
-          <Pressable
-            style={[styles.groupItem, styles.groupLayout]}
-            onPress={handleNavigate}
-          />
-          <Image
-            style={[styles.iconlycurvedprofile, styles.groupIconLayout]}
-            contentFit="cover"
-            source={require("../../assets/Profile.png")}
-          />
         </View>
-        {isActionsVisible && (
-          <Popover
-            isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
-            onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
-            from={
-              <TouchableOpacity
-                onPress={() => setPopoverVisible(!isPopoverVisible)}
-              >
-                <View style={styles.newDot}>
-                  <Entypo name="dots-three-vertical" size={15} color="black" />
-                </View>
-              </TouchableOpacity>
-            }
-          >
-            <View style={styles.menuContainer}>
-              <TouchableOpacity onPress={handleEdit} style={styles.textRow}>
-                <Text>
-                  <Feather name="edit" size={14} color="black" /> Edit
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleDelete} style={styles.textRow}>
-                <Text>
-                  <AntDesign name="delete" size={14} color="black" /> Delete
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </Popover>
-        )}
       </View>
-    </View>
+      <ConfirmationModal
+        isOpen={isDeleteRoomModalOpen}
+        onCancel={() => setIsDeleteRoomModalOpen(false)}
+        onConfirm={handleDeleteModalConfirm}
+      >
+        Are you sure you want to delete this room? All members, schedules and
+        tasks in this room will be unassigned and cleaned up.
+      </ConfirmationModal>
+    </>
   );
 };
 
@@ -207,7 +242,6 @@ const styles = StyleSheet.create({
   roomManagmentProfileSetti: {
     width: "40%",
     height: 150,
-    overflow: "hidden",
   },
 });
 

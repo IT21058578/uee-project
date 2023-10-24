@@ -31,6 +31,7 @@ import Calendar from "../components/Calendar/calender";
 import moment, { Moment } from "moment";
 import Toast from "react-native-toast-message";
 import PrioritySelector from "../components/PrioritySelector";
+import PrimaryButton from "../components/PrimaryButton";
 dayjs.extend(duration);
 
 const EditTask = ({ route }: { route: any }) => {
@@ -191,7 +192,6 @@ const EditTask = ({ route }: { route: any }) => {
           <NativeBaseProvider>
             <TextArea
               h={20}
-              style={styles.descriptionInput}
               placeholder="Enter Description"
               w="100%"
               backgroundColor={Colors.colorGhostwhite}
@@ -218,32 +218,19 @@ const EditTask = ({ route }: { route: any }) => {
           {userData?.content.map((user: any) => (
             <View style={styles.box4} key={user._id}>
               <Text style={styles.typoBoddy}>{user.firstName}</Text>
-              <NativeBaseProvider>
-                <View style={styles.CheckboxSpace1}>
-                  <Checkbox
-                    defaultIsChecked={task?.assignedUserIds.includes(user._id)}
-                    value={user._id}
-                    colorScheme="purple"
-                    onChange={() => handleCheckboxChange(user._id)}
-                    aria-label="Purple Checkbox"
-                  />
-                </View>
-              </NativeBaseProvider>
+              <View style={styles.CheckboxSpace1}>
+                <Checkbox
+                  defaultIsChecked={task?.assignedUserIds.includes(user._id)}
+                  value={user._id}
+                  colorScheme="darkBlue"
+                  onChange={() => handleCheckboxChange(user._id)}
+                />
+              </View>
             </View>
           ))}
         </View>
         <View style={styles.box1}>
-          <NativeBaseProvider>
-            <Button
-              isLoading={isUpdateTaskLoading}
-              size="lg"
-              backgroundColor={Colors.ppButtons}
-              borderRadius={10}
-              onPress={() => setShowPicker(true)}
-            >
-              Schedule
-            </Button>
-          </NativeBaseProvider>
+          <PrimaryButton label="Schedule" onPress={() => setShowPicker(true)} />
         </View>
         <TimerPickerModal
           visible={showPicker}
@@ -341,10 +328,8 @@ const styles = StyleSheet.create({
   box4: {
     flex: 1,
     flexDirection: "row",
+    justifyContent: "space-between",
     padding: 10,
-  },
-  descriptionInput: {
-    fontSize: 14,
   },
 });
 

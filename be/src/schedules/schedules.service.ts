@@ -81,6 +81,7 @@ export class SchedulesService {
         roomId: schedule.roomId,
         userId,
         tag: relevantRoom?.tag!,
+        roomName: relevantRoom?.name ?? '',
         date,
         totalScheduled: dayjs.duration(totalScheduledInMs, 'ms'),
         taskList: schedule.taskList.map((item) => {
@@ -117,6 +118,7 @@ export class SchedulesService {
       userId,
       tag: existingRoom.tag,
       date: existingSchedule.date,
+      roomName: existingRoom.name ?? '',
       totalScheduled: dayjs.duration(totalScheduledInMs, 'ms'),
       taskList: existingSchedule.taskList.map((item) => {
         const task = allTasks.find((o) => o.id === item.taskId);
@@ -178,6 +180,16 @@ export class SchedulesService {
         });
       });
     });
+  }
+
+  async deleteRoomSchedulesOfUsers(userIds: string[], roomId: string) {
+    const deleteResult = await this.scheduleModel.deleteMany({
+      roomId,
+      userId: { $in: userIds },
+    });
+    this.logger.log(
+      `Deleted ${deleteResult.deletedCount} schedules in deleted room with id ${roomId}`,
+    );
   }
 
   private buildScheduleTaskList(

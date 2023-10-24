@@ -1,36 +1,26 @@
 import * as React from "react";
-import {
-  Text,
-  StyleSheet,
-  View,
-  Pressable,
-  ScrollView,
-  TouchableWithoutFeedback,
-} from "react-native";
+import { Text, StyleSheet, View, Pressable, ScrollView } from "react-native";
 import { Image } from "expo-image";
 import Colors from "../constants/Colors";
 import Font from "../constants/Font";
 import FontSize from "../constants/FontSize";
 import RoomBox from "../components/Rooms/RoomBox";
-import { roomsApi } from "../data/virtualData";
-import { RoomType } from "../types";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import { TouchableOpacity } from "react-native";
 import Popover from "react-native-popover-view";
 import { Ionicons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
-import NonAdminRoomBox from "../components/Rooms/NonAdminRoomBox";
 import { useGetAllroomsQuery } from "../Redux/API/rooms.api.slice";
-import { ActivityIndicator } from "react-native";
-import { getItem } from "../utils/Genarals";
 import RoutePaths from "../utils/RoutePaths";
 import { useEffect } from "react";
 import { removeItem } from "../utils/Genarals";
 import { logoutCurrentUser } from "../Redux/slices/userSlice";
 import { useAppDispatch, useAppSelector } from "../hooks/redux-hooks";
-import { Button } from "native-base";
+import { Button, Stack } from "native-base";
 import LoadingIndictator from "../components/LoadingIndictator";
+import PrimaryButton from "../components/PrimaryButton";
+import EmptyListPlaceholder from "../components/EmptyListPlaceholder";
 
 const AdminRoomComponent = () => {
   const navigation = useNavigation();
@@ -62,29 +52,39 @@ const AdminRoomComponent = () => {
         display: "flex",
         flexDirection: "row",
         flexWrap: "wrap",
-        paddingLeft: 45,
-        columnGap: 10,
+        columnGap: 15,
+        width: "100%",
+        justifyContent: "center",
       }}
     >
-      {roomList?.map((room: any) => (
-        <RoomBox
-          {...room}
-          isActionsVisible={isRoomAdmin(room)}
-          onDelete={() => refetchRoomList()}
+      {roomList?.length ? (
+        roomList?.map((room: any) => (
+          <RoomBox
+            {...room}
+            isActionsVisible={isRoomAdmin(room)}
+            onDelete={() => refetchRoomList()}
+          />
+        ))
+      ) : (
+        <EmptyListPlaceholder
+          title={"No Rooms Found"}
+          content={
+            "Click the button above to get started by making a room, or wait to be invited to another room."
+          }
         />
-      ))}
+      )}
     </View>
   );
 };
 
-const RoomManagmentProfileSetti = () => {
-  const dispatch = useAppDispatch();
+const ProfileActionsButton = () => {
   const navigation = useNavigation();
-  const [isPopoverVisible, setPopoverVisible] = useState(false);
+  const dispatch = useAppDispatch();
+  const [isPopoverVisible, setIsPopoverVisible] = useState<boolean>(false);
 
   const handleSettings = () => {
     navigation.navigate("Settings");
-    setPopoverVisible(false); // Close the popover
+    setIsPopoverVisible(false); // Close the popover
   };
 
   const handleLogout = () => {
@@ -92,8 +92,51 @@ const RoomManagmentProfileSetti = () => {
     removeItem("user");
     dispatch(logoutCurrentUser);
     navigation.navigate("Login");
-    setPopoverVisible(false); // Close the popover
+    setIsPopoverVisible(false); // Close the popover
   };
+
+  return (
+    <Popover
+      isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
+      onRequestClose={() => setIsPopoverVisible(false)} // Close the Popover when backdrop is pressed
+      from={
+        <Pressable onPress={() => setIsPopoverVisible((prev) => !prev)}>
+          <Image
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+            }}
+            source={require("../assets/More-Square.png")}
+          />
+        </Pressable>
+      }
+    >
+      <View style={styles.menuContainer}>
+        <TouchableOpacity onPress={handleSettings} style={styles.textRow}>
+          <Text>
+            <AntDesign name="setting" size={14} color="black" /> Settings
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleLogout} style={styles.textRow}>
+          <Text>
+            <Ionicons
+              name="log-out-outline"
+              size={14}
+              color="black"
+              onPress={handleLogout}
+            />{" "}
+            Log Out
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </Popover>
+  );
+};
+
+const RoomManagmentProfileSetti = () => {
+  const navigation = useNavigation();
+  const user = useAppSelector((state) => state.user);
 
   const handleNavigate = () => {
     // Navigate to the desired screen when the Pressable is pressed
@@ -101,88 +144,43 @@ const RoomManagmentProfileSetti = () => {
   };
 
   return (
-    <View style={styles.roomManagmentProfileSetti}>
-      <ScrollView>
-        <View style={styles.Box}>
-          <Text
-            style={[styles.tharinduGunasekara, styles.roomsManageByFlexBox]}
-          >
-            Tharindu Gunasekara
-          </Text>
-          <Text style={[styles.tharindugmailcom, styles.roomsManageByFlexBox]}>
-            tharindu@gmail.com
-          </Text>
-          <View style={styles.groupParent}>
-            <View style={[styles.ellipseParent, styles.ellipseParentPosition]}>
+    <View>
+      <ScrollView style={{ padding: 25, marginTop: 25 }}>
+        <View style={{ position: "absolute", zIndex: 1000, left: "92%" }}>
+          <ProfileActionsButton />
+        </View>
+        <Stack space={4}>
+          <Stack space={4} alignItems={"center"} justifyContent={"center"}>
+            <View
+              style={{
+                backgroundColor: "white",
+                borderRadius: 16,
+                shadowOffset: { width: 0, height: 10 },
+                shadowColor: Colors.primary,
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+              }}
+            >
               <Image
-                style={styles.groupChild}
-                contentFit="cover"
-                source={require("../assets/Ellipse-236.png")}
-              />
-              <Image
-                style={[styles.icon, styles.iconLayout]}
+                style={{
+                  width: 50,
+                  height: 50,
+                }}
                 contentFit="cover"
                 source={require("../assets/58-13.png")}
               />
             </View>
 
-            <Popover
-              isVisible={isPopoverVisible} // Pass the state variable as a prop to control visibility
-              onRequestClose={() => setPopoverVisible(false)} // Close the Popover when backdrop is pressed
-              from={
-                <View style={styles.groupWrapper}>
-                  <View style={styles.groupPosition}>
-                    <TouchableWithoutFeedback
-                      onPress={() => setPopoverVisible(!isPopoverVisible)}
-                    >
-                      <View style={[styles.groupItem, styles.groupPosition]}>
-                        <Image
-                          style={[
-                            styles.iconlycurvedmoreSquare,
-                            styles.iconLayout,
-                          ]}
-                          resizeMode="cover"
-                          source={require("../assets/More-Square.png")}
-                        />
-                      </View>
-                    </TouchableWithoutFeedback>
-                  </View>
-                </View>
-              }
-            >
-              <View style={styles.menuContainer}>
-                <TouchableOpacity
-                  onPress={handleSettings}
-                  style={styles.textRow}
-                >
-                  <Text>
-                    <AntDesign name="setting" size={14} color="black" />{" "}
-                    Settings
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleLogout} style={styles.textRow}>
-                  <Text>
-                    <Ionicons
-                      name="log-out-outline"
-                      size={14}
-                      color="black"
-                      onPress={handleLogout}
-                    />{" "}
-                    Log Out
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </Popover>
+            <Text
+              style={styles.nameText}
+            >{`${user.firstName} ${user.lastName}`}</Text>
+            <Text style={styles.emailText}>{user.email}</Text>
+          </Stack>
+          <PrimaryButton label={"Create Room +"} onPress={handleNavigate} />
+          <View style={{ width: "100%" }}>
+            <AdminRoomComponent />
           </View>
-          <View style={styles.roomsManageByYouParent}>
-            <Button onPress={handleNavigate}>
-              <Text>Create Room +</Text>
-            </Button>
-          </View>
-        </View>
-        <View style={styles.Box1}>
-          <AdminRoomComponent />
-        </View>
+        </Stack>
       </ScrollView>
     </View>
   );
@@ -249,22 +247,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     width: "100%",
   },
-  tharinduGunasekara: {
-    top: 132,
-    left: 94,
+  nameText: {
     fontSize: 20,
     fontFamily: Font["poppins-semiBold"],
     fontWeight: "600",
     color: Colors.darkblue,
-    position: "absolute",
   },
-  tharindugmailcom: {
-    top: 176,
-    left: 124,
+  emailText: {
     fontSize: 14,
-    lineHeight: 17,
     fontFamily: Font["poppins-regular"],
-    position: "absolute",
   },
   groupChild: {
     top: -6,
@@ -369,17 +360,8 @@ const styles = StyleSheet.create({
     top: 228,
     left: 35,
     width: 305,
-    height: 40,
+    height: 60,
     position: "absolute",
-  },
-  roomManagmentProfileSetti: {
-    top: 10,
-    maxHeight: "85%",
-    backgroundColor: "#feffff",
-    flex: 1,
-    height: 812,
-    overflow: "hidden",
-    width: "100%",
   },
 });
 

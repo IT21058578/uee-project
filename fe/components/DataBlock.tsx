@@ -16,11 +16,7 @@ type Props = {
 const DataBlock = (props: Props) => {
   const { title, content, wrapperStyle, isLoading } = props;
   return (
-    <LinearGradient
-      style={[styles.dataBlockWrapper, wrapperStyle]}
-      locations={[0, 1]}
-      colors={["#fe9d9d", "#e77d7d"]}
-    >
+    <View style={[styles.dataBlockWrapper, wrapperStyle]}>
       {false ? (
         <>
           <Skeleton
@@ -45,7 +41,7 @@ const DataBlock = (props: Props) => {
           <Text style={styles.contentText}>{content}</Text>
         </>
       )}
-    </LinearGradient>
+    </View>
   );
 };
 
@@ -57,16 +53,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 20,
     paddingVertical: 20,
+    backgroundColor: Colors.lightPrimary,
   },
   titleText: {
-    color: Colors.colorGray_100,
     fontFamily: Font["poppins-bold"],
     fontSize: FontSize.medium,
+    color: Colors.primary,
   },
   contentText: {
-    color: Colors.colorWhite,
     fontFamily: Font["poppins-regular"],
     fontSize: FontSize.medium,
+    color: Colors.midPrimary,
   },
 });
 

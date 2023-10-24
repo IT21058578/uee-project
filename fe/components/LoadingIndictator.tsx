@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   loaderWrapper: {
     display: "flex",
     height: "auto",
-    width: "auto",
+    width: "100%",
     justifyContent: "center",
   },
 });

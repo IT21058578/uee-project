@@ -102,7 +102,7 @@ const TaskDetail = (props: { route: any }) => {
           <Image source={require("../assets/Line_19.png")} />
         </View>
         <View style={styles.box1}>
-          <Text style={styles.typoBoddy}>Assign Members</Text>
+          <Text style={styles.typoBoddy}>Assigned Members</Text>
         </View>
         <View style={styles.box3}>
           {task?.assignedUserIds.map((userId: string) => (
@@ -123,14 +123,10 @@ const TaskAssignedMemberItem: FC<{ id: string }> = (props) => {
   };
 
   return (
-    <View style={styles.box1}>
+    <View>
       <View style={styles.box4}>
         <Text style={styles.typoBoddy1}>{buildName()}</Text>
-        <View style={styles.CheckboxSpace1}>
-          <Text style={styles.text}>✅</Text>
-        </View>
       </View>
-      <Image source={require("../assets/Line_19.png")} />
     </View>
   );
 };

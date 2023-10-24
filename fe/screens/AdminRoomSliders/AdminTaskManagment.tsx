@@ -10,55 +10,71 @@ import AppTextInput from "../../components/AppTextInput";
 import { TouchableWithoutFeedback } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Tasks } from "../../types";
-import { useGetAlltasksQuery } from "../../Redux/API/tasks.api.slice";
+import {
+  useGetAllTasksInRoomQuery,
+  useGetAlltasksQuery,
+} from "../../Redux/API/tasks.api.slice";
 import EditableScheduleBox from "../../components/schedule/EditableScheduleBox";
 import { ActivityIndicator } from "react-native";
 import { useEffect, useState } from "react";
-import { useGetAllroomsQuery } from "../../Redux/API/rooms.api.slice";
+import {
+  useGetAllroomsQuery,
+  useGetroomQuery,
+} from "../../Redux/API/rooms.api.slice";
+import { Button } from "native-base";
+import Colors from "../../constants/Colors";
+import LoadingIndictator from "../../components/LoadingIndictator";
+import EmptyListPlaceholder from "../../components/EmptyListPlaceholder";
+import { useAppSelector } from "../../hooks/redux-hooks";
+import PrimaryButton from "../../components/PrimaryButton";
 
 const AdminCreatedTasks = () => {
   const navigation = useNavigation(); // Get the navigation object
+  const userId = useAppSelector((state) => state.user._id);
+  const roomId = useAppSelector((state) => state.user.roomId);
+  const {
+    data: { content: taskList } = {},
+    refetch: refetchTaskList,
+    isFetching: isTaskListFetching,
+  } = useGetAllTasksInRoomQuery({ roomId });
+  const [searchText, setSearchText] = useState("");
+  const { data: roomData, refetch: refetchRoomData } = useGetroomQuery(roomId);
 
-  const handleNav = () => {
-    // Navigate to the previous screen
-    navigation.navigate("AddTask");
+  const isCurrentUserAdmin = roomData?.adminIds?.includes(userId);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      refetchTaskList();
+      refetchRoomData();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const handleAddTaskClick = () => {
+    navigation.navigate("AddTask" as any, { roomId });
   };
 
-  const {
-    isLoading,
-    data: taskList,
-    isSuccess,
-    isError,
-  } = useGetAlltasksQuery("api/tasks");
-  const [searchText, setSearchText] = useState("");
-
-  // Function to filter tasks based on search text
-  const filteredTasks = taskList?.content.filter((task: Tasks) =>
-    task.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const getFilteredTasks = () => {
+    if (!searchText) return taskList;
+    return taskList?.filter((task: { name: string }) =>
+      task.name.toLowerCase().includes(searchText.toLowerCase())
+    );
+  };
 
   return (
     <View style={styles.flexBox}>
       <View style={styles.Box2}>
         <AppTextInput
+          style={{ flexGrow: 1 }}
           placeholder="🔍   Search tasks"
           onChangeText={(text) => setSearchText(text)}
         />
-      </View>
-      <View style={styles.Box3}>
-        <View style={styles.roomManagmentProfileSetti}>
-          <TouchableWithoutFeedback onPress={handleNav}>
-            <View style={styles.rectangleParent}>
-              <View style={styles.groupChild} />
-              <Text style={styles.newTask}>New Task</Text>
-              <Image
-                style={styles.iconlycurvedhome}
-                contentFit="cover"
-                source={require("../../assets/Home.png")}
-              />
-            </View>
-          </TouchableWithoutFeedback>
-        </View>
+        <PrimaryButton
+          label={"+"}
+          buttonStyle={{ width: 60 }}
+          textStyle={{ fontSize: 24 }}
+          onPress={handleAddTaskClick}
+        />
       </View>
       <View style={styles.Box1}>
         <ScrollView
@@ -68,15 +84,29 @@ const AdminCreatedTasks = () => {
           pagingEnabled={true}
           contentContainerStyle={styles.frameScrollViewContent}
         >
-          {isLoading || isError ? (
-            <ActivityIndicator
-              style={styles.contentContainer}
-              color="#0000ff"
-              size="large"
+          {isTaskListFetching ? (
+            <LoadingIndictator />
+          ) : getFilteredTasks() === undefined ||
+            getFilteredTasks()?.length === 0 ? (
+            <EmptyListPlaceholder
+              title={"No Tasks Found"}
+              content={
+                !searchText
+                  ? "Use the button above to add some tasks to this room"
+                  : "No tasks found for this search key"
+              }
             />
           ) : (
-            filteredTasks?.map((schedule: Tasks) => {
-              return <EditableScheduleBox {...schedule} key={schedule._id} />;
+            getFilteredTasks()?.map((schedule: Tasks) => {
+              return (
+                <EditableScheduleBox
+                  {...schedule}
+                  key={schedule._id}
+                  isRoomNameVisible={false}
+                  isActionsVisible={isCurrentUserAdmin}
+                  onDelete={() => refetchTaskList()}
+                />
+              );
             })
           )}
         </ScrollView>
@@ -150,12 +180,15 @@ const styles = StyleSheet.create({
   Box1: {
     width: "100%",
     height: "100%",
-    padding: 25,
+    paddingHorizontal: 25,
+    marginTop: 10,
   },
   Box2: {
-    width: "100%",
-    height: "auto",
-    padding: 25,
+    display: "flex",
+    flexDirection: "row",
+    paddingHorizontal: 25,
+    paddingTop: 10,
+    gap: 10,
   },
   Box3: {
     width: "100%",
@@ -167,5 +200,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     justifyContent: "flex-start",
+    gap: 10,
   },
 });

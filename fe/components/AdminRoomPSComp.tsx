@@ -48,10 +48,6 @@ const AdminScheduleScreen = (selectedDate: any, roomId: any) => {
           <View style={styles.timeSlotContainer}>
             <Text style={styles.timeSlot}>{item[0]}</Text>
             {item[1].map((schedule: Schedule) => (
-              //   <View key={schedule.id} style={styles.scheduleItem}>
-              //     <Text>{schedule.title}</Text>
-              //     <Text>{schedule.startTime} - {schedule.endTime}</Text>
-              //   </View>
               <AdminRoomScheduleBox {...schedule} key={schedule._id} />
             ))}
           </View>

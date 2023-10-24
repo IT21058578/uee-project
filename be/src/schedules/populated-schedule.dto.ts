@@ -7,6 +7,7 @@ export class PopulatedScheduleDto {
   date: Date;
   tag: RoomTag;
   totalScheduled: Duration;
+  roomName: string;
   taskList: {
     taskId: string;
     taskName: string;

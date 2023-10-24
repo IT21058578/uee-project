@@ -18,6 +18,7 @@ import {
   useGetroomQuery,
   useUnassignRoomAdminMutation,
 } from "../../Redux/API/rooms.api.slice";
+import PrimaryButton from "../../components/PrimaryButton";
 
 const AdminUserManage = () => {
   const roomId = useAppSelector((state) => state.user.roomId);
@@ -81,9 +82,10 @@ const AdminUserManage = () => {
     <>
       <View>
         <ScrollView contentContainerStyle={styles.container}>
-          <Button onPress={() => setIsInviteUserModalOpen(true)}>
-            Add Member +
-          </Button>
+          <PrimaryButton
+            label="Add Member +"
+            onPress={() => setIsInviteUserModalOpen(true)}
+          />
           <View style={styles.box3}>
             {isUsersListFetching ? (
               <LoadingIndictator />
@@ -94,8 +96,6 @@ const AdminUserManage = () => {
                   alignItems={"center"}
                   marginX={2}
                   height={12}
-                  borderBottomColor={"gray.200"}
-                  borderBottomWidth={2}
                   marginTop={2}
                   paddingBottom={2}
                 >
@@ -107,31 +107,40 @@ const AdminUserManage = () => {
                       <Row space={2}>
                         {roomData?.adminIds?.includes(user._id) ? (
                           <Button
+                            style={{
+                              backgroundColor: Colors.primary,
+                            }}
                             onPress={() => {
                               setSelectedUserId(user._id);
                               setIsUnassignAdminModalOpen(true);
                             }}
                           >
-                            Remove Admin
+                            DOWNGRADE
                           </Button>
                         ) : (
                           <Button
+                            style={{
+                              backgroundColor: Colors.primary,
+                            }}
                             onPress={() => {
                               setSelectedUserId(user._id);
                               setIsMakeAdminModalOpen(true);
                             }}
                           >
-                            Make Admin
+                            ELEVATE
                           </Button>
                         )}
 
                         <Button
+                          style={{
+                            backgroundColor: Colors.primary,
+                          }}
                           onPress={() => {
                             setSelectedUserId(user._id);
                             setIsUnassignUserModalOpen(true);
                           }}
                         >
-                          Remove
+                          KICK
                         </Button>
                       </Row>
                     </Column>
@@ -144,7 +153,6 @@ const AdminUserManage = () => {
       </View>
       <ConfirmationModal
         isOpen={isUnassignUserModalOpen}
-        title={"Are you sure?"}
         onCancel={() => setIsUnassignUserModalOpen(false)}
         onConfirm={handleUnassignUserModalConfirm}
       >
@@ -153,7 +161,6 @@ const AdminUserManage = () => {
       </ConfirmationModal>
       <ConfirmationModal
         isOpen={isMakeAdminModalOpen}
-        title={"Are you sure?"}
         onCancel={() => setIsMakeAdminModalOpen(false)}
         onConfirm={handleMakeAdminModalConfirm}
       >
@@ -162,7 +169,6 @@ const AdminUserManage = () => {
       </ConfirmationModal>
       <ConfirmationModal
         isOpen={isUnassignAdminModalOpen}
-        title={"Are you sure?"}
         onCancel={() => setIsUnassignAdminModalOpen(false)}
         onConfirm={handleUnassignAdminModalConfirm}
       >

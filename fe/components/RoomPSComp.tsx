@@ -11,6 +11,7 @@ import { useAppSelector } from "../hooks/redux-hooks";
 import moment from "moment";
 import { Color } from "../Styles/GlobalStyles";
 import { DateUtils } from "../utils/DateUtils";
+import EmptyListPlaceholder from "./EmptyListPlaceholder";
 
 interface ScheduleScreenProps {
   selectedDate?: Date;
@@ -111,13 +112,18 @@ const ScheduleScreen: React.FC<ScheduleScreenProps> = ({
           );
         }}
         ListEmptyComponent={
-          <View style={styles.emptyTaskListView}>
-            <Text style={styles.emptyTaskListText}>
-              {selectedCategory
-                ? `No ${selectedCategory.toLocaleLowerCase()} tasks scheduled`
-                : "No tasks scheduled"}
-            </Text>
-          </View>
+          <EmptyListPlaceholder
+            title={"Schedule is empty"}
+            content={
+              selectedCategory
+                ? `No ${selectedCategory.toLocaleLowerCase()} tasks scheduled for ${moment(
+                    selectedDate
+                  ).format("MMM Do")}`
+                : `No tasks scheduled for ${moment(selectedDate).format(
+                    "MMM Do"
+                  )}`
+            }
+          />
         }
       />
     </View>

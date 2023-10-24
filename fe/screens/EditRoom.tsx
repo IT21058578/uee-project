@@ -11,7 +11,7 @@ import Font from "../constants/Font";
 import Colors from "../constants/Colors";
 import FontSize from "../constants/FontSize";
 import { useNavigation } from "@react-navigation/native";
-import { NativeBaseProvider, Input, TextArea } from "native-base";
+import { NativeBaseProvider, Input, TextArea, useToast } from "native-base";
 import { Button, Stack } from "native-base";
 import { useEffect, useState } from "react";
 import TagButton from "../components/TagButton";
@@ -24,6 +24,7 @@ import LoadingIndictator from "../components/LoadingIndictator";
 const EditRoom = (props: any) => {
   const navigation = props.navigation;
   const roomId: string = props.route?.params?.roomId;
+  const toast = useToast();
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [updateRoom, { isLoading: isUpdateRoomLoading }] =
     useUpdateroomMutation();
@@ -50,9 +51,19 @@ const EditRoom = (props: any) => {
       console.log("Submitted Edited Room Data : ", roomId, formData);
       await updateRoom({ roomId, formData }).unwrap();
       console.log("Succesfully Edited room data");
+      toast.show({
+        placement: "top",
+        title: "Successfully Edited Room",
+        description: "All room details have been updated",
+      });
       handleBackNav();
     } catch (error) {
       console.error(error);
+      toast.show({
+        placement: "top",
+        title: "An error occurred",
+        description: "Please try again later",
+      });
     }
   };
 
