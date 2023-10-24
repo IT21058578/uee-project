@@ -11,7 +11,9 @@ const room = createSlice({
   }>,
   reducers: {
     setRoom: (state, { payload }) => {
+      console.log("BRUHHHH", payload);
       state = payload;
+      console.log("BRuh", state);
     },
   },
 });

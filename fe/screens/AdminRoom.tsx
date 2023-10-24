@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { View, StyleSheet } from "react-native";
 import TopBarRoom from "../components/Rooms/TopBarRoom"; // Import your TopBarRoom component
-import TopBarWithTabs from "../navigation/RoomTopNavigator"; // Import your TopBarWithTabs component
 import { useAppDispatch, useAppSelector } from "../hooks/redux-hooks";
 import { useGetroomQuery } from "../Redux/API/rooms.api.slice";
 import { setRoom } from "../Redux/slices/roomSlice";
+import TopBarWithTabs from "../navigation/RoomTopNavigator";
 
 const AdminRoom = () => {
   const dispatch = useAppDispatch();

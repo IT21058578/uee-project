@@ -18,6 +18,7 @@ import { useGettaskQuery } from "../Redux/API/tasks.api.slice";
 import { FC } from "react";
 import { useGetUserQuery } from "../Redux/API/users.api.slice";
 import { DateUtils } from "../utils/DateUtils";
+import DataBlock from "../components/DataBlock";
 
 const TaskDetail = (props: { route: any }) => {
   const { route } = props;
@@ -72,72 +73,18 @@ const TaskDetail = (props: { route: any }) => {
           <Text style={styles.typoTitle}>Task : {task?.name}</Text>
         </View>
         <View style={styles.box2}>
-          <LinearGradient
-            style={styles.box11}
-            locations={[0, 1]}
-            colors={["#fe9d9d", "#e77d7d"]}
-          >
-            <Text
-              style={[
-                styles.typoBoddy,
-                {
-                  color: Colors.colorGray_100,
-                  fontFamily: Font["poppins-bold"],
-                },
-              ]}
-            >
-              Date
-            </Text>
-            <Text style={[styles.typoBoddy, { color: "#FFFFFF" }]}>
-              {DateUtils.getFormattedDate(date)}
-            </Text>
-          </LinearGradient>
-          <LinearGradient
-            style={styles.box11}
-            locations={[0, 1]}
-            colors={["#fe9d9d", "#e77d7d"]}
-          >
-            <Text
-              style={[
-                styles.typoBoddy,
-                {
-                  color: Colors.colorGray_100,
-                  fontFamily: Font["poppins-bold"],
-                },
-              ]}
-            >
-              Duration
-            </Text>
-            <Text style={[styles.typoBoddy, { color: "#FFFFFF" }]}>
-              {DateUtils.getDurationAsString(task?.duration)}
-            </Text>
-          </LinearGradient>
+          <DataBlock
+            title={"Date"}
+            content={DateUtils.getFormattedDate(date)}
+          />
+          <DataBlock
+            title={"Duration"}
+            content={DateUtils.getDurationAsString(task?.duration)}
+          />
         </View>
         {task?.description && (
-          <View style={styles.box1}>
-            <LinearGradient
-              style={styles.box12}
-              locations={[0, 1]}
-              colors={["#fe9d9d", "#e77d7d"]}
-            >
-              <Text
-                style={[
-                  styles.typoBoddy,
-                  {
-                    color: Colors.colorGray_100,
-                    fontFamily: Font["poppins-bold"],
-                  },
-                ]}
-              >
-                Description
-              </Text>
-              <Text style={[styles.typoBoddy, { color: "#FFFFFF" }]}>
-                {task?.description}
-              </Text>
-            </LinearGradient>
-          </View>
+          <DataBlock title={"Description"} content={task?.description} />
         )}
-
         <View style={styles.box1}>
           <Text style={styles.typoBoddy}>Room</Text>
         </View>
@@ -233,7 +180,8 @@ const styles = StyleSheet.create({
   },
   box2: {
     flexDirection: "column",
-    marginBottom: 0,
+    gap: 10,
+    marginBottom: 20,
   },
   rectangle1: {},
   box3: {

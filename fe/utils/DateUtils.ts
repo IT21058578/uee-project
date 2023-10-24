@@ -13,6 +13,11 @@ export class DateUtils {
     return `${startTime} - ${endTime}`;
   }
 
+  static getFormattedTime(time: string) {
+    const formattedTime = moment(time).format("LT");
+    return formattedTime;
+  }
+
   static getFormattedDate(date: string) {
     return moment(date).format("MMMM Do YYYY");
   }

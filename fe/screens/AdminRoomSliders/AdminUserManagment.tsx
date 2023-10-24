@@ -4,7 +4,7 @@ import Font from "../../constants/Font";
 import Colors from "../../constants/Colors";
 import FontSize from "../../constants/FontSize";
 import { NativeBaseProvider, Button, Row, Column, Modal } from "native-base";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import {
   useGetAllUsersInRoomQuery,
@@ -13,11 +13,14 @@ import {
 import { useAppSelector } from "../../hooks/redux-hooks";
 import InviteMemberModal from "../../components/InviteMemberModal";
 import LoadingIndictator from "../../components/LoadingIndictator";
-import { useAssignRoomAdminMutation } from "../../Redux/API/rooms.api.slice";
+import {
+  useAssignRoomAdminMutation,
+  useGetroomQuery,
+  useUnassignRoomAdminMutation,
+} from "../../Redux/API/rooms.api.slice";
 
 const AdminUserManage = () => {
   const roomId = useAppSelector((state) => state.user.roomId);
-  const adminIds = useAppSelector((state) => state.room?.adminIds);
   const userId = useAppSelector((state) => state.user._id);
   const [isUnassignUserModalOpen, setIsUnassignUserModalOpen] = useState(false);
   const [isMakeAdminModalOpen, setIsMakeAdminModalOpen] = useState(false);
@@ -30,15 +33,25 @@ const AdminUserManage = () => {
     refetch: refetchUsersList,
     isFetching: isUsersListFetching,
   } = useGetAllUsersInRoomQuery(roomId);
+  const {
+    data: roomData,
+    isFetching: isFetchingRoomData,
+    refetch: refetchRoomData,
+  } = useGetroomQuery(roomId);
   const [unassignUser] = useUnassignUserFromRoomMutation();
-  const [unassignAdmin] = useAssignRoomAdminMutation();
+  const [unassignAdmin] = useUnassignRoomAdminMutation();
   const [assignAdmin] = useAssignRoomAdminMutation();
+
+  const refetchAllData = () => {
+    refetchRoomData();
+    refetchUsersList();
+  };
 
   const handleUnassignUserModalConfirm = async () => {
     try {
-      console.log(selectedUserId);
-      await unassignUser(selectedUserId).unwrap();
+      await unassignUser({ userId: selectedUserId, roomId }).unwrap();
       setIsUnassignUserModalOpen(false);
+      refetchAllData();
     } catch (error) {
       console.error(error);
     }
@@ -46,9 +59,9 @@ const AdminUserManage = () => {
 
   const handleMakeAdminModalConfirm = async () => {
     try {
-      console.log(selectedUserId);
       await assignAdmin({ userId: selectedUserId, roomId }).unwrap();
       setIsMakeAdminModalOpen(false);
+      refetchUsersList();
     } catch (error) {
       console.error(error);
     }
@@ -56,9 +69,9 @@ const AdminUserManage = () => {
 
   const handleUnassignAdminModalConfirm = async () => {
     try {
-      console.log(selectedUserId);
       await unassignAdmin({ userId: selectedUserId, roomId }).unwrap();
       setIsUnassignAdminModalOpen(false);
+      refetchUsersList();
     } catch (error) {
       console.error(error);
     }
@@ -80,7 +93,11 @@ const AdminUserManage = () => {
                   justifyContent={"space-between"}
                   alignItems={"center"}
                   marginX={2}
-                  height={10}
+                  height={12}
+                  borderBottomColor={"gray.200"}
+                  borderBottomWidth={2}
+                  marginTop={2}
+                  paddingBottom={2}
                 >
                   <Column>
                     <Text>{`${user.firstName}`}</Text>
@@ -88,7 +105,7 @@ const AdminUserManage = () => {
                   {userId !== user._id && (
                     <Column>
                       <Row space={2}>
-                        {adminIds?.includes(user._id) ? (
+                        {roomData?.adminIds?.includes(user._id) ? (
                           <Button
                             onPress={() => {
                               setSelectedUserId(user._id);
@@ -146,7 +163,7 @@ const AdminUserManage = () => {
       <ConfirmationModal
         isOpen={isUnassignAdminModalOpen}
         title={"Are you sure?"}
-        onCancel={() => setIsUnassignAdminModalOpen}
+        onCancel={() => setIsUnassignAdminModalOpen(false)}
         onConfirm={handleUnassignAdminModalConfirm}
       >
         Are you sure you want remove this user as an admin? The changes already

@@ -1,90 +1,77 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import Home from '../screens/HomeScreen';
-import EditTask from '../screens/EditTask';
-import Colors from '../constants/Colors';
-import AdminRoomDetail from '../screens/AdminRoomSliders/AdminRoomDetail';
-import AdminRoomSchedule from '../screens/AdminRoomSliders/AdminRoomSchedule';
-import AdminUserManage from '../screens/AdminRoomSliders/AdminUserManagment';
-import AdminCreatedTasks from '../screens/AdminRoomSliders/AdminTaskManagment';
+import React, { useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import Home from "../screens/HomeScreen";
+import EditTask from "../screens/EditTask";
+import Colors from "../constants/Colors";
+import AdminRoomDetail from "../screens/AdminRoomSliders/AdminRoomDetail";
+import AdminRoomSchedule from "../screens/AdminRoomSliders/AdminRoomSchedule";
+import AdminUserManage from "../screens/AdminRoomSliders/AdminUserManagment";
+import AdminCreatedTasks from "../screens/AdminRoomSliders/AdminTaskManagment";
+import { useGetroomQuery } from "../Redux/API/rooms.api.slice";
+import { useAppDispatch, useAppSelector } from "../hooks/redux-hooks";
+import { setRoom } from "../Redux/slices/roomSlice";
+import TagButton from "../components/TagButton";
 
 const Tab = createMaterialTopTabNavigator();
 
-interface CustomTabBarButtonProps {
-  label: string;
-  onPress: () => void;
-}
-
-const CustomTabBarButton: React.FC<CustomTabBarButtonProps> = ({ label, onPress }) => {
-  return (
-    <TouchableOpacity style={styles.tabBarButton} onPress={onPress}>
-      <Text style={styles.tabBarButtonText}>{label}</Text>
-    </TouchableOpacity>
-  );
-};
+const screenListData = [
+  { label: "DETAILS", component: AdminRoomDetail },
+  { label: "MEMBERS", component: AdminUserManage },
+  { label: "SCHEDULE", component: AdminRoomSchedule },
+  { label: "TASKS", component: AdminCreatedTasks },
+];
 
 const TopBarWithTabs: React.FC = () => {
   const navigation = useNavigation();
+  const [selectedTab, setSelectedTab] = useState(screenListData[0]?.label);
 
   return (
     <View style={{ flex: 1 }}>
-      <Tab.Navigator style={styles.container}
-        
+      <Tab.Navigator
         tabBar={(props) => (
           <View style={styles.tabBar}>
-            <CustomTabBarButton
-              label="Details"
-              onPress={() => navigation.navigate('Screen1')}
-            />
-            <CustomTabBarButton
-              label="Members"
-              onPress={() => navigation.navigate('Screen2')}
-            />
-            <CustomTabBarButton
-              label="Schedule"
-              onPress={() => navigation.navigate('Screen3')}
-            />
-            <CustomTabBarButton
-              label="Tasks"
-              onPress={() => navigation.navigate('Screen4')}
-            />
+            {screenListData.map(({ label }) => (
+              <TagButton
+                isSelected={selectedTab === label}
+                onClick={() => {
+                  setSelectedTab(label);
+                  navigation.navigate(label as any);
+                }}
+              >
+                {label}
+              </TagButton>
+            ))}
           </View>
         )}
       >
-        <Tab.Screen name="Screen1" component={AdminRoomDetail} />
-        <Tab.Screen name="Screen2" component={AdminUserManage} />
-        <Tab.Screen name="Screen3" component={AdminRoomSchedule} />
-        <Tab.Screen name="Screen4" component={AdminCreatedTasks} />
+        {screenListData.map(({ component, label }) => (
+          <Tab.Screen name={label} component={component} />
+        ))}
       </Tab.Navigator>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container:{
-    top:0,
-  },
+export const styles = StyleSheet.create({
   tabBar: {
-    flexDirection: 'row',
-    color: Colors.purpleLight,
-    justifyContent: 'space-between',
-    backgroundColor: 'transparent', // Set the background color of the tab bar
-    paddingHorizontal:12,
-    paddingLeft:15,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "transparent", // Set the background color of the tab bar
+    paddingHorizontal: 12,
   },
   tabBarButton: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 10,
     marginHorizontal: 4,
     backgroundColor: Colors.purpletext, // Set the background color of each tab button
     borderRadius: 10, // Set the border radius for rounded corners
   },
   tabBarButtonText: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

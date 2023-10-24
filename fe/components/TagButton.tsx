@@ -1,4 +1,4 @@
-import { Button } from "native-base";
+import { Button, Text } from "native-base";
 import React from "react";
 import Colors from "../constants/Colors";
 
@@ -14,12 +14,14 @@ const TagButton = ({ isSelected, onClick, children }: Props) => {
       size="sm"
       variant="subtle"
       style={{
-        borderRadius: 20,
+        borderRadius: 4,
         backgroundColor: isSelected ? Colors.lightPrimary : "transparent",
       }}
       onPress={() => onClick(children ?? "")}
     >
-      {children}
+      <Text style={{ fontSize: 14, fontWeight: "500", color: Colors.primary }}>
+        {children}
+      </Text>
     </Button>
   );
 };

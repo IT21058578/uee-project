@@ -104,7 +104,7 @@ export class RoomsService {
   async unassignRoomAdmin(userId: string, roomId: string) {
     const existingRoom = await this.getRoom(roomId);
     const isAlreadyAdmin = existingRoom.adminIds.some((id) => id === userId);
-    if (isAlreadyAdmin) {
+    if (!isAlreadyAdmin) {
       throw new BadRequestException(
         ErrorMessage.USER_NOT_ADMIN,
         `User with id ${userId} is not an admin of room with id '${roomId}'`,
