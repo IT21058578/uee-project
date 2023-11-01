@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  Logger,
   Scope,
   forwardRef,
 } from '@nestjs/common';
@@ -23,6 +24,8 @@ dayjs?.extend(duration);
 
 @Injectable({ scope: Scope.REQUEST })
 export class SchedulesService {
+  private readonly logger = new Logger(SchedulesService.name);
+
   constructor(
     @Inject(REQUEST) private req: Request,
     @Inject(forwardRef(() => TasksService))
@@ -37,21 +40,26 @@ export class SchedulesService {
     roomId: string,
     date: Date,
   ) {
-    const existingSchedule = await this.scheduleModel.findOne({
+    let existingSchedule = await this.scheduleModel.findOne({
       userId,
       roomId,
       date,
     });
     if (existingSchedule === null) {
-      throw new BadRequestException(
-        ErrorMessage.SCHEDULE_NOT_FOUND,
-        `User with id '${userId}' does not have a schedule in room with id '${roomId}'`,
-      );
+      existingSchedule = new this.scheduleModel({
+        userId,
+        roomId,
+        date,
+        taskList: [],
+      });
     }
     return existingSchedule;
   }
 
   async getPopulatedSchedulesByUserAndDate(userId: string, date: Date) {
+    this.logger.log(
+      `Finding or creating populated schedule for user '${userId}' for date '${date}'`,
+    );
     const [allSchedules, allRooms] = await Promise.all([
       this.scheduleModel.find({ userId, date }),
       this.roomsService.getAllUserRooms(userId),
@@ -73,6 +81,7 @@ export class SchedulesService {
         roomId: schedule.roomId,
         userId,
         tag: relevantRoom?.tag!,
+        roomName: relevantRoom?.name ?? '',
         date,
         totalScheduled: dayjs.duration(totalScheduledInMs, 'ms'),
         taskList: schedule.taskList.map((item) => {
@@ -90,6 +99,9 @@ export class SchedulesService {
     roomId: string,
     date: Date,
   ) {
+    this.logger.log(
+      `Finding or creating schedule for user '${userId}' in room '${roomId}' for date '${date}'`,
+    );
     const [existingRoom, existingSchedule] = await Promise.all([
       this.roomsService.getRoom(roomId),
       this.getScheduleByUserAndRoomAndDate(userId, roomId, date),
@@ -106,6 +118,7 @@ export class SchedulesService {
       userId,
       tag: existingRoom.tag,
       date: existingSchedule.date,
+      roomName: existingRoom.name ?? '',
       totalScheduled: dayjs.duration(totalScheduledInMs, 'ms'),
       taskList: existingSchedule.taskList.map((item) => {
         const task = allTasks.find((o) => o.id === item.taskId);
@@ -167,6 +180,16 @@ export class SchedulesService {
         });
       });
     });
+  }
+
+  async deleteRoomSchedulesOfUsers(userIds: string[], roomId: string) {
+    const deleteResult = await this.scheduleModel.deleteMany({
+      roomId,
+      userId: { $in: userIds },
+    });
+    this.logger.log(
+      `Deleted ${deleteResult.deletedCount} schedules in deleted room with id ${roomId}`,
+    );
   }
 
   private buildScheduleTaskList(

@@ -10,7 +10,7 @@ import { RoomsModule } from 'src/rooms/rooms.module';
 @Module({
   imports: [
     forwardRef(() => TasksModule),
-    RoomsModule,
+    forwardRef(() => RoomsModule),
     MongooseModule.forFeature([
       { name: Schedule.name, schema: ScheduleSchema },
     ]),

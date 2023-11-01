@@ -8,21 +8,26 @@ export class MongooseUtil {
     model: Model<T>,
     { pageNum = 1, pageSize = 10, filter, sort }: PageRequest,
   ) {
-    const [content, totalDocuments] = await Promise.all([
-      model
-        .find(QueryUtil.buildQueryFromFilter(filter))
-        .sort(QueryUtil.buildSort(sort))
-        .skip((pageNum - 1) * pageSize)
-        .limit(pageSize),
-      model.count(),
-    ]);
-    const jsonContent = content.map((doc) => doc.toJSON());
-    const page = PageUtil.buildPage(jsonContent, {
-      pageNum,
-      pageSize,
-      totalDocuments,
-      sort,
-    });
-    return page;
+    try {
+      const [content, totalDocuments] = await Promise.all([
+        model
+          .find(QueryUtil.buildQueryFromFilter(filter))
+          .sort(QueryUtil.buildSort(sort))
+          .skip((pageNum - 1) * pageSize)
+          .limit(pageSize),
+        model.count(),
+      ]);
+      const jsonContent = content.map((doc) => doc.toJSON());
+      const page = PageUtil.buildPage(jsonContent, {
+        pageNum,
+        pageSize,
+        totalDocuments,
+        sort,
+      });
+      return page;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 }

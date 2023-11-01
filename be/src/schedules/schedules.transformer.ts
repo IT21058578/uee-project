@@ -16,8 +16,8 @@ export class SchedulesTransformer {
     schedules: PopulatedScheduleDto[],
   ): Promise<DetailedSchedulesDto> {
     const totalScheduled = schedules.reduce(
-      (a, b) => b.totalScheduled.add(a),
-      dayjs.duration(0),
+      (a, b) => a + b.totalScheduled.asMilliseconds(),
+      0,
     );
     let totalTaskCount = 0;
     let counts: DetailedSchedulesDto['counts'] = Object.values(RoomTag).reduce(
@@ -28,12 +28,19 @@ export class SchedulesTransformer {
           0,
         );
         totalTaskCount += taskCount;
-        return { ...obj, tag: taskCount };
+        return { ...obj, [tag]: taskCount };
       },
       {} as DetailedSchedulesDto['counts'],
     );
     counts = { ...counts, total: totalTaskCount };
 
+    console.log({
+      counts,
+      date,
+      schedules,
+      totalScheduled,
+      userId,
+    });
     return {
       counts,
       date,

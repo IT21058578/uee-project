@@ -28,10 +28,10 @@ export class RoomsController {
   async getRoom(@Param('id', ValidateObjectIdPipe) roomId: string) {
     return await this.roomsService.getRoom(roomId);
   }
-  
+
   @Post('search')
   async getRoomPage(@Body() pageRequest: PageRequest) {
-    await this.roomsService.getRoomPage(pageRequest);
+    return await this.roomsService.getRoomPage(pageRequest);
   }
 
   @Post()

@@ -140,6 +140,6 @@ export class UsersService {
       return user;
     });
     const userPromises = updatedUsers.map(async (user) => user.save());
-    await Promise.all(userPromises);
+    return await Promise.all(userPromises);
   }
 }

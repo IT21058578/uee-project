@@ -15,6 +15,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { PageRequest } from 'src/common/dtos/page-request.dto';
 import { MongooseUtil } from 'src/common/util/mongoose.util';
+import { SchedulesService } from 'src/schedules/schedules.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class RoomsService {
@@ -23,6 +24,8 @@ export class RoomsService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => TasksService))
     private readonly tasksService: TasksService,
+    @Inject(forwardRef(() => SchedulesService))
+    private readonly schedulesService: SchedulesService,
     @InjectModel(Room.name) private readonly roomModel: RoomModel,
   ) {}
 
@@ -74,7 +77,11 @@ export class RoomsService {
 
   async deleteRoom(id: string) {
     const existingRoom = await this.getRoom(id);
-    await this.usersService.unassignAllFromRoom(id);
+    const affectedUsers = await this.usersService.unassignAllFromRoom(id);
+    await this.schedulesService.deleteRoomSchedulesOfUsers(
+      affectedUsers.map((user) => user.id),
+      id,
+    );
     await this.tasksService.deleteAllTasksFromRoom(id);
     await existingRoom.deleteOne();
   }
@@ -104,7 +111,7 @@ export class RoomsService {
   async unassignRoomAdmin(userId: string, roomId: string) {
     const existingRoom = await this.getRoom(roomId);
     const isAlreadyAdmin = existingRoom.adminIds.some((id) => id === userId);
-    if (isAlreadyAdmin) {
+    if (!isAlreadyAdmin) {
       throw new BadRequestException(
         ErrorMessage.USER_NOT_ADMIN,
         `User with id ${userId} is not an admin of room with id '${roomId}'`,
