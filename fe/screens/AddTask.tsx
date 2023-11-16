@@ -85,6 +85,7 @@ const AddTask = ({ route }: any) => {
     }
   };
 
+  //handle duration selection
   const handleDurationSelection = (pickedDuration: any) => {
     const { hours, minutes, seconds } = pickedDuration;
     const duration = dayjs.duration({
@@ -97,6 +98,7 @@ const AddTask = ({ route }: any) => {
     handleCreateTask(duration.asMilliseconds());
   };
 
+  //validating form details
   const validateFormFields = () => {
     console.log("Validating form fields");
     const { name, priority, assignedUserIds } = formData;
@@ -122,6 +124,7 @@ const AddTask = ({ route }: any) => {
     return isValid;
   };
 
+  //handle creating task
   const handleCreateTask = async (durationInMs: number) => {
     try {
       if (!validateFormFields()) return;
@@ -159,6 +162,7 @@ const AddTask = ({ route }: any) => {
     }
   };
 
+  //get field value change handler
   const getFieldValueChangeHandler = (fieldName: string) => (value: string) => {
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
     setFormErrors({});

@@ -32,6 +32,7 @@ const TaskDetail = (props: { route: any }) => {
     navigate.goBack();
   };
 
+  //setting the date
   const date = task?.date.split("T")[0];
 
   if (isTaskFetching) {

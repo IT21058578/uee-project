@@ -1,3 +1,4 @@
+//setting priorities in tasks
 export const TaskPriority = {
     LOW: 'LOW',
     MEDIUM: 'MEDIUM',

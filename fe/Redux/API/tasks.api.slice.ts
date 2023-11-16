@@ -26,6 +26,7 @@ export const taskApiSlice = createApi({
       }),
     }),
 
+    //query to get all tasks from the API
     getAllTasksInRoom: builder.query({
       query: ({ roomId }) => ({
         url: "/tasks/search",
@@ -41,11 +42,13 @@ export const taskApiSlice = createApi({
       }),
     }),
 
+    //query to get a task
     gettask: builder.query({
       query: (taskId: string) => `/tasks/${taskId}`,
       providesTags: ["tasks"],
     }),
 
+    //query to create a task
     createtask: builder.mutation({
       query: (formData) => ({
         url: "/tasks",
@@ -55,6 +58,7 @@ export const taskApiSlice = createApi({
       invalidatesTags: ["tasks"],
     }),
 
+    //query to update a task
     updatetask: builder.mutation({
       query: ({ taskId, formData }) => ({
         url: `/tasks/${taskId}`,
@@ -64,6 +68,7 @@ export const taskApiSlice = createApi({
       invalidatesTags: ["tasks"],
     }),
 
+    //query to delete a task
     deletetask: builder.mutation({
       query: (id: String) => ({
         url: `/tasks/${id}`,

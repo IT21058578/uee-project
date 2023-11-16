@@ -107,6 +107,7 @@ const EditTask = ({ route }: { route: any }) => {
     handleCreateTask(duration.asMilliseconds());
   };
 
+  //validating form fields
   const validateFormFields = () => {
     console.log("Validating form fields");
     const { name, priority, assignedUserIds } = formData;
@@ -132,6 +133,7 @@ const EditTask = ({ route }: { route: any }) => {
     return isValid;
   };
 
+  //handling the create task function
   const handleCreateTask = async (durationInMs: number) => {
     try {
       if (!validateFormFields()) return;
@@ -169,6 +171,7 @@ const EditTask = ({ route }: { route: any }) => {
     }
   };
 
+  //get the values for the fields 
   const getFieldValueChangeHandler = (fieldName: string) => (value: string) => {
     setFormData((prev) => ({ ...prev, [fieldName]: value }));
     setFormErrors({});

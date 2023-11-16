@@ -18,6 +18,7 @@ import { useGetAllroomsQuery } from "../Redux/API/rooms.api.slice";
 import { useAppSelector } from "../hooks/redux-hooks";
 import EmptyListPlaceholder from "../components/EmptyListPlaceholder";
 
+//created tasks page
 const CreatedTasks = (props: any) => {
   const navigation = props.navigation;
   const user = useAppSelector((state) => state.user);

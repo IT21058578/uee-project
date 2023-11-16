@@ -19,6 +19,7 @@ import { ValidateObjectIdPipe } from 'src/common/pipes/validate-object-id.pipe';
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
+  //searching tasks from db
   @Post('search')
   async searchTasks(@Body() pageRequest: PageRequest) {
     const page = await this.tasksService.searchTasks(pageRequest);
@@ -31,6 +32,7 @@ export class TasksController {
     return await this.tasksService.getDetailedTask(id);
   }
 
+  //unassigning tasks from objects
   @Put('unassign')
   @Roles(...Object.values(UserRole))
   async unassignUserFromTask(
@@ -40,6 +42,7 @@ export class TasksController {
     await this.tasksService.unassignUserFromTask(userId, taskId);
   }
 
+  //assigning tasks to objects
   @Put('assign')
   @Roles(...Object.values(UserRole))
   async assignUserToTask(

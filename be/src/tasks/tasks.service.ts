@@ -34,6 +34,7 @@ export class TasksService {
     dayjs.extend(duration);
   }
 
+  //function to get tasks
   async getTask(id: string) {
     const existingTask = await this.taskModel.findById(id);
     if (existingTask == null) {
@@ -45,6 +46,7 @@ export class TasksService {
     return existingTask;
   }
 
+  //function to get detailed task details
   async getDetailedTask(id: string) {
     const existingTask = await this.getTask(id);
     const existingRoom = await this.roomsService.getRoom(existingTask.roomId);
@@ -64,6 +66,7 @@ export class TasksService {
     return detailedTask;
   }
 
+  //function to edit tasks
   async editTask(id: string, editTaskDto: CreateTaskDto) {
     let { date, description, duration, name, priority, assignedUserIds } =
       editTaskDto;
@@ -103,6 +106,7 @@ export class TasksService {
     return savedTask;
   }
 
+  //function to create task
   async createTask(createTaskDto: CreateTaskDto) {
     let {
       date,
@@ -143,6 +147,7 @@ export class TasksService {
     return savedTask;
   }
 
+  //function to delete task
   async deleteTask(id: string) {
     const existingTask = await this.taskModel.findByIdAndDelete(id);
     if (existingTask == null) {
@@ -193,6 +198,7 @@ export class TasksService {
     ]);
   }
 
+  //function to unassign objects from tasks
   async unassignUserFromTask(userId: string, taskId: string) {
     await this.usersService.getUser(userId);
     const existingTask = await this.getTask(taskId);

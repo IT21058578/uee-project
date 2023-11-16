@@ -10,6 +10,7 @@ import {
   IsString,
 } from 'class-validator';
 
+//DTOs for the create tasks function
 export class CreateTaskDto {
   @IsString()
   @IsNotEmpty()
